@@ -13,8 +13,8 @@
   <SmarterBeds_NegotiationEnabled>Let colonists negotiate for better rooms</SmarterBeds_NegotiationEnabled>
   <SmarterBeds_QualityNegotiation>Also negotiate on room quality alone (equal rank)</SmarterBeds_QualityNegotiation>
   <SmarterBeds_QualityThreshold>Quality gap needed to negotiate: {0}</SmarterBeds_QualityThreshold>
-  <SmarterBeds_Cooldown>Days before the same colonists negotiate again: {0}</SmarterBeds_Cooldown>
+  <SmarterBeds_Cooldown>Days before a colonist negotiates again: {0}</SmarterBeds_Cooldown>
   <SmarterBeds_LostRoomThought>Losing a room causes a mild mood penalty</SmarterBeds_LostRoomThought>
   <SmarterBeds_Messages>Show a message when a room changes hands</SmarterBeds_Messages>
-  <SmarterBeds_RoomTaken>{0} took {1}'s bedroom. {1} will find another room at bedtime.</SmarterBeds_RoomTaken>
+  <SmarterBeds_RoomTaken>{0} talked {1} out of their bedroom. {1} will find another room at bedtime.</SmarterBeds_RoomTaken>
 </LanguageData>

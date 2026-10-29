@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <JoyGiverDef>
+    <defName>SmarterBeds_NegotiateRoom</defName>
+    <giverClass>SmarterBeds.JoyGiver_NegotiateRoom</giverClass>
+    <baseChance>2.0</baseChance>
+    <joyKind>Social</joyKind>
+    <jobDef>SmarterBeds_NegotiateRoom</jobDef>
+  </JoyGiverDef>
+</Defs>

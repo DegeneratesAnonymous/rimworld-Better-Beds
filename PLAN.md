@@ -16,13 +16,14 @@ Primary target: RimWorld 1.7 on the unstable branch. 1.6 builds are kept until 1
 
 1. Requirements are a pawn property, read from the game. Royalty title bedroom requirements are used now; Ideology role room requirements are not exposed on the role precept in the reference API, so they are a follow-up. An unmet requirement is a heavy score penalty in the bedtime search, not a ban.
 2. A pawn with no bed searches for the best available room (existing search plus the requirement penalty). A pawn who lost a room gets no special handling.
-3. Negotiation happens at bedtime, only for a pawn who owns a bed and is about to sleep with a problem: an active sleep-related mood debuff (barracks, cold, heat, slave in room, outside, ground) or an unmet title requirement. Checked at most once an hour per pawn.
-   - Only against pawns who also own a bed and aren't using it right now (reservation check), never against their love partner.
+3. Negotiation is a recreation activity. A pawn who owns a bed and has a sleep-related mood debuff (barracks, cold, heat, slave in room, outside, ground) or an unmet title requirement can choose "negotiate for a better room" during joy time. They walk to the other pawn, talk for a while, and the swap is decided at the end of the conversation.
+   - The other pawn must own a bed, not be using it right now, and not be the initiator's love partner. Shared beds (two owners) are excluded; a double bed with a single owner is fine.
    - Requirement case: A's room fails A's requirements, B's room is better for A, and A outranks B (title seniority).
    - Quality case (own toggle, large threshold): equal rank, and the quality gain exceeds the threshold. Ties are broken by time in the colony, then id, so no pair can swap back and forth.
    - Skipped if a free room is at least as good for A.
-   - The winner takes the loser's bed and releases their old one, then heads to it; the loser is left bedless and finds a room at their own bedtime.
-   - Per-pawn cooldown after a swap. Excluded: shared beds and couples, medical beds, prisoners, guests, slaves, children.
+   - The winner takes the loser's bed and releases their old one; the loser is left bedless and finds a room at their own bedtime.
+   - 3 day cooldown (setting) for the initiator after every conversation, and for both after a swap. Looking for someone to talk to is throttled to once an hour per pawn.
+   - Excluded: prisoners, guests, slaves, children, medical beds.
    - Optional mild "lost my room" thought (off by default) and an optional message.
 
 ## 1.7 checks
@@ -43,4 +44,4 @@ Primary target: RimWorld 1.7 on the unstable branch. 1.6 builds are kept until 1
 ## Known limits in v1
 
 - Only fully unowned beds are considered, so a colonist won't join a half-claimed double bed. Vanilla handles that case.
-- Ideology role bedroom requirements aren't weighted yet (Royalty titles are, from M6).
+- Ideology roles carry no bedroom requirements in the game's data (their room requirements are for ritual buildings), so only Royalty titles are weighted.

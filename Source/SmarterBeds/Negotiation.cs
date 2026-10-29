@@ -7,9 +7,10 @@ using Verse.AI;
 namespace SmarterBeds
 {
     /// <summary>
-    /// Room negotiation, triggered when a pawn who owns a bed goes to sleep with a sleep-related
-    /// mood debuff (or an unmet title requirement). The winner takes the loser's bed; the loser is
-    /// left bedless and finds a room at their own bedtime.
+    /// Room negotiation. A pawn who owns a bed and has a sleep-related mood debuff (or an unmet title
+    /// requirement) can pick "negotiate for a better room" as a recreation activity (see
+    /// JoyGiver_NegotiateRoom). If they get to talk to someone they outrank, the winner takes the
+    /// loser's bed and the loser is left bedless to find a room at their own bedtime.
     /// </summary>
     public class GameComponent_BedNegotiation : GameComponent
     {
@@ -78,8 +79,9 @@ namespace SmarterBeds
             if (HealthAIUtility.ShouldSeekMedicalRest(p)) return false;
             var bed = p.ownership?.OwnedBed;
             if (bed == null || bed.Medical || !bed.Spawned) return false;
-            // Single sleeper in a single-slot bed: leaves couples and shared beds to vanilla.
-            if (bed.SleepingSlotsCount != 1 || bed.OwnersForReading.Count != 1) return false;
+            // Shared beds belong to two people (usually a couple); leave those to vanilla.
+            // A double bed with a single owner is fine.
+            if (bed.OwnersForReading.Count != 1) return false;
             return true;
         }
 
@@ -92,40 +94,65 @@ namespace SmarterBeds
             return false;
         }
 
-        /// <summary>
-        /// Called when <paramref name="a"/> is about to go to bed. Returns the pawn's bed after any
-        /// negotiation (the new bed on a swap), or null when nothing changed.
-        /// </summary>
-        public Building_Bed TryNegotiateFor(Pawn a)
+        /// <summary>Cheap check: is this pawn in a position where negotiating makes sense at all?</summary>
+        public bool WantsToNegotiate(Pawn a)
         {
             var s = SmarterBedsMod.Settings;
-            if (!s.enabled || !s.negotiationEnabled) return null;
-            if (!Eligible(a) || OnCooldown(a)) return null;
+            if (!s.enabled || !s.negotiationEnabled) return false;
+            if (!Eligible(a) || OnCooldown(a)) return false;
+            // Only negotiate when something is actually wrong with how they sleep.
+            return Requirements.Unmet(a, a.ownership.OwnedBed.GetRoom()) > 0 || HasSleepDebuff(a);
+        }
 
+        /// <summary>Finds who this pawn would negotiate with, or null. Throttled to once an hour per pawn.</summary>
+        public Pawn FindNegotiationTarget(Pawn a)
+        {
+            if (!WantsToNegotiate(a)) return null;
             if (lastChecked.TryGetValue(a.thingIDNumber, out int last) && Now - last < RecheckTicks) return null;
             lastChecked[a.thingIDNumber] = Now;
 
-            var bedA = a.ownership.OwnedBed;
-            int unmetNow = Requirements.Unmet(a, bedA.GetRoom());
-            // Only negotiate when something is actually wrong with how they sleep.
-            if (unmetNow == 0 && !HasSleepDebuff(a)) return null;
-
-            try
-            {
-                var loser = FindLoser(a, bedA, unmetNow, s, out float gain);
-                if (loser == null) return null;
-                return Swap(a, loser, gain, s) ? a.ownership.OwnedBed : null;
-            }
+            try { return FindLoser(a, a.ownership.OwnedBed, SmarterBedsMod.Settings, out _); }
             catch (System.Exception e)
             {
-                Log.Error($"[Smarter Beds] negotiation failed: {e}");
+                Log.Error($"[Smarter Beds] finding a negotiation target failed: {e}");
                 return null;
             }
         }
 
-        private Pawn FindLoser(Pawn a, Building_Bed bedA, int unmetNow, SmarterBedsSettings s, out float bestGain)
+        /// <summary>
+        /// End of the conversation: re-checks everything (the world moved while they walked over) and,
+        /// if it still holds, swaps. The initiator is on cooldown afterwards whether or not it worked.
+        /// </summary>
+        public void ResolveNegotiation(Pawn a, Pawn b)
+        {
+            var s = SmarterBedsMod.Settings;
+            try
+            {
+                if (WantsToNegotiate(a) && Eligible(b) && !OnCooldown(b))
+                {
+                    var target = FindLoser(a, a.ownership.OwnedBed, s, out float gain, only: b);
+                    if (target == b) Swap(a, b, gain, s);
+                }
+            }
+            catch (System.Exception e)
+            {
+                Log.Error($"[Smarter Beds] negotiation failed: {e}");
+            }
+            finally
+            {
+                SetCooldown(a);
+            }
+        }
+
+        private void SetCooldown(Pawn p)
+        {
+            cooldownUntil[p.thingIDNumber] = Now + (int)(SmarterBedsMod.Settings.negotiationCooldownDays * GenDate.TicksPerDay);
+        }
+
+        private Pawn FindLoser(Pawn a, Building_Bed bedA, SmarterBedsSettings s, out float bestGain, Pawn only = null)
         {
             bestGain = 0f;
+            int unmetNow = Requirements.Unmet(a, bedA.GetRoom());
             Pawn best = null;
 
             float currentA = BedScorer.Quality(bedA, a, s);
@@ -134,7 +161,7 @@ namespace SmarterBeds
 
             foreach (var b in a.Map.mapPawns.FreeColonistsSpawned)
             {
-                if (b == a || !Eligible(b) || OnCooldown(b)) continue;
+                if (b == a || (only != null && b != only) || !Eligible(b) || OnCooldown(b)) continue;
                 if (AreLovePartners(a, b)) continue; // never split a couple's rooms
 
                 var bedB = b.ownership.OwnedBed;
@@ -179,9 +206,8 @@ namespace SmarterBeds
                 return false;
             }
 
-            int until = Now + (int)(s.negotiationCooldownDays * GenDate.TicksPerDay);
-            cooldownUntil[winner.thingIDNumber] = until;
-            cooldownUntil[loser.thingIDNumber] = until;
+            SetCooldown(winner);
+            SetCooldown(loser);
             PruneCooldowns();
 
             if (s.verboseLogging)

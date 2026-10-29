@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <JobDef>
+    <defName>SmarterBeds_NegotiateRoom</defName>
+    <driverClass>SmarterBeds.JobDriver_NegotiateRoom</driverClass>
+    <reportString>negotiating for a better room with TargetA.</reportString>
+    <casualInterruptible>true</casualInterruptible>
+    <joyDuration>600</joyDuration>
+    <joyKind>Social</joyKind>
+  </JobDef>
+</Defs>
