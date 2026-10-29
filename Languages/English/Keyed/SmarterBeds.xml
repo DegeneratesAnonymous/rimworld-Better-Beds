@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <SmarterBeds_OverflowLabel>Overflow bed</SmarterBeds_OverflowLabel>
+  <SmarterBeds_OverflowDesc>When enabled, colonists only claim this bed if no better free bed is available.</SmarterBeds_OverflowDesc>
+  <SmarterBeds_SettingsEnabled>Enable smarter bed choice</SmarterBeds_SettingsEnabled>
+  <SmarterBeds_SettingsVerbose>Log bed decisions (debugging)</SmarterBeds_SettingsVerbose>
+  <SmarterBeds_WeightImpressiveness>Room impressiveness weight: {0}</SmarterBeds_WeightImpressiveness>
+  <SmarterBeds_WeightPrivate>Private bedroom bonus: {0}</SmarterBeds_WeightPrivate>
+  <SmarterBeds_WeightRest>Bed rest effectiveness weight: {0}</SmarterBeds_WeightRest>
+  <SmarterBeds_WeightDistance>Distance penalty per cell: {0}</SmarterBeds_WeightDistance>
+  <SmarterBeds_OverflowPenalty>Overflow penalty: {0}</SmarterBeds_OverflowPenalty>
+</LanguageData>

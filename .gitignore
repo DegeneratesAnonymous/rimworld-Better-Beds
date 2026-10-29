@@ -1,0 +1,16 @@
+# Build output (CI builds the DLL; don't commit it)
+Source/**/bin/
+Source/**/obj/
+1.6/Assemblies/*.dll
+1.7/Assemblies/*.dll
+
+# IDEs
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+
+# OS
+.DS_Store
+Thumbs.db

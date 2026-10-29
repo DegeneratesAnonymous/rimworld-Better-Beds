@@ -1,0 +1,25 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        game: ['1.7', '1.6']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Build for RimWorld ${{ matrix.game }}
+        run: dotnet build Source/SmarterBeds/SmarterBeds.csproj -c Release -p:GameVersion=${{ matrix.game }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SmarterBeds-${{ matrix.game }}-dll
+          path: ${{ matrix.game }}/Assemblies/SmarterBeds.dll
