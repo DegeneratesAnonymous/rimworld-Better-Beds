@@ -13,13 +13,13 @@ namespace SmarterBeds
         private static RoyalTitle Title(Pawn pawn)
         {
             if (!ModsConfig.RoyaltyActive || pawn?.royalty == null) return null;
+            // CanRequireBedroom respects the player's per-pawn "allow room requirements" toggle.
+            if (!pawn.royalty.CanRequireBedroom()) return null;
             return pawn.royalty.HighestTitleWithBedroomRequirements();
         }
 
         /// <summary>Higher outranks lower. 0 for a pawn with no bedroom requirements.</summary>
         public static int Rank(Pawn pawn) => Title(pawn)?.def.seniority ?? 0;
-
-        public static bool Has(Pawn pawn) => Title(pawn) != null;
 
         public static IEnumerable<RoomRequirement> For(Pawn pawn)
         {
