@@ -9,4 +9,12 @@
   <SmarterBeds_WeightRest>Bed rest effectiveness weight: {0}</SmarterBeds_WeightRest>
   <SmarterBeds_WeightDistance>Distance penalty per cell: {0}</SmarterBeds_WeightDistance>
   <SmarterBeds_OverflowPenalty>Overflow penalty: {0}</SmarterBeds_OverflowPenalty>
+  <SmarterBeds_UnmetPenalty>Unmet room requirement penalty: {0}</SmarterBeds_UnmetPenalty>
+  <SmarterBeds_NegotiationEnabled>Let colonists negotiate for better rooms</SmarterBeds_NegotiationEnabled>
+  <SmarterBeds_QualityNegotiation>Also negotiate on room quality alone (equal rank)</SmarterBeds_QualityNegotiation>
+  <SmarterBeds_QualityThreshold>Quality gap needed to negotiate: {0}</SmarterBeds_QualityThreshold>
+  <SmarterBeds_Cooldown>Days before the same colonists negotiate again: {0}</SmarterBeds_Cooldown>
+  <SmarterBeds_LostRoomThought>Losing a room causes a mild mood penalty</SmarterBeds_LostRoomThought>
+  <SmarterBeds_Messages>Show a message when a room changes hands</SmarterBeds_Messages>
+  <SmarterBeds_RoomTaken>{0} took {1}'s bedroom. {1} will find another room at bedtime.</SmarterBeds_RoomTaken>
 </LanguageData>

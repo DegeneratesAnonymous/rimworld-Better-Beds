@@ -15,6 +15,15 @@ namespace SmarterBeds
         public float distanceWeight = 0.25f;
         public float overflowPenalty = 1000f;
 
+        // Requirements and negotiation
+        public float unmetRequirementPenalty = 2000f;
+        public bool negotiationEnabled = true;
+        public bool qualityNegotiationEnabled = true;
+        public float qualityNegotiationThreshold = 250f;
+        public float negotiationCooldownDays = 5f;
+        public bool lostRoomThought = false;
+        public bool negotiationMessages = true;
+
         public override void ExposeData()
         {
             base.ExposeData();
@@ -25,6 +34,13 @@ namespace SmarterBeds
             Scribe_Values.Look(ref restEffectivenessWeight, "restEffectivenessWeight", 100f);
             Scribe_Values.Look(ref distanceWeight, "distanceWeight", 0.25f);
             Scribe_Values.Look(ref overflowPenalty, "overflowPenalty", 1000f);
+            Scribe_Values.Look(ref unmetRequirementPenalty, "unmetRequirementPenalty", 2000f);
+            Scribe_Values.Look(ref negotiationEnabled, "negotiationEnabled", true);
+            Scribe_Values.Look(ref qualityNegotiationEnabled, "qualityNegotiationEnabled", true);
+            Scribe_Values.Look(ref qualityNegotiationThreshold, "qualityNegotiationThreshold", 250f);
+            Scribe_Values.Look(ref negotiationCooldownDays, "negotiationCooldownDays", 5f);
+            Scribe_Values.Look(ref lostRoomThought, "lostRoomThought", false);
+            Scribe_Values.Look(ref negotiationMessages, "negotiationMessages", true);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace SmarterBeds
             {
                 if (!IsCandidate(bed, sleeper, traveler)) continue;
 
-                float score = Score(bed, traveler, s);
+                float score = Score(bed, sleeper, traveler, s);
                 if (s.verboseLogging)
                     Log.Message($"[Smarter Beds] {sleeper.LabelShort}: {bed.LabelShort} at {bed.Position} scored {score:0.0}");
 
@@ -62,7 +62,11 @@ namespace SmarterBeds
             return true;
         }
 
-        private static float Score(Building_Bed bed, Pawn traveler, SmarterBedsSettings s)
+        /// <summary>
+        /// How good this bed is for this pawn, ignoring distance and the overflow flag.
+        /// Used by the bedtime search and by room negotiation.
+        /// </summary>
+        public static float Quality(Building_Bed bed, Pawn pawn, SmarterBedsSettings s)
         {
             float score = 0f;
             Room room = bed.GetRoom();
@@ -74,6 +78,13 @@ namespace SmarterBeds
             }
 
             score += bed.GetStatValue(StatDefOf.BedRestEffectiveness) * s.restEffectivenessWeight;
+            score -= Requirements.Unmet(pawn, room) * s.unmetRequirementPenalty;
+            return score;
+        }
+
+        private static float Score(Building_Bed bed, Pawn sleeper, Pawn traveler, SmarterBedsSettings s)
+        {
+            float score = Quality(bed, sleeper, s);
             score -= (bed.Position - traveler.Position).LengthHorizontal * s.distanceWeight;
 
             if (bed.GetComp<CompOverflowBed>()?.isOverflow == true) score -= s.overflowPenalty;

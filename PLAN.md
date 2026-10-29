@@ -10,6 +10,18 @@ Primary target: RimWorld 1.7 on the unstable branch. 1.6 builds are kept until 1
 - [ ] M3: Overflow toggle, gizmo, icon, and save/load round trip (code in place, needs in-game verification)
 - [ ] M4: Settings window with weights (code in place, needs tuning of defaults)
 - [ ] M5: Compatibility pass and first Workshop release
+- [ ] M6: Room requirements and room negotiation (code in place, needs in-game verification)
+
+## M6: Requirements and negotiation
+
+1. Requirements are a pawn property, read from the game. Royalty title bedroom requirements are used now; Ideology role room requirements are not exposed on the role precept in the reference API, so they are a follow-up. An unmet requirement is a heavy score penalty in the bedtime search, not a ban.
+2. A pawn with no bed searches for the best available room (existing search plus the requirement penalty). A pawn who lost a room gets no special handling.
+3. Negotiation is a separate hourly check, only between two pawns who both own a bed, at most one swap per map per run.
+   - Requirement case: A's room fails A's requirements, B's room is better for A, and A outranks B (title seniority).
+   - Quality case (own toggle, large threshold): equal rank, and the quality gain exceeds the threshold.
+   - The winner takes the loser's bed and releases their old one; the loser is left bedless and finds a room at bedtime.
+   - Per-pawn cooldown. Excluded: shared beds and couples, medical beds, prisoners, guests, slaves, children.
+   - Optional mild "lost my room" thought (off by default) and an optional message.
 
 ## 1.7 checks
 
@@ -29,4 +41,4 @@ Primary target: RimWorld 1.7 on the unstable branch. 1.6 builds are kept until 1
 ## Known limits in v1
 
 - Only fully unowned beds are considered, so a colonist won't join a half-claimed double bed. Vanilla handles that case.
-- Ideology and Royalty bedroom requirements aren't weighted yet.
+- Ideology role bedroom requirements aren't weighted yet (Royalty titles are, from M6).
