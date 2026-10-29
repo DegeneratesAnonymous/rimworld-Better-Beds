@@ -31,10 +31,35 @@ namespace SmarterBeds
             var s = SmarterBedsMod.Settings;
             if (!s.enabled || !s.negotiationEnabled) return;
 
+            PruneCooldowns();
             foreach (var map in Find.Maps)
             {
-                if (map.IsPlayerHome) TryNegotiate(map, s);
+                if (!map.IsPlayerHome) continue;
+                try { TryNegotiate(map, s); }
+                catch (System.Exception e) { Log.Error($"[Smarter Beds] negotiation failed: {e}"); }
             }
+        }
+
+        private void PruneCooldowns()
+        {
+            int now = Find.TickManager.TicksGame;
+            foreach (var key in cooldownUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
+                cooldownUntil.Remove(key);
+        }
+
+        /// <summary>
+        /// Total order used to break ties between equal-rank pawns: longer time in the colony wins,
+        /// then the lower id. Because it is strict and never changes in a pair's favor, two pawns can
+        /// never take the same room back and forth.
+        /// </summary>
+        private static bool HasPriorityOver(Pawn a, Pawn b)
+        {
+            int rankA = Requirements.Rank(a), rankB = Requirements.Rank(b);
+            if (rankA != rankB) return rankA > rankB;
+            int tenureA = a.records.GetAsInt(RecordDefOf.TimeAsColonistOrColonyAnimal);
+            int tenureB = b.records.GetAsInt(RecordDefOf.TimeAsColonistOrColonyAnimal);
+            if (tenureA != tenureB) return tenureA > tenureB;
+            return a.thingIDNumber < b.thingIDNumber;
         }
 
         private bool OnCooldown(Pawn p) =>
@@ -44,6 +69,7 @@ namespace SmarterBeds
         {
             if (p == null || !p.Spawned || p.Dead || !p.IsColonist || p.IsPrisoner || p.IsSlave) return false;
             if (p.HostFaction != null) return false;
+            if (!p.Awake()) return false; // never take a bed out from under a sleeper
             if ((p.DevelopmentalStage & DevelopmentalStage.Adult) == 0) return false;
             if (HealthAIUtility.ShouldSeekMedicalRest(p)) return false;
             var bed = p.ownership?.OwnedBed;
@@ -65,8 +91,9 @@ namespace SmarterBeds
             {
                 var bedA = a.ownership.OwnedBed;
                 float currentA = BedScorer.Quality(bedA, a, s);
-                int rankA = Requirements.Rank(a);
                 int unmetNow = Requirements.Unmet(a, bedA.GetRoom());
+                // A free room that is at least as good for A makes taking someone's room pointless.
+                float bestFree = BedScorer.BestFreeQuality(a, s);
 
                 foreach (var b in pawns)
                 {
@@ -77,12 +104,14 @@ namespace SmarterBeds
                     float gain = BedScorer.Quality(bedB, a, s) - currentA;
                     if (gain <= 0f) continue;
 
-                    int rankB = Requirements.Rank(b);
+                    if (bestFree >= currentA + gain) continue;
+                    if (!HasPriorityOver(a, b)) continue;
+
                     int unmetAfter = Requirements.Unmet(a, bedB.GetRoom());
 
-                    bool requirementCase = unmetNow > unmetAfter && rankA > rankB;
+                    bool requirementCase = unmetNow > unmetAfter && Requirements.Rank(a) > Requirements.Rank(b);
                     bool qualityCase = s.qualityNegotiationEnabled
-                        && rankA == rankB
+                        && Requirements.Rank(a) == Requirements.Rank(b)
                         && gain >= s.qualityNegotiationThreshold
                         && unmetNow == 0 && unmetAfter == 0;
 

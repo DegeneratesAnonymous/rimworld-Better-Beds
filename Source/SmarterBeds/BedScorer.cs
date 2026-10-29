@@ -49,6 +49,19 @@ namespace SmarterBeds
             return best;
         }
 
+        /// <summary>Best quality among free beds this pawn could claim now; MinValue when there are none.</summary>
+        public static float BestFreeQuality(Pawn pawn, SmarterBedsSettings s)
+        {
+            float best = float.MinValue;
+            foreach (var bed in pawn.Map.listerBuildings.AllBuildingsColonistOfClass<Building_Bed>())
+            {
+                if (!IsCandidate(bed, pawn, pawn)) continue;
+                float q = Quality(bed, pawn, s);
+                if (q > best) best = q;
+            }
+            return best;
+        }
+
         private static bool IsCandidate(Building_Bed bed, Pawn sleeper, Pawn traveler)
         {
             if (!bed.Spawned || bed.Destroyed) return false;
