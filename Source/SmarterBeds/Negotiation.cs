@@ -19,6 +19,11 @@ namespace SmarterBeds
         // Saved: pawn thingIDNumber -> tick when they may negotiate again after a swap.
         private Dictionary<int, int> cooldownUntil = new Dictionary<int, int>();
 
+        // Saved: "loserId>winnerId" -> tick until which the loser may not challenge that winner again.
+        private Dictionary<string, int> rematchUntil = new Dictionary<string, int>();
+        private const int RematchDays = 15;
+        private const float MinWinChance = 0.1f;
+
         // Not saved: stops a pawn from re-running the search every time the game asks for a bed.
         private readonly Dictionary<int, int> lastChecked = new Dictionary<int, int>();
         private const int RecheckTicks = GenDate.TicksPerHour;
@@ -28,8 +33,12 @@ namespace SmarterBeds
         public override void ExposeData()
         {
             Scribe_Collections.Look(ref cooldownUntil, "cooldownUntil", LookMode.Value, LookMode.Value);
-            if (Scribe.mode == LoadSaveMode.PostLoadInit && cooldownUntil == null)
-                cooldownUntil = new Dictionary<int, int>();
+            Scribe_Collections.Look(ref rematchUntil, "rematchUntil", LookMode.Value, LookMode.Value);
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                if (cooldownUntil == null) cooldownUntil = new Dictionary<int, int>();
+                if (rematchUntil == null) rematchUntil = new Dictionary<string, int>();
+            }
         }
 
         private static int Now => Find.TickManager.TicksGame;
@@ -111,7 +120,7 @@ namespace SmarterBeds
             if (lastChecked.TryGetValue(a.thingIDNumber, out int last) && Now - last < RecheckTicks) return null;
             lastChecked[a.thingIDNumber] = Now;
 
-            try { return FindLoser(a, a.ownership.OwnedBed, SmarterBedsMod.Settings, out _); }
+            try { return FindLoser(a, a.ownership.OwnedBed, SmarterBedsMod.Settings, out _, out _); }
             catch (System.Exception e)
             {
                 Log.Error($"[Smarter Beds] finding a negotiation target failed: {e}");
@@ -130,8 +139,22 @@ namespace SmarterBeds
             {
                 if (WantsToNegotiate(a) && Eligible(b) && !OnCooldown(b))
                 {
-                    var target = FindLoser(a, a.ownership.OwnedBed, s, out float gain, only: b);
-                    if (target == b) Swap(a, b, gain, s);
+                    var target = FindLoser(a, a.ownership.OwnedBed, s, out float gain, out var contest, only: b);
+                    if (target == b)
+                    {
+                        if (!s.useNegotiationRoll)
+                        {
+                            Swap(a, b, gain, s, null, 0, 0);
+                        }
+                        else
+                        {
+                            bool won = NegotiationRoll.Roll(contest, out int askerTotal, out int defenderTotal);
+                            GiveSocialExperience(a, won);
+                            if (contest.approach == NegotiationApproach.Intimidate) Resent(b, a);
+                            if (won) Swap(a, b, gain, s, contest, askerTotal, defenderTotal);
+                            else ReportFailure(a, b, contest, askerTotal, defenderTotal, s);
+                        }
+                    }
                 }
             }
             catch (System.Exception e)
@@ -144,14 +167,39 @@ namespace SmarterBeds
             }
         }
 
+        private static void GiveSocialExperience(Pawn asker, bool won)
+        {
+            // Winning is more instructive than being turned down, but both are practice.
+            asker.skills?.Learn(SkillDefOf.Social, won ? 60f : 35f);
+        }
+
+        /// <summary>Someone who was leaned on remembers it.</summary>
+        private static void Resent(Pawn victim, Pawn bully)
+        {
+            victim.needs?.mood?.thoughts?.memories?.TryGainMemory(
+                DefDatabase<ThoughtDef>.GetNamed("SmarterBeds_PushedAround"), bully);
+        }
+
+        private static void ReportFailure(Pawn asker, Pawn defender, NegotiationContest c, int askerTotal, int defenderTotal, SmarterBedsSettings s)
+        {
+            if (s.verboseLogging)
+                Log.Message($"[Smarter Beds] negotiation failed: {asker.LabelShort} vs {defender.LabelShort} ({c.approach}) {askerTotal} vs {defenderTotal}");
+            if (s.negotiationMessages)
+                Messages.Message("SmarterBeds_RoomFailed".Translate(asker.LabelShort, defender.LabelShort, askerTotal, defenderTotal),
+                    new LookTargets(asker, defender), MessageTypeDefOf.NeutralEvent, false);
+        }
+
         private void SetCooldown(Pawn p)
         {
             cooldownUntil[p.thingIDNumber] = Now + (int)(SmarterBedsMod.Settings.negotiationCooldownDays * GenDate.TicksPerDay);
         }
 
-        private Pawn FindLoser(Pawn a, Building_Bed bedA, SmarterBedsSettings s, out float bestGain, Pawn only = null)
+        private Pawn FindLoser(Pawn a, Building_Bed bedA, SmarterBedsSettings s, out float bestGain, out NegotiationContest bestContest, Pawn only = null)
         {
             bestGain = 0f;
+            bestContest = default;
+            float bestValue = 0f;
+            bool roll = s.useNegotiationRoll;
             int unmetNow = Requirements.Unmet(a, bedA.GetRoom());
             Pawn best = null;
 
@@ -163,6 +211,7 @@ namespace SmarterBeds
             {
                 if (b == a || (only != null && b != only) || !Eligible(b) || OnCooldown(b)) continue;
                 if (AreLovePartners(a, b)) continue; // never split a couple's rooms
+                if (rematchUntil.TryGetValue(RematchKey(a, b), out int rematch) && Now < rematch) continue;
 
                 var bedB = b.ownership.OwnedBed;
                 if (bedA.GetRoom() == bedB.GetRoom()) continue;
@@ -172,26 +221,41 @@ namespace SmarterBeds
                 float gain = BedScorer.Quality(bedB, a, s) - currentA;
                 if (gain <= 0f) continue;
                 if (bestFree >= currentA + gain) continue;
-                if (!HasPriorityOver(a, b)) continue;
+                // Strict rules: higher title, then longer-serving, decides before anyone talks.
+                // Roll mode lets anyone try; the title is just one of the numbers in the roll.
+                if (!roll && !HasPriorityOver(a, b)) continue;
 
                 int unmetAfter = Requirements.Unmet(a, bedB.GetRoom());
-                bool requirementCase = unmetNow > unmetAfter && Requirements.Rank(a) > Requirements.Rank(b);
+                bool requirementCase = unmetNow > unmetAfter && (roll || Requirements.Rank(a) > Requirements.Rank(b));
                 bool qualityCase = s.qualityNegotiationEnabled
-                    && Requirements.Rank(a) == Requirements.Rank(b)
+                    && (roll || Requirements.Rank(a) == Requirements.Rank(b))
                     && gain >= s.qualityNegotiationThreshold
                     && unmetNow == 0 && unmetAfter == 0;
 
                 if (!requirementCase && !qualityCase) continue;
-                if (gain > bestGain)
+
+                var contest = default(NegotiationContest);
+                float value = gain;
+                if (roll)
                 {
+                    contest = NegotiationRoll.Build(a, b, s);
+                    // Don't spend three days on a conversation that has almost no chance.
+                    if (!contest.possible || contest.winChance < MinWinChance) continue;
+                    value = gain * contest.winChance;
+                }
+
+                if (value > bestValue)
+                {
+                    bestValue = value;
                     bestGain = gain;
+                    bestContest = contest;
                     best = b;
                 }
             }
             return best;
         }
 
-        private bool Swap(Pawn winner, Pawn loser, float gain, SmarterBedsSettings s)
+        private bool Swap(Pawn winner, Pawn loser, float gain, SmarterBedsSettings s, NegotiationContest? contest, int winnerTotal, int loserTotal)
         {
             var wonBed = loser.ownership.OwnedBed;
             var oldBed = winner.ownership.OwnedBed;
@@ -208,6 +272,8 @@ namespace SmarterBeds
 
             SetCooldown(winner);
             SetCooldown(loser);
+            // The loser can't just turn around and take it back.
+            rematchUntil[RematchKey(loser, winner)] = Now + RematchDays * GenDate.TicksPerDay;
             PruneCooldowns();
 
             if (s.verboseLogging)
@@ -217,16 +283,28 @@ namespace SmarterBeds
                 loser.needs.mood.thoughts.memories.TryGainMemory(DefDatabase<ThoughtDef>.GetNamed("SmarterBeds_LostRoom"));
 
             if (s.negotiationMessages)
-                Messages.Message("SmarterBeds_RoomTaken".Translate(winner.LabelShort, loser.LabelShort),
-                    new LookTargets(winner, loser), MessageTypeDefOf.NeutralEvent, false);
+            {
+                string text;
+                if (contest == null)
+                    text = "SmarterBeds_RoomTaken".Translate(winner.LabelShort, loser.LabelShort);
+                else if (contest.Value.approach == NegotiationApproach.Intimidate)
+                    text = "SmarterBeds_RoomWonIntimidate".Translate(winner.LabelShort, loser.LabelShort, winnerTotal, loserTotal);
+                else
+                    text = "SmarterBeds_RoomWonPersuade".Translate(winner.LabelShort, loser.LabelShort, winnerTotal, loserTotal);
+                Messages.Message(text, new LookTargets(winner, loser), MessageTypeDefOf.NeutralEvent, false);
+            }
             return true;
         }
+
+        private static string RematchKey(Pawn loser, Pawn winner) => loser.thingIDNumber + ">" + winner.thingIDNumber;
 
         private void PruneCooldowns()
         {
             int now = Now;
             foreach (var key in cooldownUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
                 cooldownUntil.Remove(key);
+            foreach (var key in rematchUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
+                rematchUntil.Remove(key);
         }
     }
 }

@@ -6,6 +6,8 @@
     <reportString>negotiating for a better room with TargetA.</reportString>
     <casualInterruptible>true</casualInterruptible>
     <joyDuration>600</joyDuration>
+    <joySkill>Social</joySkill>
+    <joyXpPerTick>0.01</joyXpPerTick>
     <joyKind>Social</joyKind>
   </JobDef>
 </Defs>

@@ -13,4 +13,17 @@
       </li>
     </stages>
   </ThoughtDef>
+  <ThoughtDef>
+    <defName>SmarterBeds_PushedAround</defName>
+    <thoughtClass>Thought_MemorySocial</thoughtClass>
+    <durationDays>15</durationDays>
+    <stackLimit>3</stackLimit>
+    <stackLimitForSameOtherPawn>1</stackLimitForSameOtherPawn>
+    <stages>
+      <li>
+        <label>leaned on over my room</label>
+        <baseOpinionOffset>-15</baseOpinionOffset>
+      </li>
+    </stages>
+  </ThoughtDef>
 </Defs>

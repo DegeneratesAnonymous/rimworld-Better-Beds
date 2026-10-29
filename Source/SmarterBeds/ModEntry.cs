@@ -45,6 +45,9 @@ namespace SmarterBeds
             Settings.unmetRequirementPenalty = list.Slider(Settings.unmetRequirementPenalty, 0f, 10000f);
             list.CheckboxLabeled("SmarterBeds_NegotiationEnabled".Translate(), ref Settings.negotiationEnabled);
             list.CheckboxLabeled("SmarterBeds_QualityNegotiation".Translate(), ref Settings.qualityNegotiationEnabled);
+            list.CheckboxLabeled("SmarterBeds_UseRoll".Translate(), ref Settings.useNegotiationRoll);
+            list.Label("SmarterBeds_TitleWeight".Translate(Settings.titleRollWeight.ToString("0.0")));
+            Settings.titleRollWeight = list.Slider(Settings.titleRollWeight, 0f, 10f);
             list.Label("SmarterBeds_QualityThreshold".Translate(Settings.qualityNegotiationThreshold.ToString("0")));
             Settings.qualityNegotiationThreshold = list.Slider(Settings.qualityNegotiationThreshold, 50f, 1000f);
             list.Label("SmarterBeds_Cooldown".Translate(Settings.negotiationCooldownDays.ToString("0.0")));
