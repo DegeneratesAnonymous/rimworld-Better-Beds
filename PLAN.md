@@ -16,11 +16,13 @@ Primary target: RimWorld 1.7 on the unstable branch. 1.6 builds are kept until 1
 
 1. Requirements are a pawn property, read from the game. Royalty title bedroom requirements are used now; Ideology role room requirements are not exposed on the role precept in the reference API, so they are a follow-up. An unmet requirement is a heavy score penalty in the bedtime search, not a ban.
 2. A pawn with no bed searches for the best available room (existing search plus the requirement penalty). A pawn who lost a room gets no special handling.
-3. Negotiation is a separate hourly check, only between two pawns who both own a bed, at most one swap per map per run.
+3. Negotiation happens at bedtime, only for a pawn who owns a bed and is about to sleep with a problem: an active sleep-related mood debuff (barracks, cold, heat, slave in room, outside, ground) or an unmet title requirement. Checked at most once an hour per pawn.
+   - Only against pawns who also own a bed and aren't using it right now (reservation check), never against their love partner.
    - Requirement case: A's room fails A's requirements, B's room is better for A, and A outranks B (title seniority).
-   - Quality case (own toggle, large threshold): equal rank, and the quality gain exceeds the threshold.
-   - The winner takes the loser's bed and releases their old one; the loser is left bedless and finds a room at bedtime.
-   - Per-pawn cooldown. Excluded: shared beds and couples, medical beds, prisoners, guests, slaves, children.
+   - Quality case (own toggle, large threshold): equal rank, and the quality gain exceeds the threshold. Ties are broken by time in the colony, then id, so no pair can swap back and forth.
+   - Skipped if a free room is at least as good for A.
+   - The winner takes the loser's bed and releases their old one, then heads to it; the loser is left bedless and finds a room at their own bedtime.
+   - Per-pawn cooldown after a swap. Excluded: shared beds and couples, medical beds, prisoners, guests, slaves, children.
    - Optional mild "lost my room" thought (off by default) and an optional message.
 
 ## 1.7 checks

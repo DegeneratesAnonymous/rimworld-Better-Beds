@@ -37,5 +37,22 @@ namespace SmarterBeds.Patches
             __result = bed;
             return false;
         }
+
+        /// <summary>
+        /// A pawn who already owns a bed is going to sleep. If something is wrong with how they
+        /// sleep, let them negotiate for a better room; on a swap they head straight to the new bed.
+        /// </summary>
+        static void Postfix(object[] __args, ref Building_Bed __result)
+        {
+            if (!SmarterBedsMod.Settings.enabled) return;
+
+            var sleeper = __args.Length > 0 ? __args[0] as Pawn : null;
+            var traveler = __args.Length > 1 ? __args[1] as Pawn : sleeper;
+            if (sleeper == null || sleeper != traveler) return;               // only a pawn seeking its own rest
+            if (sleeper.ownership?.OwnedBed == null || __result != sleeper.ownership.OwnedBed) return;
+
+            var newBed = GameComponent_BedNegotiation.Instance?.TryNegotiateFor(sleeper);
+            if (newBed != null) __result = newBed;
+        }
     }
 }

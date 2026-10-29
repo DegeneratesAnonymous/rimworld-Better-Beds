@@ -19,7 +19,21 @@ namespace SmarterBeds
             if ((sleeper.DevelopmentalStage & DevelopmentalStage.Adult) == 0) return false;  // babies/children
             if (sleeper.ownership?.OwnedBed != null) return false;                           // already has a bed
             if (HealthAIUtility.ShouldSeekMedicalRest(sleeper)) return false;                // medical beds
+            if (PartnerHasRoomInTheirBed(sleeper)) return false;                             // vanilla sleeps couples together
             return true;
+        }
+
+        /// <summary>True when a love partner owns a bed with a free sleeping slot the pawn could share.</summary>
+        private static bool PartnerHasRoomInTheirBed(Pawn sleeper)
+        {
+            foreach (var rel in LovePartnerRelationUtility.ExistingLovePartners(sleeper, false))
+            {
+                var bed = rel.otherPawn?.ownership?.OwnedBed;
+                if (bed == null || bed.Medical || !bed.Spawned) continue;
+                if (bed.OwnersForReading.Count < bed.SleepingSlotsCount
+                    && RestUtility.CanUseBedEver(sleeper, bed.def)) return true;
+            }
+            return false;
         }
 
         public static Building_Bed FindBest(Pawn sleeper, Pawn traveler)
