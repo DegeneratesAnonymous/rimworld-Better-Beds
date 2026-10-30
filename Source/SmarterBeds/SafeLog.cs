@@ -22,6 +22,13 @@ namespace SmarterBeds
             if (!Seen.Add(what)) return;
             Log.Warning($"[Smarter Beds] {what} failed and was skipped (reported once): {e.GetType().Name}: {e.Message}");
         }
+
+        /// <summary>A plain message, written once per key.</summary>
+        public static void Note(string key, string text)
+        {
+            if (!Seen.Add(key)) return;
+            Log.Warning("[Smarter Beds] " + text);
+        }
     }
 
     /// <summary>
@@ -99,6 +106,8 @@ namespace SmarterBeds
             if (Failed.Count > 0) lines.Add("Skipped: " + string.Join("; ", Failed));
             if (DetectedMods.Count > 0) lines.Add("Alongside: " + string.Join(", ", DetectedMods));
             lines.Add("Active: " + string.Join(", ", Applied));
+            string perf = PerfWatch.Report();
+            if (perf.Length > 0) lines.Add(perf);
             return string.Join("\n", lines);
         }
     }

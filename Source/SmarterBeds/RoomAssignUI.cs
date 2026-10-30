@@ -102,8 +102,11 @@ namespace SmarterBeds
             lastBuilt = Time.realtimeSinceStartup;
             try
             {
-                rows = BuildRows(Find.CurrentMap);
-                Sort();
+                using (PerfWatch.Measure("room list"))
+                {
+                    rows = BuildRows(Find.CurrentMap);
+                    Sort();
+                }
             }
             catch (System.Exception e)
             {
@@ -226,7 +229,10 @@ namespace SmarterBeds
             }
 
             Widgets.BeginScrollView(outRect, ref scroll, viewRect);
-            for (int i = 0; i < rows.Count; i++)
+            // Only the rows in view are drawn; the rest cost nothing however long the list is.
+            int first = Mathf.Max(0, (int)(scroll.y / RowHeight) - 1);
+            int last = Mathf.Min(rows.Count - 1, (int)((scroll.y + outRect.height) / RowHeight) + 1);
+            for (int i = first; i <= last; i++)
             {
                 DoRow(new Rect(0f, i * RowHeight, listWidth, RowHeight), rows[i], i, ownersWidth);
             }

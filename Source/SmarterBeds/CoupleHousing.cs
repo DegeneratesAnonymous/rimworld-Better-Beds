@@ -26,8 +26,11 @@ namespace SmarterBeds
             foreach (var a in map.mapPawns.FreeColonistsSpawned)
             {
                 if (!Family.IsAdultColonist(a)) continue;
+                Family.Refresh(a); // this runs once an hour, so read the relations afresh
                 var b = Family.SoleLover(a);
-                if (b == null || Family.SoleLover(b) != a) continue;
+                if (b == null) continue;
+                Family.Refresh(b);
+                if (Family.SoleLover(b) != a) continue;
                 if (a.thingIDNumber > b.thingIDNumber) continue; // once per pair
                 if (!Family.IsAdultColonist(b) || b.Map != a.Map) continue;
                 if (!a.Awake() || !b.Awake()) continue;
@@ -35,7 +38,8 @@ namespace SmarterBeds
                 if (Family.IsInCoupleRoom(a) && !FamilyProblem(a, b, s)) continue;
                 if (comp.CoupleOnCooldown(a, b)) continue;
 
-                bool moved = TryHouse(a, b, s);
+                bool moved;
+                using (PerfWatch.Measure("couple housing")) moved = TryHouse(a, b, s);
                 comp.StartCoupleCooldown(a, b, moved ? s.negotiationCooldownDays : RetryDaysWhenNothingFits);
                 if (moved) return; // one couple per map per hour is plenty
             }

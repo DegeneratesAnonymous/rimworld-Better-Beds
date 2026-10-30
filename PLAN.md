@@ -69,6 +69,16 @@ A selected colonist gets Force negotiation: sends them to ask for a better room 
 ### Negotiation conversation
 When the asker gets within 6 cells, the colonist being asked stops, faces them and waits (a short job that resumes their old one afterwards, interruptible by emergencies and skipped for drafted, mentally broken, downed or sleeping colonists). Both stand still for the talk. The listener is released as soon as the conversation ends or the asker's job is interrupted.
 
+### Performance
+Where the time could go, and what is done about it:
+- Family relations (relatives, opinions, partners) are asked for constantly by the bed score and the two family thoughts. Each colonist's answer is a snapshot kept for 600 ticks (forced fresh for the hourly couple check, cleared when a game loads). Beds are always read live.
+- The joy system asks every colonist, many times a minute, whether negotiating is on offer. The answer is cached for 250 ticks; settling a negotiation always recomputes it.
+- A bedless colonist's bed search scores every free bed. The answer, including "none free", is kept for 180 ticks and re-validated before use.
+- The negotiation search does the cheap checks first (eligibility, room, cooldowns, relationships, score) and the pathing check (can reach and reserve) last, uses packed numbers for cooldown keys instead of strings, and runs at most once an hour per colonist.
+- Scoring a bed allocates nothing per call; the room list draws only visible rows and rebuilds twice a second while open.
+- The hourly work (lock cleanup, couple housing) only looks at couples without a room of their own, with a 1 day retry when nothing fits.
+- `PerfWatch` times bed choice, the negotiation search, couple housing, the family thoughts and the room list. Hover the compatibility line in the mod options for calls, average, worst and total, or see the log for any single call over 20 ms.
+
 ### Open
 - Verify in game: the recreation activity is picked, bubbles appear, the chair looks acceptable.
 - Temperature debuffs trigger a request but are not in the room score.

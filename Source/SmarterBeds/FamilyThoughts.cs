@@ -14,7 +14,8 @@ namespace SmarterBeds
         {
             try
             {
-                return Family.IsFarFromFamily(p, SmarterBedsMod.Settings) ? ThoughtState.ActiveAtStage(0) : ThoughtState.Inactive;
+                using (PerfWatch.Measure("family thoughts"))
+                    return Family.IsFarFromFamily(p, SmarterBedsMod.Settings) ? ThoughtState.ActiveAtStage(0) : ThoughtState.Inactive;
             }
             catch (System.Exception e)
             {
@@ -34,8 +35,11 @@ namespace SmarterBeds
         {
             try
             {
-                var relative = Family.NearbyDislikedRelative(p, SmarterBedsMod.Settings);
-                return relative != null ? ThoughtState.ActiveWithReason(relative.LabelShort) : ThoughtState.Inactive;
+                using (PerfWatch.Measure("family thoughts"))
+                {
+                    var relative = Family.NearbyDislikedRelative(p, SmarterBedsMod.Settings);
+                    return relative != null ? ThoughtState.ActiveWithReason(relative.LabelShort) : ThoughtState.Inactive;
+                }
             }
             catch (System.Exception e)
             {

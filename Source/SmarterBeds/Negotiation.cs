@@ -21,11 +21,15 @@ namespace SmarterBeds
     {
         public static GameComponent_BedNegotiation Instance => Current.Game?.GetComponent<GameComponent_BedNegotiation>();
 
-        // Saved: "lowId:highId" -> tick when these two may negotiate with each other again.
-        private Dictionary<string, int> pairCooldownUntil = new Dictionary<string, int>();
+        // Saved: pair of pawn ids -> tick when these two may negotiate with each other again.
+        // (Keys are two ids packed into one number: no strings are built while searching.)
+        private Dictionary<long, int> pairCooldownUntil = new Dictionary<long, int>();
 
-        // Saved: "loserId>winnerId" -> tick until which the loser may not challenge that winner again.
-        private Dictionary<string, int> rematchUntil = new Dictionary<string, int>();
+        // Saved: same, for the housing check on a couple.
+        private Dictionary<long, int> coupleCooldownUntil = new Dictionary<long, int>();
+
+        // Saved: loser/winner ids -> tick until which the loser may not challenge that winner again.
+        private Dictionary<long, int> rematchUntil = new Dictionary<long, int>();
 
         // Saved: bed id -> id of the owner the player set with the Set owner button (see BedLocks).
         private Dictionary<int, int> lockedBeds = new Dictionary<int, int>();
@@ -97,30 +101,41 @@ namespace SmarterBeds
         }
 
         public bool CoupleOnCooldown(Pawn a, Pawn b) =>
-            pairCooldownUntil.TryGetValue("c" + PairKey(a, b), out int until) && Now < until;
+            coupleCooldownUntil.TryGetValue(PairKey(a, b), out int until) && Now < until;
 
         public void StartCoupleCooldown(Pawn a, Pawn b, float days) =>
-            pairCooldownUntil["c" + PairKey(a, b)] = Now + (int)(days * GenDate.TicksPerDay);
+            coupleCooldownUntil[PairKey(a, b)] = Now + (int)(days * GenDate.TicksPerDay);
+
+        // Caches in this file are per game; the shared ones are cleared whenever a game loads, because
+        // pawn ids are reused between saves.
+        public override void LoadedGame() { Family.ClearCache(); BedScorer.ClearCache(); }
+        public override void StartedNewGame() { Family.ClearCache(); BedScorer.ClearCache(); }
 
         public override void ExposeData()
         {
-            Scribe_Collections.Look(ref pairCooldownUntil, "pairCooldownUntil", LookMode.Value, LookMode.Value);
-            Scribe_Collections.Look(ref rematchUntil, "rematchUntil", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref pairCooldownUntil, "pairCooldowns", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref coupleCooldownUntil, "coupleCooldowns", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref rematchUntil, "rematches", LookMode.Value, LookMode.Value);
             Scribe_Collections.Look(ref lockedBeds, "lockedBeds", LookMode.Value, LookMode.Value);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 if (lockedBeds == null) lockedBeds = new Dictionary<int, int>();
-                if (pairCooldownUntil == null) pairCooldownUntil = new Dictionary<string, int>();
-                if (rematchUntil == null) rematchUntil = new Dictionary<string, int>();
+                if (pairCooldownUntil == null) pairCooldownUntil = new Dictionary<long, int>();
+                if (coupleCooldownUntil == null) coupleCooldownUntil = new Dictionary<long, int>();
+                if (rematchUntil == null) rematchUntil = new Dictionary<long, int>();
             }
         }
 
         private static int Now => Find.TickManager.TicksGame;
 
-        private static string PairKey(Pawn a, Pawn b) =>
-            a.thingIDNumber < b.thingIDNumber ? a.thingIDNumber + ":" + b.thingIDNumber : b.thingIDNumber + ":" + a.thingIDNumber;
+        private static long Pack(int first, int second) => ((long)first << 32) | (uint)second;
 
-        private static string RematchKey(Pawn loser, Pawn winner) => loser.thingIDNumber + ">" + winner.thingIDNumber;
+        /// <summary>The same number whichever of the two is given first.</summary>
+        private static long PairKey(Pawn a, Pawn b) =>
+            a.thingIDNumber < b.thingIDNumber ? Pack(a.thingIDNumber, b.thingIDNumber) : Pack(b.thingIDNumber, a.thingIDNumber);
+
+        /// <summary>Order matters: this is "loser may not challenge winner".</summary>
+        private static long RematchKey(Pawn loser, Pawn winner) => Pack(loser.thingIDNumber, winner.thingIDNumber);
 
         private bool PairOnCooldown(Pawn a, Pawn b) =>
             pairCooldownUntil.TryGetValue(PairKey(a, b), out int until) && Now < until;
@@ -179,8 +194,11 @@ namespace SmarterBeds
                 foreach (var t in tmpThoughts)
                 {
                     var worker = t.def.workerClass;
-                    if (worker == null || !BedroomThoughtWorkers.Any(w => w.IsAssignableFrom(worker))) continue;
-                    if (t.MoodOffset() < 0f) return true;
+                    if (worker == null) continue;
+                    for (int i = 0; i < BedroomThoughtWorkers.Length; i++)
+                    {
+                        if (BedroomThoughtWorkers[i].IsAssignableFrom(worker) && t.MoodOffset() < 0f) return true;
+                    }
                 }
             }
             finally { tmpThoughts.Clear(); }
@@ -204,14 +222,7 @@ namespace SmarterBeds
             return true;
         }
 
-        private static bool AreLovePartners(Pawn a, Pawn b)
-        {
-            foreach (var rel in LovePartnerRelationUtility.ExistingLovePartners(a, false))
-            {
-                if (rel.otherPawn == b) return true;
-            }
-            return false;
-        }
+        private static bool AreLovePartners(Pawn a, Pawn b) => Family.Lovers(a).Contains(b);
 
         /// <summary>Cheap check: is this pawn in a position where negotiating makes sense at all?</summary>
         // Not saved: when each pawn last moved to a new room, so old sleep memories do not count against the new one.
@@ -223,10 +234,28 @@ namespace SmarterBeds
         private bool RecentlyMoved(Pawn p) =>
             movedAt.TryGetValue(p.thingIDNumber, out int at) && Now - at < MemoryIgnoreTicks;
 
+        // Not saved. The joy system asks every colonist, many times a minute, whether this is on offer;
+        // the honest answer only changes over hours, so it is worked out at most every 250 ticks.
+        private readonly Dictionary<int, KeyValuePair<int, bool>> wantsCache = new Dictionary<int, KeyValuePair<int, bool>>();
+        private const int WantsCacheTicks = 250;
+
         public bool WantsToNegotiate(Pawn a)
         {
             var s = SmarterBedsMod.Settings;
             if (!s.enabled || !s.negotiationEnabled) return false;
+
+            int now = Now;
+            if (wantsCache.TryGetValue(a.thingIDNumber, out var cached) && now >= cached.Key && now - cached.Key < WantsCacheTicks)
+                return cached.Value;
+
+            bool wants = ComputeWants(a);
+            wantsCache[a.thingIDNumber] = new KeyValuePair<int, bool>(now, wants);
+            return wants;
+        }
+
+        /// <summary>The real answer, never cached: used when it must be right (settling a negotiation).</summary>
+        private bool ComputeWants(Pawn a)
+        {
             if (!Eligible(a)) return false;
             // A couple who have a room of their own are not going to break it up.
             if (Family.IsInCoupleRoom(a)) return false;
@@ -238,10 +267,14 @@ namespace SmarterBeds
         public Pawn FindNegotiationTarget(Pawn a)
         {
             if (!WantsToNegotiate(a)) return null;
-            if (lastChecked.TryGetValue(a.thingIDNumber, out int last) && Now - last < RecheckTicks) return null;
+            if (lastChecked.TryGetValue(a.thingIDNumber, out int last) && Now >= last && Now - last < RecheckTicks) return null;
             lastChecked[a.thingIDNumber] = Now;
 
-            try { return FindLoser(a, a.ownership.OwnedBed, SmarterBedsMod.Settings, out _, out _); }
+            try
+            {
+                using (PerfWatch.Measure("negotiation search"))
+                    return FindLoser(a, a.ownership.OwnedBed, SmarterBedsMod.Settings, out _, out _);
+            }
             catch (System.Exception e)
             {
                 SafeLog.Once("finding someone to negotiate with", e);
@@ -299,7 +332,7 @@ namespace SmarterBeds
             var s = SmarterBedsMod.Settings;
             try
             {
-                if ((forced ? Eligible(a) : WantsToNegotiate(a)) && Eligible(b))
+                if ((forced ? Eligible(a) : ComputeWants(a)) && Eligible(b))
                 {
                     var target = FindLoser(a, a.ownership.OwnedBed, s, out float gain, out var contest, only: b, force: forced);
                     if (target == b)
@@ -410,15 +443,12 @@ namespace SmarterBeds
             foreach (var b in a.Map.mapPawns.FreeColonistsSpawned)
             {
                 if (b == a || (only != null && b != only) || !Eligible(b)) continue;
-                if (!force && PairOnCooldown(a, b)) continue;
-                if (AreLovePartners(a, b)) continue; // never split a couple's rooms
-                if (Family.IsInCoupleRoom(b)) continue; // nor take a bed out of one
-                if (!force && rematchUntil.TryGetValue(RematchKey(a, b), out int rematch) && Now < rematch) continue;
-
                 var bedB = b.ownership.OwnedBed;
                 if (bedA.GetRoom() == bedB.GetRoom()) continue;
-                // The owner must not be using it right now.
-                if (!a.CanReserveAndReach(bedB, PathEndMode.OnCell, Danger.Some, bedB.SleepingSlotsCount)) continue;
+                if (!force && PairOnCooldown(a, b)) continue;
+                if (!force && rematchUntil.TryGetValue(RematchKey(a, b), out int rematch) && Now < rematch) continue;
+                if (AreLovePartners(a, b)) continue; // never split a couple's rooms
+                if (Family.IsInCoupleRoom(b)) continue; // nor take a bed out of one
 
                 float gain = BedScorer.Quality(bedB, a, s, leaving: b) - currentA;
                 if (gain <= 0f) continue;
@@ -429,6 +459,9 @@ namespace SmarterBeds
                 bool fixesAPenalty = RoomComfort.DebuffPenalty(bedB, a, s, leaving: b) < debuffNow;
                 bool bigUpgrade = s.qualityNegotiationEnabled && gain >= s.qualityNegotiationThreshold;
                 if (!force && !fixesAPenalty && !bigUpgrade) continue;
+
+                // The owner must not be using it right now. Checked last: it asks the pathfinder.
+                if (!a.CanReserveAndReach(bedB, PathEndMode.OnCell, Danger.Some, bedB.SleepingSlotsCount)) continue;
 
                 // Anyone may try; rank only matters as a number in the roll.
                 var contest = NegotiationRoll.Build(a, b, s);
@@ -487,6 +520,8 @@ namespace SmarterBeds
             int now = Now;
             foreach (var key in pairCooldownUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
                 pairCooldownUntil.Remove(key);
+            foreach (var key in coupleCooldownUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
+                coupleCooldownUntil.Remove(key);
             foreach (var key in rematchUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
                 rematchUntil.Remove(key);
         }

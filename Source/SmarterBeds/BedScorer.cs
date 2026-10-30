@@ -24,7 +24,35 @@ namespace SmarterBeds
             return true;
         }
 
+        // A bedless colonist asks for a bed every time they think about sleeping, and each answer means
+        // scoring every free bed in the colony. The best bed does not change in a few seconds, so the
+        // answer (including "none free") is kept for 180 ticks and checked again before it is used.
+        private class Remembered { public int tick; public Building_Bed bed; }
+        private static readonly System.Collections.Generic.Dictionary<int, Remembered> remembered = new System.Collections.Generic.Dictionary<int, Remembered>();
+        private const int RememberTicks = 180;
+
+        public static void ClearCache() => remembered.Clear();
+
         public static Building_Bed FindBest(Pawn sleeper, Pawn traveler)
+        {
+            int now = Find.TickManager.TicksGame;
+            bool cacheable = sleeper == traveler;
+            if (cacheable && remembered.TryGetValue(sleeper.thingIDNumber, out var memo) && now >= memo.tick && now - memo.tick < RememberTicks)
+            {
+                if (memo.bed == null) return null;
+                if (IsCandidate(memo.bed, sleeper, traveler)) return memo.bed;
+            }
+
+            var found = Search(sleeper, traveler);
+            if (cacheable)
+            {
+                if (remembered.Count > 200) remembered.Clear();
+                remembered[sleeper.thingIDNumber] = new Remembered { tick = now, bed = found };
+            }
+            return found;
+        }
+
+        private static Building_Bed Search(Pawn sleeper, Pawn traveler)
         {
             var s = SmarterBedsMod.Settings;
             Building_Bed best = null;

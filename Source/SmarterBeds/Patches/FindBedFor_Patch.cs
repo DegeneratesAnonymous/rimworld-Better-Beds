@@ -46,7 +46,8 @@ namespace SmarterBeds.Patches
                 if (!BedScorer.ShouldHandle(sleeper, traveler)) return;
                 if (__result != null && __result.OwnersForReading.Count > 0) return; // a partner's bed, or similar
 
-                var bed = BedScorer.FindBest(sleeper, traveler);
+                Building_Bed bed;
+                using (PerfWatch.Measure("bed choice")) bed = BedScorer.FindBest(sleeper, traveler);
                 if (bed != null) __result = bed;
             }
             catch (System.Exception e)
