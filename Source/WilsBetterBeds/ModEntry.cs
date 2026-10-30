@@ -47,6 +47,9 @@ namespace WilsBetterBeds
             if (s.titleRulesEnabled)
                 Slide(list, "WilsBetterBeds_S_Unmet", ref s.unmetRequirementPenalty, 0f, 20f, "0.0");
             Check(list, "WilsBetterBeds_S_Jealousy", ref s.jealousyEnabled);
+            Check(list, "WilsBetterBeds_S_Temperature", ref s.temperatureEnabled);
+            if (s.temperatureEnabled)
+                Slide(list, "WilsBetterBeds_S_TemperaturePenalty", ref s.temperaturePenalty, 0f, 10f, "0.0");
             Check(list, "WilsBetterBeds_S_FreeBeds", ref s.freeBedMoveEnabled);
 
             // Used by both family and neighbours, so it is not hidden behind either switch.

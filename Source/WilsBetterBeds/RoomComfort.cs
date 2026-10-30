@@ -34,6 +34,7 @@ namespace WilsBetterBeds
             points += (bed.GetStatValue(StatDefOf.BedRestEffectiveness) - 1f) * s.restEffectivenessWeight;
             points -= TitlePenalty(bed, room, outdoors, pawn, s);
             points -= JealousyPenalty(room, outdoors, pawn);
+            points -= TemperaturePenalty(bed, pawn, s);
             points -= FamilyPenalty(bed, pawn, s, leaving);
             points -= NeighborPenalty(bed, pawn, s, leaving);
             points -= PrisonerPenalty(bed, pawn, s);
@@ -51,7 +52,7 @@ namespace WilsBetterBeds
         {
             Room room = bed.GetRoom();
             bool outdoors = room == null || room.PsychologicallyOutdoors;
-            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn) + FamilyPenalty(bed, pawn, s, leaving) + NeighborPenalty(bed, pawn, s, leaving) + PrisonerPenalty(bed, pawn, s);
+            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn) + TemperaturePenalty(bed, pawn, s) + FamilyPenalty(bed, pawn, s, leaving) + NeighborPenalty(bed, pawn, s, leaving) + PrisonerPenalty(bed, pawn, s);
         }
 
         /// <summary>
@@ -152,6 +153,32 @@ namespace WilsBetterBeds
             }
             mood += System.Math.Min(family, 2) * s.familyShareBonus;
             return mood;
+        }
+
+        /// <summary>
+        /// The game's own test for "slept in the cold" and "slept in the heat": the temperature where the bed
+        /// stands against the sleeper's comfortable range (their race, plus any genes that move it). Either
+        /// is -4 in the game, which is the default here. It is the temperature now, so a room that is
+        /// heated, or cooled, counts as the better room, and one that has gone cold with the weather does not.
+        /// </summary>
+        public static float TemperaturePenalty(Building_Bed bed, Pawn pawn, WilsBetterBedsSettings s)
+        {
+            if (!s.temperatureEnabled || s.temperaturePenalty <= 0f || bed == null || bed.Map == null) return 0f;
+
+            float min = pawn.def.GetStatValueAbstract(StatDefOf.ComfyTemperatureMin);
+            float max = pawn.def.GetStatValueAbstract(StatDefOf.ComfyTemperatureMax);
+            if (ModsConfig.BiotechActive && pawn.genes != null)
+            {
+                foreach (var gene in pawn.genes.GenesListForReading)
+                {
+                    if (!gene.Active) continue;
+                    min += gene.def.statOffsets.GetStatOffsetFromList(StatDefOf.ComfyTemperatureMin);
+                    max += gene.def.statOffsets.GetStatOffsetFromList(StatDefOf.ComfyTemperatureMax);
+                }
+            }
+
+            float temperature = bed.AmbientTemperature;
+            return temperature < min || temperature > max ? s.temperaturePenalty : 0f;
         }
 
         /// <summary>The mood the vanilla "slept in ..." thought would give for this room.</summary>

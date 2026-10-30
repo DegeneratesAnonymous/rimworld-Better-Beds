@@ -21,6 +21,7 @@
 
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
+    <Version>1.0.0</Version>
     <RootNamespace>WilsBetterBeds</RootNamespace>
     <AssemblyName>WilsBetterBeds</AssemblyName>
     <OutputPath>../../$(GameVersion)/Assemblies/</OutputPath>
