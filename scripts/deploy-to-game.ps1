@@ -42,6 +42,7 @@ if (-not $NoBuild) {
 # Only what the game needs: no source, no git data, no docs.
 robocopy $repo $dest /MIR /XD .git .github Source docs scripts obj bin /XF *.md .gitignore *.deps.json /R:2 /W:1 /NFL /NDL /NJH /NJS | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "Copy failed (robocopy exit code $LASTEXITCODE)" }
+$global:LASTEXITCODE = 0   # robocopy uses 1-7 for "copied something", which is success
 
 Write-Host "Deployed to $dest"
 Write-Host "In RimSort: Refresh, make sure 'Smarter Beds' (SpacemanWil.SmarterBeds) is active, Sort, Save."
