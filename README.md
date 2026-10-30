@@ -2,10 +2,10 @@
 
 A RimWorld mod for 1.7 (unstable branch) and 1.6 about who sleeps where.
 
-- **Better bed choice.** A colonist without a bed claims the free bed that would make them happiest, scored in mood points using the game's own numbers for bedrooms, barracks and sleeping outside, instead of whatever is nearest. Beds marked **overflow** are used only when nothing better is free.
+- **Better bed choice.** A colonist without a bed claims the free bed that would make them happiest, scored in mood points using the game's own numbers for bedrooms, barracks and sleeping outside, instead of whatever is nearest.
 - **Royal and trait awareness.** Title-holders need a personal bedroom that meets their title, and the Jealous trait envies better rooms. Both are scored exactly as the game scores them.
 - **Room negotiation.** A colonist who sleeps badly can pick "negotiate for a better room" as recreation, walk to another colonist, and ask. A contested d20 roll decides it, using Social (or Melee, to intimidate), opinion, royal title and time in the colony. The winner takes the room, the loser finds another at bedtime, and both feel it in their mood. The conversation shows in the play log and, with Interaction Bubbles, as speech bubbles.
-- **You have the last word.** A bed you assign yourself is locked: nobody negotiates for it and its owner does not negotiate either. Unlock it from the bed's buttons.
+- **You have the last word.** When you set a bed's owner with the Set Owner button, the assignment is locked: nobody negotiates for that room and its owner does not negotiate either. Unassign the owner to release it.
 - **Last resort sleeping.** A colonist with no bed dozes in a chair instead of on the floor, for a smaller mood penalty.
 
 Prisoner, guest, slave, medical, and child bed choice is left entirely to vanilla.
@@ -29,7 +29,7 @@ Smarter Beds is built to coexist with other bed mods rather than overrule them. 
 | --- | --- |
 | Hospitality (Continued) | Guest beds are separate bed defs and `IsValidBedFor` keeps colonists out of them, so we never take one. Guests are never part of negotiation. |
 | Interaction Bubbles | Negotiation lines are written as ordinary interactions, so each speaker gets a bubble. |
-| Dubs Mint Menus | Its assign window ends up in the same assignment method as vanilla's, so assigning through it locks the bed. |
+| Dubs Mint Menus | Its assign window ends up in the same assignment method as vanilla's, so setting an owner through it locks the bed. |
 | Vanilla Factions Expanded - Empire | Changes royal bedroom requirements through the game's title methods, which we read. |
 | Replace Stuff, EBSG Framework, Worksites Expanded, Vanilla Races Expanded - Android | Patch bed choice or ownership. We run after them and call the game's own claim and validity methods. |
 | Realistic Rooms Rewritten | Only relabels room size stages; room impressiveness is untouched. |
@@ -72,7 +72,6 @@ Enable dev mode, turn on **Log decisions** in mod settings, and watch the debug 
 | `About/` | Mod metadata and preview image |
 | `1.7/Assemblies/`, `1.6/Assemblies/` | Built DLLs per game version (ignored by git, built by CI) |
 | `Languages/English/Keyed/` | All player-facing text |
-| `Textures/UI/` | Gizmo icon |
 | `Source/SmarterBeds/` | C# source |
 | `Source/SmarterBeds/Patches/` | Harmony patches |
 | `scripts/` | `deploy-to-game.ps1`, builds and installs the mod into your game |

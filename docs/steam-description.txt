@@ -8,11 +8,11 @@ Colonists pick the bed that would actually make them happiest. A colonist who sl
 [h2]What it does[/h2]
 
 [list]
-[*][b]Better bed choice.[/b] Vanilla gives a bedless colonist the nearest bed. Smarter Beds scores every free bed in mood points, using the game's own numbers for bedrooms, barracks and sleeping outside, so a "better" bed is one that really would make them happier. Mark any bed as [b]overflow[/b] and it is only used when nothing else is free.
+[*][b]Better bed choice.[/b] Vanilla gives a bedless colonist the nearest bed. Smarter Beds scores every free bed in mood points, using the game's own numbers for bedrooms, barracks and sleeping outside, so a "better" bed is one that really would make them happier.
 [*][b]Royalty and traits.[/b] Title-holders need a personal bedroom that meets their title, and the Jealous trait envies better rooms. Both are scored exactly the way the game scores them.
 [*][b]Room negotiation.[/b] A colonist with a sleep-related mood penalty (slept in barracks, outside, on the ground, too cold or hot, a title bedroom problem, or jealousy) can choose "negotiate for a better room" as recreation. They walk to another colonist, make their case, and a contested roll decides it.
 [*][b]Mood and experience.[/b] The winner moves into the better room and gains Social experience, with half as much if they fail. The loser finds another room at bedtime and feels it: bullied out is a penalty, while a friend who was talked round is happy to have helped.
-[*][b]You decide.[/b] Assign a bed yourself and it is locked: nobody negotiates for that room and its owner does not negotiate either. Every bed has a lock button if you want to change that.
+[*][b]You decide.[/b] Set a bed's owner with the Set Owner button and the assignment is locked: nobody negotiates for that room and its owner does not negotiate either. Unassign the owner to release it.
 [*][b]No bed? A chair.[/b] A colonist with nowhere to sleep dozes in a free indoor chair instead of on the floor, for a smaller mood penalty.
 [/list]
 
@@ -31,7 +31,7 @@ Intimidation always costs something: the person who was leaned on remembers it.
 
 [h2]See it happen[/h2]
 
-Every conversation is written to the colonists' social log, and with [b]Interaction Bubbles[/b] installed each speaker gets a speech bubble: the pitch from the asker, then the answer from the defender. A message with the roll totals tells you when a room changes hands.
+Every conversation is written to the colonists' social log, and with [b]Interaction Bubbles[/b] installed each speaker gets a speech bubble: the pitch from the asker, then the answer from the defender. A brief notification in the top left, with the roll totals, tells you when a negotiation happens.
 
 [h2]Compatibility[/h2]
 
@@ -41,14 +41,14 @@ Smarter Beds is built to sit alongside other bed mods rather than override them.
 [*]Bed choice runs last, after vanilla and every other mod, and defers to the game's own "can this pawn use this bed" check. Whatever another mod forbids, this mod forbids too.
 [*][b]Hospitality:[/b] guest beds are never used by colonists, and guests never take part in negotiation.
 [*][b]Interaction Bubbles:[/b] negotiation shows up as bubbles.
-[*][b]Dubs Mint Menus:[/b] assigning through its window locks the bed like the normal one.
+[*][b]Dubs Mint Menus:[/b] setting an owner through its window locks the bed like the normal one.
 [*]Mods that change royal bedroom requirements (such as Vanilla Factions Expanded - Empire) are honoured, because the requirements are read through the game.
 [*]Prisoners, guests, slaves, children and medical beds are left to vanilla.
 [/list]
 
 [h2]Settings[/h2]
 
-Everything is adjustable in the mod options, with a tooltip on every setting and a reset button: scoring weights, how big an upgrade is worth asking for, cooldowns, every number in the roll, whether moods, messages and log entries appear, locking, and chair sleeping.
+Everything is adjustable in the mod options, with a tooltip on every setting and a reset button: scoring weights, how big an upgrade is worth asking for, cooldowns, every number in the roll, how long the notification stays, whether moods, messages and log entries appear, and chair sleeping.
 
 [h2]Load order[/h2]
 

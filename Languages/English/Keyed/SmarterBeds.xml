@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
-  <!-- Bed buttons -->
-  <SmarterBeds_LockLabel>Lock assignment</SmarterBeds_LockLabel>
-  <SmarterBeds_LockDesc>Keep this bed with its owner. Nobody will try to negotiate for this room, and its owner will not negotiate for a different one. Assigning a bed yourself locks it automatically.</SmarterBeds_LockDesc>
-  <SmarterBeds_LockNeedsOneOwner>Needs exactly one owner.</SmarterBeds_LockNeedsOneOwner>
-  <SmarterBeds_LockedInspect>Assignment locked: no room negotiations.</SmarterBeds_LockedInspect>
+  <!-- Bed inspector -->
+  <SmarterBeds_LockedInspect>Owner set by you: nobody negotiates for this room.</SmarterBeds_LockedInspect>
   <SmarterBeds_ReportDozing>dozing in a chair.</SmarterBeds_ReportDozing>
 
   <!-- Settings window: headings -->
@@ -13,7 +10,6 @@
   <SmarterBeds_Sec_Negotiation>Negotiating for rooms</SmarterBeds_Sec_Negotiation>
   <SmarterBeds_Sec_Roll>The roll</SmarterBeds_Sec_Roll>
   <SmarterBeds_Sec_Feedback>Moods, messages and the log</SmarterBeds_Sec_Feedback>
-  <SmarterBeds_Sec_Control>Your control</SmarterBeds_Sec_Control>
   <SmarterBeds_Sec_Rough>Sleeping rough</SmarterBeds_Sec_Rough>
   <SmarterBeds_ResetDefaults>Reset all to defaults</SmarterBeds_ResetDefaults>
   <SmarterBeds_Intro>Colonists pick the best free bed by how happy it would make them, and a colonist who sleeps badly can ask another colonist to swap rooms. Hover any setting for what it does. Everything here is scored in mood points, the same unit as the game's own thoughts.</SmarterBeds_Intro>
@@ -31,8 +27,6 @@
   <SmarterBeds_S_Rest_Tip>Mood points per 1.0 of bed rest effectiveness. At 10, a bed that is 5% better is worth half a point.</SmarterBeds_S_Rest_Tip>
   <SmarterBeds_S_Distance>Distance penalty per cell: {0}</SmarterBeds_S_Distance>
   <SmarterBeds_S_Distance_Tip>Mood points lost per cell walked to the bed. Only used when choosing among free beds.</SmarterBeds_S_Distance_Tip>
-  <SmarterBeds_S_Overflow>Overflow bed penalty: {0}</SmarterBeds_S_Overflow>
-  <SmarterBeds_S_Overflow_Tip>Beds marked overflow lose this many points, so they are only used when nothing else is free.</SmarterBeds_S_Overflow_Tip>
   <SmarterBeds_S_Unmet>Royal bedroom penalty: {0}</SmarterBeds_S_Unmet>
   <SmarterBeds_S_Unmet_Tip>Applied to a title-holder for a room that is not a personal bedroom, or that fails the title's requirements. Each is -6 in the game, so this matches it.</SmarterBeds_S_Unmet_Tip>
 
@@ -75,8 +69,6 @@
   <SmarterBeds_S_Log_Tip>Adds the conversation to the colonists' social log. Interaction Bubbles, if installed, shows it as speech bubbles.</SmarterBeds_S_Log_Tip>
 
   <!-- Settings window: control -->
-  <SmarterBeds_S_AutoLock>Lock beds I assign myself</SmarterBeds_S_AutoLock>
-  <SmarterBeds_S_AutoLock_Tip>When you assign a colonist to a bed, nobody negotiates for that room and its owner does not negotiate either. You can unlock a bed from its buttons.</SmarterBeds_S_AutoLock_Tip>
 
   <!-- Settings window: sleeping rough -->
   <SmarterBeds_S_Chair>Sleep in a chair when there is no bed</SmarterBeds_S_Chair>
@@ -84,8 +76,6 @@
 
   <!-- Messages -->
 
-  <SmarterBeds_OverflowLabel>Overflow bed</SmarterBeds_OverflowLabel>
-  <SmarterBeds_OverflowDesc>When enabled, colonists only claim this bed if no better free bed is available.</SmarterBeds_OverflowDesc>
   <SmarterBeds_RoomWonPersuade>{0} talked {1} out of their bedroom. ({2} vs {3})</SmarterBeds_RoomWonPersuade>
   <SmarterBeds_RoomWonIntimidate>{0} pushed {1} out of their bedroom. ({2} vs {3})</SmarterBeds_RoomWonIntimidate>
   <SmarterBeds_RoomFailed>{0} tried to take {1}'s bedroom, but {1} held firm. ({2} vs {3})</SmarterBeds_RoomFailed>

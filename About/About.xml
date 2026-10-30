@@ -26,10 +26,10 @@
   </loadAfter>
   <description>Colonists pick the bed that would actually make them happiest, and a colonist who sleeps badly can ask someone else to swap rooms. You always have the last word.
 
-- Better bed choice: every free bed is scored in mood points using the game's own room numbers, instead of picking the nearest. Mark any bed as overflow to use it only when nothing else is free.
+- Better bed choice: every free bed is scored in mood points using the game's own room numbers, instead of picking the nearest.
 - Royalty and traits: title-holders need a personal bedroom that meets their title, and Jealous colonists envy better rooms. Scored exactly as the game scores them.
 - Room negotiation: a colonist with a sleep-related mood penalty can spend recreation asking another colonist for their room. A d20 contest decides it, using Social (or Melee to intimidate), opinion, royal title and time in the colony. Winners gain Social experience, and both sides feel it in their mood.
-- You decide: a bed you assign yourself is locked. Nobody negotiates for it and its owner does not negotiate. Every bed has a lock button.
+- You decide: when you set a bed's owner with the Set Owner button, the assignment is locked. Nobody negotiates for that room and its owner does not negotiate.
 - No bed? A colonist dozes in a chair instead of on the floor, for a smaller mood penalty.
 - Negotiations appear in the social log, and as speech bubbles with Interaction Bubbles.
 

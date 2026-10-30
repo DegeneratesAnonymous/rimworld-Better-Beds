@@ -7,7 +7,7 @@ Primary target: RimWorld 1.7 on the unstable branch. 1.6 builds are kept until 1
 - [x] M0: Mod loads in 1.6 and logs "Loaded" from a Harmony-initialized `Mod` class
 - [ ] M1: Verify in game that the patch fires; use verbose logging to learn the call patterns
 - [ ] M2: Scorer picks private, higher-impressiveness rooms for unassigned colonists (code in place, needs in-game tuning)
-- [ ] M3: Overflow toggle, gizmo, icon, and save/load round trip (code in place, needs in-game verification)
+- [x] M3: Overflow beds were dropped; the player's say now comes from the Set Owner button (see M6)
 - [ ] M4: Settings window with weights (code in place, needs tuning of defaults)
 - [ ] M5: Compatibility pass and first Workshop release
 - [ ] M6: Room requirements and room negotiation (code in place, needs in-game verification)
@@ -20,7 +20,7 @@ Bed quality is how many mood points a night there is worth, using the numbers th
 - Rest: (bed rest effectiveness - 1) x 10.
 - Royalty, mirroring the game: a title-holder needs a personal bedroom (only love partners share it), else -6; if it is personal, it must meet the title's requirements, else -6. Respects the "allow room requirements" toggle and both grace periods. Ideology roles have no bedroom requirements in the game's data.
 - Jealous trait: -8 when someone owns a room 10% more impressive (the game's own comparison).
-- Choosing a free bed also subtracts 0.01 per cell walked and 20 for overflow beds.
+- Choosing a free bed also subtracts 0.01 per cell walked.
 
 ### Choosing a bed
 Postfix on `RestUtility.FindBedFor`, running last. Vanilla and other mods decide first; we only replace a free bed (or none) for a bedless colonist, never a bed someone owns. Candidates must pass the game's `IsValidBedFor`.
@@ -37,7 +37,7 @@ A colonist who owns a bed alone and has a sleep debuff can choose "negotiate for
 - Shown in the play log (so Interaction Bubbles draws speech bubbles for the ask and the answer).
 
 ### Player control
-A bed assigned through the assign window (vanilla or a reskin of it) is locked to that owner. Locked beds are never targets and their owners never ask. A lock button on every bed toggles it; a lock stops applying when the owner changes.
+A bed whose owner the player sets with the Set Owner button (vanilla's window or a reskin of it) is locked to that owner. Locked beds are never targets and their owners never ask. There is no separate button: unassigning the owner releases the lock, and it stops applying whenever the owner changes.
 
 ### Sleeping rough
 With no bed to use, the game's "lie down where you stand" is replaced by dozing in a free indoor chair (upright, since the game has no sitting posture), with a -3 thought in place of the -4 floor thought.
@@ -57,9 +57,7 @@ With no bed to use, the game's "lie down where you stand" is replaced by dozing 
 
 - [ ] Dorm with 4 beds near the work area, 2 empty private bedrooms farther away: new colonist claims a private room
 - [ ] All private rooms full: new colonist takes a dorm bed
-- [ ] Dorm beds marked overflow, one private room free: overflow is skipped
 - [ ] Prisoner, guest, sick colonist, slave, and child each still get vanilla behavior
-- [ ] Save, reload, confirm overflow flags persist
 - [ ] Remove the mod from a save, confirm the save still loads
 
 ## Known limits in v1

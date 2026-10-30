@@ -17,7 +17,6 @@ namespace SmarterBeds
         public float roomMoodWeight = 1f;            // 1 = trust the game's room mood numbers as they are
         public float restEffectivenessWeight = 10f;  // mood points per 1.0 of bed rest effectiveness
         public float distanceWeight = 0.01f;         // mood points lost per cell walked
-        public float overflowPenalty = 20f;          // overflow beds are used only when nothing else is free
         public float unmetRequirementPenalty = 6f;   // the game's own title bedroom penalty
 
         // Negotiation
@@ -42,8 +41,6 @@ namespace SmarterBeds
         public float messageSeconds = 1f;              // how long the top-left notification stays before it fades
         public bool showInPlayLog = true;              // also what Interaction Bubbles displays
 
-        // Player control
-        public bool autoLockManualAssignments = true;
 
         // Sleeping rough
         public bool chairSleepEnabled = true;
@@ -57,7 +54,6 @@ namespace SmarterBeds
             Scribe_Values.Look(ref roomMoodWeight, "roomMoodWeight", 1f);
             Scribe_Values.Look(ref restEffectivenessWeight, "restEffectivenessWeight", 10f);
             Scribe_Values.Look(ref distanceWeight, "distanceWeight", 0.01f);
-            Scribe_Values.Look(ref overflowPenalty, "overflowPenalty", 20f);
             Scribe_Values.Look(ref unmetRequirementPenalty, "unmetRequirementPenalty", 6f);
 
             Scribe_Values.Look(ref negotiationEnabled, "negotiationEnabled", true);
@@ -79,7 +75,6 @@ namespace SmarterBeds
             Scribe_Values.Look(ref messageSeconds, "messageSeconds", 1f);
             Scribe_Values.Look(ref showInPlayLog, "showInPlayLog", true);
 
-            Scribe_Values.Look(ref autoLockManualAssignments, "autoLockManualAssignments", true);
             Scribe_Values.Look(ref chairSleepEnabled, "chairSleepEnabled", true);
         }
 

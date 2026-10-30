@@ -79,7 +79,7 @@ namespace SmarterBeds
         }
 
         /// <summary>
-        /// How good this bed is for this pawn, in mood points, ignoring distance and the overflow flag.
+        /// How good this bed is for this pawn, in mood points, ignoring distance.
         /// Used by the bedtime search and by room negotiation.
         /// </summary>
         public static float Quality(Building_Bed bed, Pawn pawn, SmarterBedsSettings s) =>
@@ -89,7 +89,6 @@ namespace SmarterBeds
         {
             float score = Quality(bed, sleeper, s);
             score -= (bed.Position - traveler.Position).LengthHorizontal * s.distanceWeight;
-            if (bed.GetComp<CompOverflowBed>()?.isOverflow == true) score -= s.overflowPenalty;
             return score;
         }
     }

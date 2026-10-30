@@ -13,7 +13,7 @@ All notable changes are listed here. Versions follow semantic versioning.
 - Mood effects for the loser (bullied out / gave it up for a friend) and the winner (got a better room), social experience for the asker
 - Negotiation shown in the play log and in Interaction Bubbles
 - Per-pair negotiation cooldown and a rematch block
-- Player lock: beds you assign are never negotiated for; lock button on every bed
+- Player lock: setting a bed's owner with the Set Owner button locks it; nobody negotiates for that room and its owner does not negotiate
 - Sleep in a chair as a last resort, with a milder penalty than the floor
 - Scrollable settings window with a tooltip on every option and a reset button
 - Compatibility: bed choice is a last-running postfix that defers to `IsValidBedFor`, so Hospitality and other bed mods keep working

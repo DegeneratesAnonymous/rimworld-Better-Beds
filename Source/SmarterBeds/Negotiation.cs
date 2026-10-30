@@ -14,7 +14,7 @@ namespace SmarterBeds
     /// decides it. A winner takes the loser's bed; the loser is left bedless to find a room at
     /// their own bedtime.
     ///
-    /// The player always has the last word: a bed the player assigned (or locked) is never
+    /// The player always has the last word: a bed whose owner the player set is never
     /// negotiated for, and its owner does not negotiate either.
     /// </summary>
     public class GameComponent_BedNegotiation : GameComponent
@@ -123,7 +123,7 @@ namespace SmarterBeds
             // A double bed with a single owner is fine.
             if (bed.OwnersForReading.Count != 1) return false;
             // The player decided; that is final.
-            if (CompOverflowBed.IsLocked(bed, p)) return false;
+            if (CompBedLock.IsLocked(bed, p)) return false;
             return true;
         }
 

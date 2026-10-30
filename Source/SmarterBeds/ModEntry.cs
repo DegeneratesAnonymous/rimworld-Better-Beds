@@ -41,7 +41,6 @@ namespace SmarterBeds
             Slide(list, "SmarterBeds_S_RoomMood", ref s.roomMoodWeight, 0f, 3f, "0.00");
             Slide(list, "SmarterBeds_S_Rest", ref s.restEffectivenessWeight, 0f, 30f, "0.0");
             Slide(list, "SmarterBeds_S_Distance", ref s.distanceWeight, 0f, 0.1f, "0.000");
-            Slide(list, "SmarterBeds_S_Overflow", ref s.overflowPenalty, 0f, 100f, "0");
             Slide(list, "SmarterBeds_S_Unmet", ref s.unmetRequirementPenalty, 0f, 20f, "0.0");
 
             Section(list, "SmarterBeds_Sec_Negotiation");
@@ -70,9 +69,6 @@ namespace SmarterBeds
                     Slide(list, "SmarterBeds_S_MessageSeconds", ref s.messageSeconds, 0.5f, 13f, "0.0");
                 Check(list, "SmarterBeds_S_Log", ref s.showInPlayLog);
             }
-
-            Section(list, "SmarterBeds_Sec_Control");
-            Check(list, "SmarterBeds_S_AutoLock", ref s.autoLockManualAssignments);
 
             Section(list, "SmarterBeds_Sec_Rough");
             Check(list, "SmarterBeds_S_Chair", ref s.chairSleepEnabled);
