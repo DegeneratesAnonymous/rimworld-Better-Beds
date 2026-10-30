@@ -7,6 +7,7 @@ namespace SmarterBeds
     /// <summary>
     /// Pure bed-choice logic. No Harmony here, so it can be reasoned about on its own.
     /// Scores are in mood points (see RoomComfort), so every weight below is a number of mood.
+    /// A bedless colonist gets the nicest free bed they can reach.
     /// </summary>
     public static class BedScorer
     {
@@ -68,7 +69,7 @@ namespace SmarterBeds
         /// every other mod that cares about beds patches (Hospitality keeps guest beds away from
         /// colonists, gene mods change who can sleep where, and so on). Anything they forbid, so do we.
         /// </summary>
-        private static bool IsCandidate(Building_Bed bed, Pawn sleeper, Pawn traveler)
+        public static bool IsCandidate(Building_Bed bed, Pawn sleeper, Pawn traveler)
         {
             if (!bed.Spawned || bed.Destroyed || bed.IsBurning()) return false;
             if (bed.Medical || !bed.ForColonists) return false;
@@ -82,13 +83,17 @@ namespace SmarterBeds
         /// How good this bed is for this pawn, in mood points, ignoring distance.
         /// Used by the bedtime search and by room negotiation.
         /// </summary>
-        public static float Quality(Building_Bed bed, Pawn pawn, SmarterBedsSettings s) =>
-            RoomComfort.Points(bed, pawn, s);
+        public static float Quality(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, Pawn leaving = null) =>
+            RoomComfort.Points(bed, pawn, s, company: true, leaving: leaving);
+
+        // Distance does not count against a bed: a colonist takes the nicest bed they can reach, however
+        // far it is. It only breaks ties, so that of two equally good beds the nearer one wins.
+        private const float TieBreakPerCell = 0.0001f;
 
         private static float Score(Building_Bed bed, Pawn sleeper, Pawn traveler, SmarterBedsSettings s)
         {
             float score = Quality(bed, sleeper, s);
-            score -= (bed.Position - traveler.Position).LengthHorizontal * s.distanceWeight;
+            score -= (bed.Position - traveler.Position).LengthHorizontal * TieBreakPerCell;
             return score;
         }
     }

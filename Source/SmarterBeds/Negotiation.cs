@@ -41,6 +41,26 @@ namespace SmarterBeds
 
         public GameComponent_BedNegotiation(Game game) { }
 
+        public override void GameComponentTick()
+        {
+            if (Find.TickManager.TicksGame % GenDate.TicksPerHour != 0) return;
+            var s = SmarterBedsMod.Settings;
+            if (!s.enabled || !s.familyEnabled || !s.coupleHousingEnabled) return;
+
+            foreach (var map in Find.Maps)
+            {
+                if (!map.IsPlayerHome) continue;
+                try { CoupleHousing.Run(map, this); }
+                catch (System.Exception e) { Log.Error($"[Smarter Beds] couple housing failed: {e}"); }
+            }
+        }
+
+        public bool CoupleOnCooldown(Pawn a, Pawn b) =>
+            pairCooldownUntil.TryGetValue("c" + PairKey(a, b), out int until) && Now < until;
+
+        public void StartCoupleCooldown(Pawn a, Pawn b, float days) =>
+            pairCooldownUntil["c" + PairKey(a, b)] = Now + (int)(days * GenDate.TicksPerDay);
+
         public override void ExposeData()
         {
             Scribe_Collections.Look(ref pairCooldownUntil, "pairCooldownUntil", LookMode.Value, LookMode.Value);
@@ -72,13 +92,15 @@ namespace SmarterBeds
             ThoughtDefOf.SleptInCold, ThoughtDefOf.SleptInHeat, ThoughtDefOf.SleptInRoomWithSlave
         };
 
-        // Situational thoughts the game raises about a bedroom: a title without a personal bedroom
-        // or with unmet requirements, and the Jealous trait envying someone's room.
+        // Situational thoughts about a bedroom: the game's (a title without a personal bedroom or with
+        // unmet requirements, the Jealous trait envying someone's room) and this mod's two family ones.
         private static readonly System.Type[] BedroomThoughtWorkers =
         {
             typeof(ThoughtWorker_BedroomRequirementsNotMet),
             typeof(ThoughtWorker_NoPersonalBedroom),
-            typeof(ThoughtWorker_BedroomJealous)
+            typeof(ThoughtWorker_BedroomJealous),
+            typeof(ThoughtWorker_RoomFarFromFamily),
+            typeof(ThoughtWorker_RoomNearDislikedFamily)
         };
 
         private static readonly List<Thought> tmpThoughts = new List<Thought>();
@@ -142,6 +164,8 @@ namespace SmarterBeds
             var s = SmarterBedsMod.Settings;
             if (!s.enabled || !s.negotiationEnabled) return false;
             if (!Eligible(a)) return false;
+            // A couple who have a room of their own are not going to break it up.
+            if (Family.IsInCoupleRoom(a)) return false;
             // Only negotiate when something is actually wrong with how they sleep.
             return HasSleepDebuff(a);
         }
@@ -161,6 +185,34 @@ namespace SmarterBeds
             }
         }
 
+        /// <summary>
+        /// Dev tool: send this pawn to negotiate for a better room right now, skipping the usual
+        /// reasons, cooldowns and odds checks. They still walk over and roll like anyone else.
+        /// </summary>
+        public void ForceNegotiation(Pawn a)
+        {
+            var s = SmarterBedsMod.Settings;
+            string problem = null;
+            Pawn target = null;
+
+            if (!Eligible(a)) problem = "SmarterBeds_Force_NotEligible";
+            else
+            {
+                target = FindLoser(a, a.ownership.OwnedBed, s, out _, out _, force: true);
+                if (target == null) problem = "SmarterBeds_Force_NoTarget";
+            }
+
+            if (problem != null)
+            {
+                Messages.Message(problem.Translate(a.LabelShort), a, MessageTypeDefOf.RejectInput, false);
+                return;
+            }
+
+            var job = JobMaker.MakeJob(DefDatabase<JobDef>.GetNamed("SmarterBeds_NegotiateRoom"), target);
+            job.count = 1; // marks it as forced for the job driver
+            a.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+        }
+
         /// <summary>The asker has walked over: they make their pitch (a bubble over their head).</summary>
         public void BeginConversation(Pawn a, Pawn b)
         {
@@ -172,14 +224,14 @@ namespace SmarterBeds
         /// End of the conversation: re-checks everything (the world moved while they walked over),
         /// rolls, and swaps on a win. The two are on cooldown with each other afterwards either way.
         /// </summary>
-        public void ResolveNegotiation(Pawn a, Pawn b)
+        public void ResolveNegotiation(Pawn a, Pawn b, bool forced = false)
         {
             var s = SmarterBedsMod.Settings;
             try
             {
-                if (WantsToNegotiate(a) && Eligible(b))
+                if ((forced || WantsToNegotiate(a)) && Eligible(b))
                 {
-                    var target = FindLoser(a, a.ownership.OwnedBed, s, out float gain, out var contest, only: b);
+                    var target = FindLoser(a, a.ownership.OwnedBed, s, out float gain, out var contest, only: b, force: forced);
                     if (target == b)
                     {
                         bool won = NegotiationRoll.Roll(contest, out int askerTotal, out int defenderTotal);
@@ -272,7 +324,7 @@ namespace SmarterBeds
                     new LookTargets(asker, defender), s.messageSeconds);
         }
 
-        private Pawn FindLoser(Pawn a, Building_Bed bedA, SmarterBedsSettings s, out float bestGain, out NegotiationContest bestContest, Pawn only = null)
+        private Pawn FindLoser(Pawn a, Building_Bed bedA, SmarterBedsSettings s, out float bestGain, out NegotiationContest bestContest, Pawn only = null, bool force = false)
         {
             bestGain = 0f;
             bestContest = default;
@@ -287,29 +339,30 @@ namespace SmarterBeds
             foreach (var b in a.Map.mapPawns.FreeColonistsSpawned)
             {
                 if (b == a || (only != null && b != only) || !Eligible(b)) continue;
-                if (PairOnCooldown(a, b)) continue;
+                if (!force && PairOnCooldown(a, b)) continue;
                 if (AreLovePartners(a, b)) continue; // never split a couple's rooms
-                if (rematchUntil.TryGetValue(RematchKey(a, b), out int rematch) && Now < rematch) continue;
+                if (Family.IsInCoupleRoom(b)) continue; // nor take a bed out of one
+                if (!force && rematchUntil.TryGetValue(RematchKey(a, b), out int rematch) && Now < rematch) continue;
 
                 var bedB = b.ownership.OwnedBed;
                 if (bedA.GetRoom() == bedB.GetRoom()) continue;
                 // The owner must not be using it right now.
                 if (!a.CanReserveAndReach(bedB, PathEndMode.OnCell, Danger.Some, bedB.SleepingSlotsCount)) continue;
 
-                float gain = BedScorer.Quality(bedB, a, s) - currentA;
+                float gain = BedScorer.Quality(bedB, a, s, leaving: b) - currentA;
                 if (gain <= 0f) continue;
-                if (bestFree >= currentA + gain) continue;
+                if (!force && bestFree >= currentA + gain) continue;
 
                 // A reason to ask: their room is what causes a title or jealousy penalty and this one would not,
                 // or (optional) the move is a big enough upgrade on its own.
-                bool fixesAPenalty = RoomComfort.DebuffPenalty(bedB, a, s) < debuffNow;
+                bool fixesAPenalty = RoomComfort.DebuffPenalty(bedB, a, s, leaving: b) < debuffNow;
                 bool bigUpgrade = s.qualityNegotiationEnabled && gain >= s.qualityNegotiationThreshold;
-                if (!fixesAPenalty && !bigUpgrade) continue;
+                if (!force && !fixesAPenalty && !bigUpgrade) continue;
 
                 // Anyone may try; rank only matters as a number in the roll.
                 var contest = NegotiationRoll.Build(a, b, s);
                 // Don't spend a conversation on something with almost no chance.
-                if (!contest.possible || contest.winChance < s.minWinChance) continue;
+                if (!contest.possible || contest.winChance < (force ? 0.01f : s.minWinChance)) continue;
 
                 float value = gain * contest.winChance;
                 if (value > bestValue)

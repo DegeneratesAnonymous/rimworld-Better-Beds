@@ -1,3 +1,4 @@
+using System.Linq;
 using RimWorld;
 using Verse;
 
@@ -15,7 +16,15 @@ namespace SmarterBeds
     /// </summary>
     public static class RoomComfort
     {
-        public static float Points(Building_Bed bed, Pawn pawn, SmarterBedsSettings s)
+        /// <param name="company">
+        /// Include who the pawn would be sharing the room with (a couple on their own, family together).
+        /// Off when the caller is deciding on rooms for two people at once and will count that itself.
+        /// </param>
+        /// <param name="leaving">
+        /// Someone who is about to give this bed up (the colonist being asked in a negotiation), so they
+        /// are not counted as a roommate or as family living nearby.
+        /// </param>
+        public static float Points(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, bool company = true, Pawn leaving = null)
         {
             Room room = bed.GetRoom();
             bool outdoors = room == null || room.PsychologicallyOutdoors;
@@ -25,18 +34,87 @@ namespace SmarterBeds
             points += (bed.GetStatValue(StatDefOf.BedRestEffectiveness) - 1f) * s.restEffectivenessWeight;
             points -= TitlePenalty(bed, room, outdoors, pawn, s);
             points -= JealousyPenalty(room, outdoors, pawn);
+            points -= FamilyPenalty(bed, pawn, s, leaving);
+            if (company) points += CompanyMood(bed, room, outdoors, pawn, s, leaving);
             return points;
         }
 
         /// <summary>
-        /// The part of a bed's score that comes from the penalties negotiation can actually fix:
-        /// a title-holder's bedroom penalties and the Jealous trait. Positive means penalised.
+        /// The part of a bed's score that comes from penalties negotiation can actually fix: a
+        /// title-holder's bedroom penalties, the Jealous trait, and being too close to (or, for a
+        /// couple, too far from) family. Positive means penalised.
         /// </summary>
-        public static float DebuffPenalty(Building_Bed bed, Pawn pawn, SmarterBedsSettings s)
+        public static float DebuffPenalty(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, Pawn leaving = null)
         {
             Room room = bed.GetRoom();
             bool outdoors = room == null || room.PsychologicallyOutdoors;
-            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn);
+            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn) + FamilyPenalty(bed, pawn, s, leaving);
+        }
+
+        /// <summary>
+        /// Distance from family, which is what the two family thoughts describe:
+        /// - negative relations with a relative: unhappy with a bed inside the family radius of theirs;
+        /// - a couple with family in the colony: unhappy with a bed outside the radius of all of them.
+        /// Mirrors the "too close to a disliked relative" and "room far from family" thoughts.
+        /// </summary>
+        public static float FamilyPenalty(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, Pawn leaving = null)
+        {
+            if (!s.familyEnabled || !Family.IsAdultColonist(pawn)) return 0f;
+
+            float penalty = 0f;
+            var friendly = new System.Collections.Generic.List<Building_Bed>();
+            foreach (var relative in Family.CloseRelatives(pawn))
+            {
+                if (relative == leaving) continue;
+                var theirs = Family.BedOf(relative);
+                if (theirs == null) continue;
+                if (Family.IsHostile(pawn, relative, s))
+                {
+                    if (theirs == bed || Family.Distance(bed, theirs) <= s.familyRadius) penalty += s.familyHostilePenalty;
+                }
+                else friendly.Add(theirs);
+            }
+
+            if (Family.SoleLover(pawn) != null && Family.IsFarFromAll(bed, friendly, s)) penalty += s.familyFarPenalty;
+            return penalty;
+        }
+
+        /// <summary>
+        /// Who the pawn would be sharing the room with, in mood points.
+        /// - A pawn with a partner is happiest in a room that holds only the two of them, and a little
+        ///   less so in an empty room their partner could move into; sharing with anyone else costs.
+        /// - Family sharing a room is a small plus, for pawns on good terms.
+        /// </summary>
+        private static float CompanyMood(Building_Bed bed, Room room, bool outdoors, Pawn pawn, SmarterBedsSettings s, Pawn leaving)
+        {
+            if (!s.familyEnabled || outdoors || !Family.IsAdultColonist(pawn)) return 0f;
+
+            float mood = 0f;
+            var lovers = Family.Lovers(pawn);
+            var others = new System.Collections.Generic.List<Pawn>();
+            foreach (var other in room.ContainedBeds)
+            {
+                foreach (var owner in other.OwnersForReading)
+                {
+                    if (owner != pawn && owner != leaving && !owner.RaceProps.Animal && !others.Contains(owner)) others.Add(owner);
+                }
+            }
+
+            if (lovers.Count > 0)
+            {
+                bool anyoneElse = others.Any(o => !lovers.Contains(o));
+                bool loverHere = others.Any(o => lovers.Contains(o));
+                if (anyoneElse) mood -= s.coupleSharePenalty;
+                else mood += loverHere ? s.coupleRoomBonus : s.coupleRoomBonus * 0.5f;
+            }
+
+            int family = 0;
+            foreach (var relative in Family.CloseRelatives(pawn))
+            {
+                if (others.Contains(relative) && !Family.IsHostile(pawn, relative, s)) family++;
+            }
+            mood += System.Math.Min(family, 2) * s.familyShareBonus;
+            return mood;
         }
 
         /// <summary>The mood the vanilla "slept in ..." thought would give for this room.</summary>

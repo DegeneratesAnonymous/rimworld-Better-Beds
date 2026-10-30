@@ -2,11 +2,14 @@
 
 A RimWorld mod for 1.7 (unstable branch) and 1.6 about who sleeps where.
 
-- **Better bed choice.** A colonist without a bed claims the free bed that would make them happiest, scored in mood points using the game's own numbers for bedrooms, barracks and sleeping outside, instead of whatever is nearest.
+- **Better bed choice.** A colonist without a bed takes the nicest bed they can reach, scored in mood points using the game's own numbers for bedrooms, barracks and sleeping outside. Distance does not count against a bed.
 - **Royal and trait awareness.** Title-holders need a personal bedroom that meets their title, and the Jealous trait envies better rooms. Both are scored exactly as the game scores them.
 - **Room negotiation.** A colonist who sleeps badly can pick "negotiate for a better room" as recreation, walk to another colonist, and ask. A contested d20 roll decides it, using Social (or Melee, to intimidate), opinion, royal title and time in the colony. The winner takes the room, the loser finds another at bedtime, and both feel it in their mood. The conversation shows in the play log and, with Interaction Bubbles, as speech bubbles.
 - **You have the last word.** When you set a bed's owner with the Set Owner button, the assignment is locked: nobody negotiates for that room and its owner does not negotiate either. Unassign the owner to release it.
 - **Last resort sleeping.** A colonist with no bed dozes in a chair instead of on the floor, for a smaller mood penalty.
+- **Assign rooms.** The Assign tab gets an **Assign rooms** button. It lists every room with beds (beds taken, room score, size, owners). Hover a room to point at its beds in the world, double-click to jump the camera there, and use **Assign** to set owners room by room.
+- **Family and couples.** Colonists prefer to share a room with family they get on with. A colonist with negative relations with a parent, child or sibling wants a room outside 35 tiles of them. A couple wants a room of just the two of them, close to family, and a couple far from family gets a "room far from family" thought. New couples are moved into a free room of their own.
+- **God mode.** A selected colonist gets a **Force negotiation** button that sends them to ask for a better room right now.
 
 Prisoner, guest, slave, medical, and child bed choice is left entirely to vanilla.
 

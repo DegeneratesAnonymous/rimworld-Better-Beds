@@ -31,6 +31,8 @@
 - Room negotiation: a colonist with a sleep-related mood penalty can spend recreation asking another colonist for their room. A d20 contest decides it, using Social (or Melee to intimidate), opinion, royal title and time in the colony. Winners gain Social experience, and both sides feel it in their mood.
 - You decide: when you set a bed's owner with the Set Owner button, the assignment is locked. Nobody negotiates for that room and its owner does not negotiate.
 - No bed? A colonist dozes in a chair instead of on the floor, for a smaller mood penalty.
+- Family and couples: colonists prefer to share with family they get on with and want distance from relatives they do not. A couple wants a room of their own near family, and new couples are moved into one.
+- Assign rooms: a button on the Assign tab lists every room with beds, with hover highlights, double-click to jump to it, and per-room owner assignment.
 - Negotiations appear in the social log, and as speech bubbles with Interaction Bubbles.
 
 Works alongside other bed mods: bed choice runs last and defers to the game's own bed check, so Hospitality's guest beds and similar rules are respected. Prisoners, guests, slaves, children and medical beds are left to vanilla.

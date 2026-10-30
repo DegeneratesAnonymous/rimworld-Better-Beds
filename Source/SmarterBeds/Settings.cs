@@ -16,8 +16,18 @@ namespace SmarterBeds
         // Bed scoring, in mood points
         public float roomMoodWeight = 1f;            // 1 = trust the game's room mood numbers as they are
         public float restEffectivenessWeight = 10f;  // mood points per 1.0 of bed rest effectiveness
-        public float distanceWeight = 0.01f;         // mood points lost per cell walked
         public float unmetRequirementPenalty = 6f;   // the game's own title bedroom penalty
+
+        // Family and couples
+        public bool familyEnabled = true;
+        public float familyRadius = 35f;               // tiles between beds
+        public float familyHostileOpinion = -20f;      // opinion at or below this counts as negative relations
+        public float familyShareBonus = 2f;            // mood points for sharing a room with family you get on with
+        public float familyHostilePenalty = 4f;        // mirrors the "too close to a relative" thought
+        public float familyFarPenalty = 4f;            // mirrors the "room far from family" thought
+        public bool coupleHousingEnabled = true;       // move a new couple into a room of their own
+        public float coupleRoomBonus = 3f;             // a room for just the two of them
+        public float coupleSharePenalty = 3f;          // a couple sharing a room with anyone else
 
         // Negotiation
         public bool negotiationEnabled = true;
@@ -53,8 +63,17 @@ namespace SmarterBeds
 
             Scribe_Values.Look(ref roomMoodWeight, "roomMoodWeight", 1f);
             Scribe_Values.Look(ref restEffectivenessWeight, "restEffectivenessWeight", 10f);
-            Scribe_Values.Look(ref distanceWeight, "distanceWeight", 0.01f);
             Scribe_Values.Look(ref unmetRequirementPenalty, "unmetRequirementPenalty", 6f);
+
+            Scribe_Values.Look(ref familyEnabled, "familyEnabled", true);
+            Scribe_Values.Look(ref familyRadius, "familyRadius", 35f);
+            Scribe_Values.Look(ref familyHostileOpinion, "familyHostileOpinion", -20f);
+            Scribe_Values.Look(ref familyShareBonus, "familyShareBonus", 2f);
+            Scribe_Values.Look(ref familyHostilePenalty, "familyHostilePenalty", 4f);
+            Scribe_Values.Look(ref familyFarPenalty, "familyFarPenalty", 4f);
+            Scribe_Values.Look(ref coupleHousingEnabled, "coupleHousingEnabled", true);
+            Scribe_Values.Look(ref coupleRoomBonus, "coupleRoomBonus", 3f);
+            Scribe_Values.Look(ref coupleSharePenalty, "coupleSharePenalty", 3f);
 
             Scribe_Values.Look(ref negotiationEnabled, "negotiationEnabled", true);
             Scribe_Values.Look(ref qualityNegotiationEnabled, "qualityNegotiationEnabled", true);

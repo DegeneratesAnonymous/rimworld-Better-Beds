@@ -8,12 +8,15 @@ Colonists pick the bed that would actually make them happiest. A colonist who sl
 [h2]What it does[/h2]
 
 [list]
-[*][b]Better bed choice.[/b] Vanilla gives a bedless colonist the nearest bed. Smarter Beds scores every free bed in mood points, using the game's own numbers for bedrooms, barracks and sleeping outside, so a "better" bed is one that really would make them happier.
+[*][b]Better bed choice.[/b] Vanilla gives a bedless colonist the nearest bed. Smarter Beds scores every free bed in mood points, using the game's own numbers for bedrooms, barracks and sleeping outside, and a colonist takes the nicest bed they can reach, however far away.
 [*][b]Royalty and traits.[/b] Title-holders need a personal bedroom that meets their title, and the Jealous trait envies better rooms. Both are scored exactly the way the game scores them.
 [*][b]Room negotiation.[/b] A colonist with a sleep-related mood penalty (slept in barracks, outside, on the ground, too cold or hot, a title bedroom problem, or jealousy) can choose "negotiate for a better room" as recreation. They walk to another colonist, make their case, and a contested roll decides it.
 [*][b]Mood and experience.[/b] The winner moves into the better room and gains Social experience, with half as much if they fail. The loser finds another room at bedtime and feels it: bullied out is a penalty, while a friend who was talked round is happy to have helped.
 [*][b]You decide.[/b] Set a bed's owner with the Set Owner button and the assignment is locked: nobody negotiates for that room and its owner does not negotiate either. Unassign the owner to release it.
 [*][b]No bed? A chair.[/b] A colonist with nowhere to sleep dozes in a free indoor chair instead of on the floor, for a smaller mood penalty.
+[*][b]Family and couples.[/b] Colonists prefer to share a room with family they get on with. If they have negative relations with a parent, child or sibling they want a room outside 35 tiles of them. A couple wants a room of just the two of them, close to family, and a couple far from family gets a "room far from family" mood penalty. New couples are moved into a free room of their own.
+[*][b]Assign rooms.[/b] The Assign tab gets an [b]Assign rooms[/b] button. It lists every room with beds: beds taken, room score, size and owners. Hover a room to see its beds in the world, double-click to jump the camera there, and use Assign to set owners room by room.
+[*][b]God mode.[/b] Select a colonist and press [b]Force negotiation[/b] to watch them ask for a better room right now.
 [/list]
 
 [h2]How a negotiation is decided[/h2]

@@ -60,7 +60,7 @@ namespace SmarterBeds
             yield return new Toil
             {
                 defaultCompleteMode = ToilCompleteMode.Instant,
-                initAction = () => GameComponent_BedNegotiation.Instance?.ResolveNegotiation(pawn, Target)
+                initAction = () => GameComponent_BedNegotiation.Instance?.ResolveNegotiation(pawn, Target, job.count == 1)
             };
         }
     }

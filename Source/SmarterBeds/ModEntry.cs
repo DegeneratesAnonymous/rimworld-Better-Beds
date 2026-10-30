@@ -40,8 +40,21 @@ namespace SmarterBeds
             Section(list, "SmarterBeds_Sec_Scoring");
             Slide(list, "SmarterBeds_S_RoomMood", ref s.roomMoodWeight, 0f, 3f, "0.00");
             Slide(list, "SmarterBeds_S_Rest", ref s.restEffectivenessWeight, 0f, 30f, "0.0");
-            Slide(list, "SmarterBeds_S_Distance", ref s.distanceWeight, 0f, 0.1f, "0.000");
             Slide(list, "SmarterBeds_S_Unmet", ref s.unmetRequirementPenalty, 0f, 20f, "0.0");
+
+            Section(list, "SmarterBeds_Sec_Family");
+            Check(list, "SmarterBeds_S_Family", ref s.familyEnabled);
+            if (s.familyEnabled)
+            {
+                Slide(list, "SmarterBeds_S_FamilyRadius", ref s.familyRadius, 5f, 100f, "0");
+                Slide(list, "SmarterBeds_S_FamilyHostile", ref s.familyHostileOpinion, -100f, 0f, "0");
+                Slide(list, "SmarterBeds_S_FamilyShare", ref s.familyShareBonus, 0f, 6f, "0.0");
+                Slide(list, "SmarterBeds_S_FamilyNear", ref s.familyHostilePenalty, 0f, 10f, "0.0");
+                Slide(list, "SmarterBeds_S_FamilyFar", ref s.familyFarPenalty, 0f, 10f, "0.0");
+                Check(list, "SmarterBeds_S_CoupleHousing", ref s.coupleHousingEnabled);
+                Slide(list, "SmarterBeds_S_CoupleRoom", ref s.coupleRoomBonus, 0f, 8f, "0.0");
+                Slide(list, "SmarterBeds_S_CoupleShare", ref s.coupleSharePenalty, 0f, 8f, "0.0");
+            }
 
             Section(list, "SmarterBeds_Sec_Negotiation");
             Check(list, "SmarterBeds_S_Negotiate", ref s.negotiationEnabled);

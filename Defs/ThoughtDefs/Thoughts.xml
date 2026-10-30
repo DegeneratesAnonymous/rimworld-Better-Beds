@@ -71,4 +71,32 @@
       </li>
     </stages>
   </ThoughtDef>
+  <!-- Situational: worked out in code (see FamilyThoughts.cs). Mood is fixed here; the settings
+       for how much a bed is marked down for these default to the same -4. -->
+  <ThoughtDef>
+    <defName>SmarterBeds_RoomFarFromFamily</defName>
+    <workerClass>SmarterBeds.ThoughtWorker_RoomFarFromFamily</workerClass>
+    <developmentalStageFilter>Adult</developmentalStageFilter>
+    <stages>
+      <li>
+        <label>room far from family</label>
+        <description>My partner and I have a place of our own, but it is a long way from my family.</description>
+        <baseMoodEffect>-4</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <ThoughtDef>
+    <defName>SmarterBeds_RoomNearDislikedFamily</defName>
+    <workerClass>SmarterBeds.ThoughtWorker_RoomNearDislikedFamily</workerClass>
+    <developmentalStageFilter>Adult</developmentalStageFilter>
+    <stages>
+      <li>
+        <label>sleeping too close to {0}</label>
+        <description>I do not get on with {0}, and my bed is too close to theirs.</description>
+        <baseMoodEffect>-4</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
 </Defs>
