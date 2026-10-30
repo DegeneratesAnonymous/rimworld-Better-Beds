@@ -12,6 +12,7 @@ All notable changes are listed here. Versions follow semantic versioning.
 - Messages and the chair options no longer disappear when negotiation is off
 
 ### Fixed
+- Performance: the hourly free-bed and couple checks are spread over the hour a few colonists at a time instead of all on one tick, and a colonist with no partner is skipped without building their relationships snapshot
 - Nobody is pulled into a negotiation while using the toilet, washing, bathing, showering (Dubs Bad Hygiene) or eating, and a conversation is called off if the other colonist goes to the toilet on the way
 - The settings window went blank after the General heading once it grew past its starting height (the list wrapped into a hidden second column)
 - "Collection was modified" errors when searching for someone to negotiate with, or housing couples

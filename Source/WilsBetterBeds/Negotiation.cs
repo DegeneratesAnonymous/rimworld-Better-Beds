@@ -48,27 +48,86 @@ namespace WilsBetterBeds
 
         public GameComponent_BedNegotiation(Game game) { }
 
+        // The hourly jobs (moving to a free bed, housing couples) are not done all at once: at the top of the
+        // hour each home map gets a list of its colonists, and a few are dealt with every half second or so
+        // until the list is empty. The work is the same; it just never lands on one tick.
+        private const int SliceTicks = 30;
+
+        private class MapWork
+        {
+            public readonly Queue<Pawn> freeBeds = new Queue<Pawn>();
+            public readonly Queue<Pawn> couples = new Queue<Pawn>();
+            public int moved;           // colonists who moved to a free bed this hour
+            public bool coupleMoved;    // a couple was housed this hour: one is plenty
+        }
+
+        // Not saved.
+        private readonly Dictionary<int, MapWork> work = new Dictionary<int, MapWork>();
+
         public override void GameComponentTick()
         {
-            if (Find.TickManager.TicksGame % GenDate.TicksPerHour != 0) return;
-            PruneLocks();
-            PruneCooldowns();
+            int tick = Find.TickManager.TicksGame;
+            if (tick % SliceTicks != 0) return; // everything below is about half a second apart at most
+
             var s = WilsBetterBedsMod.Settings;
+            bool newHour = tick % GenDate.TicksPerHour == 0;
+            if (newHour)
+            {
+                PruneLocks();
+                PruneCooldowns();
+            }
             if (!s.enabled) return;
 
             foreach (var map in Find.Maps)
             {
                 if (!map.IsPlayerHome) continue;
-                if (s.freeBedMoveEnabled)
+                if (!work.TryGetValue(map.uniqueID, out var w)) work[map.uniqueID] = w = new MapWork();
+
+                if (newHour)
                 {
-                    try { using (PerfWatch.Measure("moving to a free bed")) MoveToFreeBeds(map, s); }
-                    catch (System.Exception e) { SafeLog.Once("moving to a free bed", e); }
+                    w.moved = 0;
+                    w.coupleMoved = false;
+                    w.freeBeds.Clear();
+                    w.couples.Clear();
+                    foreach (var p in map.mapPawns.FreeColonistsSpawned)
+                    {
+                        if (s.freeBedMoveEnabled) w.freeBeds.Enqueue(p);
+                        if (s.familyEnabled && s.coupleHousingEnabled) w.couples.Enqueue(p);
+                    }
                 }
-                if (s.familyEnabled && s.coupleHousingEnabled)
-                {
-                    try { CoupleHousing.Run(map, this); }
-                    catch (System.Exception e) { SafeLog.Once("couple housing", e); }
-                }
+
+                int slicesLeft = Mathf.Max(1, (GenDate.TicksPerHour - tick % GenDate.TicksPerHour) / SliceTicks);
+                try { StepFreeBeds(w, s, slicesLeft); }
+                catch (System.Exception e) { SafeLog.Once("moving to a free bed", e); }
+                try { StepCouples(w, s, slicesLeft); }
+                catch (System.Exception e) { SafeLog.Once("couple housing", e); }
+            }
+        }
+
+        /// <summary>Enough colonists each time to have emptied the list by the end of the hour.</summary>
+        private static int Share(int queued, int slicesLeft) => (queued + slicesLeft - 1) / slicesLeft;
+
+        private void StepFreeBeds(MapWork w, WilsBetterBedsSettings s, int slicesLeft)
+        {
+            if (!s.freeBedMoveEnabled) { w.freeBeds.Clear(); return; }
+            for (int n = Share(w.freeBeds.Count, slicesLeft); n > 0 && w.freeBeds.Count > 0; n--)
+            {
+                var p = w.freeBeds.Dequeue();
+                if (w.moved >= 2) { w.freeBeds.Clear(); return; } // a couple per hour is plenty
+                bool moved;
+                using (PerfWatch.Measure("moving to a free bed")) moved = TryMoveToFreeBed(p, s);
+                if (moved) w.moved++;
+            }
+        }
+
+        private void StepCouples(MapWork w, WilsBetterBedsSettings s, int slicesLeft)
+        {
+            if (!s.familyEnabled || !s.coupleHousingEnabled) { w.couples.Clear(); return; }
+            for (int n = Share(w.couples.Count, slicesLeft); n > 0 && w.couples.Count > 0; n--)
+            {
+                var p = w.couples.Dequeue();
+                if (w.coupleMoved) { w.couples.Clear(); return; } // one couple per map per hour
+                if (CoupleHousing.Step(p, this)) w.coupleMoved = true;
             }
         }
 
@@ -79,19 +138,10 @@ namespace WilsBetterBeds
         public bool HasRoomDebuff(Pawn p) => HasSleepDebuff(p, includeMemories: !RecentlyMoved(p));
 
         /// <summary>
-        /// Once an hour, colonists on their own who have a sleep penalty and a free bed that would clearly
-        /// be better (it fixes a penalty, or is a big upgrade) give up their bed and take it. Couples are
-        /// housed together by CoupleHousing instead. A few per map per hour, so nothing churns.
+        /// A colonist on their own who has a sleep penalty and a free bed that would clearly be better (it
+        /// fixes a penalty, or is a big upgrade) gives up their bed and takes it. Couples are housed together
+        /// by CoupleHousing instead. Called for a few colonists at a time through the hour.
         /// </summary>
-        private void MoveToFreeBeds(Map map, WilsBetterBedsSettings s)
-        {
-            int moved = 0;
-            foreach (var a in new List<Pawn>(map.mapPawns.FreeColonistsSpawned))
-            {
-                if (TryMoveToFreeBed(a, s) && ++moved >= 2) return;
-            }
-        }
-
         private bool TryMoveToFreeBed(Pawn a, WilsBetterBedsSettings s)
         {
             if (!Eligible(a) || CoupleOf(a) != null || RecentlyMoved(a)) return false;
@@ -192,6 +242,7 @@ namespace WilsBetterBeds
             movedAt.Clear();
             lastChecked.Clear();
             wantsCache.Clear();
+            work.Clear();
         }
 
         public override void ExposeData()

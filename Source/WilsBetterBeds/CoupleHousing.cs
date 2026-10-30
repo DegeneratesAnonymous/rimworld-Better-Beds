@@ -20,30 +20,40 @@ namespace WilsBetterBeds
         private const float NoBedMood = -4f; // "slept on the ground"
         private const float RetryDaysWhenNothingFits = 1f;
 
-        public static void Run(Map map, GameComponent_BedNegotiation comp)
+        /// <summary>
+        /// Looks at one colonist: if they are half of a couple with a sleep penalty and no room of their own,
+        /// tries to house the two of them. Called for each colonist in turn through the hour. Returns true if
+        /// they moved.
+        /// </summary>
+        public static bool Step(Pawn a, GameComponent_BedNegotiation comp)
         {
             var s = WilsBetterBedsMod.Settings;
-            foreach (var a in new List<Pawn>(map.mapPawns.FreeColonistsSpawned))
+            try
             {
-                if (!Family.IsAdultColonist(a)) continue;
+                if (!Family.IsAdultColonist(a) || !Family.HasSingleLover(a)) return false; // most colonists stop here, cheaply
                 Family.Refresh(a); // this runs once an hour, so read the relations afresh
                 var b = Family.SoleLover(a);
-                if (b == null) continue;
+                if (b == null) return false;
                 Family.Refresh(b);
-                if (Family.SoleLover(b) != a) continue;
-                if (a.thingIDNumber > b.thingIDNumber) continue; // once per pair
-                if (!Family.IsAdultColonist(b) || b.Map != a.Map) continue;
-                if (!a.Awake() || !b.Awake()) continue;
+                if (Family.SoleLover(b) != a) return false;
+                if (a.thingIDNumber > b.thingIDNumber) return false; // once per pair
+                if (!Family.IsAdultColonist(b) || b.Map != a.Map) return false;
+                if (!a.Awake() || !b.Awake()) return false;
                 // Content, so nothing to look for: only a couple with a sleep penalty are moved.
-                if (!comp.HasRoomDebuff(a) && !comp.HasRoomDebuff(b)) continue;
+                if (!comp.HasRoomDebuff(a) && !comp.HasRoomDebuff(b)) return false;
                 // Already in a room of their own: only look again if family distance is still a problem.
-                if (Family.IsInCoupleRoom(a) && !FamilyProblem(a, b, s)) continue;
-                if (comp.CoupleOnCooldown(a, b)) continue;
+                if (Family.IsInCoupleRoom(a) && !FamilyProblem(a, b, s)) return false;
+                if (comp.CoupleOnCooldown(a, b)) return false;
 
                 bool moved;
                 using (PerfWatch.Measure("couple housing")) moved = TryHouse(a, b, s);
                 comp.StartCoupleCooldown(a, b, moved ? s.negotiationCooldownDays : RetryDaysWhenNothingFits);
-                if (moved) return; // one couple per map per hour is plenty
+                return moved;
+            }
+            catch (System.Exception e)
+            {
+                SafeLog.Once("couple housing", e);
+                return false;
             }
         }
 

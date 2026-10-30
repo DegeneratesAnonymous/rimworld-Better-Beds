@@ -234,6 +234,21 @@ namespace WilsBetterBeds
         /// <summary>The pawn's current love partners (spouse, fiance, lover) who are alive. Do not modify the list.</summary>
         public static List<Pawn> Lovers(Pawn p) => p?.relations == null ? NoPawns : Get(p).lovers;
 
+        /// <summary>
+        /// True when the pawn has exactly one living love partner. Asks the game directly, without building a
+        /// snapshot, so it is cheap enough to ask about every colonist.
+        /// </summary>
+        public static bool HasSingleLover(Pawn p)
+        {
+            if (p?.relations == null) return false;
+            int count = 0;
+            foreach (var rel in LovePartnerRelationUtility.ExistingLovePartners(p, false))
+            {
+                if (rel.otherPawn != null && !rel.otherPawn.Dead && ++count > 1) return false;
+            }
+            return count == 1;
+        }
+
         /// <summary>The one partner a pawn has, or null if they have none or several.</summary>
         public static Pawn SoleLover(Pawn p)
         {
