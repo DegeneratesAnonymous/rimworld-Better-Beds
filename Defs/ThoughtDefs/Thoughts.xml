@@ -115,6 +115,20 @@
     </stages>
   </ThoughtDef>
 
+  <ThoughtDef>
+    <defName>SmarterBeds_RoomNearPrisoners</defName>
+    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
+    <workerClass>SmarterBeds.ThoughtWorker_RoomNearPrisoners</workerClass>
+    <developmentalStageFilter>Adult</developmentalStageFilter>
+    <stages>
+      <li>
+        <label>sleeping near prisoners</label>
+        <description>There are prisoners locked up not far from my bed. It is hard to sleep easy.</description>
+        <baseMoodEffect>-3</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
   <ThoughtDef MayRequire="Ludeon.RimWorld.Ideology">
     <defName>SmarterBeds_RoomAmongOwnIdeo</defName>
     <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>

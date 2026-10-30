@@ -35,7 +35,7 @@ namespace SmarterBeds
         private static readonly List<Pawn> NoPawns = new List<Pawn>();
 
         /// <summary>Forget everything. Pawn ids are reused between saves, so this runs whenever a game loads.</summary>
-        public static void ClearCache() => cache.Clear();
+        public static void ClearCache() { cache.Clear(); prisonerBeds.Clear(); }
 
         /// <summary>Make the next question about this pawn read the game's data again.</summary>
         public static void Refresh(Pawn p)
@@ -139,6 +139,38 @@ namespace SmarterBeds
                 return string.IsNullOrEmpty(key) || key == "Baseliner" ? null : key;
             }
             catch { return null; }
+        }
+
+        // Beds with a prisoner assigned, per map, remembered for a few seconds: asked for every bed scored.
+        private class PrisonerBedList { public int tick; public readonly List<Building_Bed> beds = new List<Building_Bed>(); }
+        private static readonly Dictionary<int, PrisonerBedList> prisonerBeds = new Dictionary<int, PrisonerBedList>();
+        private const int PrisonerBedTicks = 250;
+
+        private static List<Building_Bed> OccupiedPrisonerBeds(Map map)
+        {
+            int now = Find.TickManager.TicksGame;
+            if (!prisonerBeds.TryGetValue(map.uniqueID, out var list))
+                prisonerBeds[map.uniqueID] = list = new PrisonerBedList { tick = -1000000 };
+            if (now >= list.tick && now - list.tick < PrisonerBedTicks) return list.beds;
+
+            list.tick = now;
+            list.beds.Clear();
+            foreach (var bed in map.listerBuildings.AllBuildingsColonistOfClass<Building_Bed>())
+            {
+                if (bed.Spawned && bed.ForPrisoners && bed.OwnersForReading.Count > 0) list.beds.Add(bed);
+            }
+            return list.beds;
+        }
+
+        /// <summary>Is a bed with a prisoner assigned to it within the family distance of this bed?</summary>
+        public static bool PrisonersNear(Building_Bed bed, SmarterBedsSettings s)
+        {
+            if (bed == null || bed.Map == null) return false;
+            foreach (var prisonBed in OccupiedPrisonerBeds(bed.Map))
+            {
+                if (prisonBed != bed && Distance(bed, prisonBed) <= s.familyRadius) return true;
+            }
+            return false;
         }
 
         public static List<Pawn> HostileNeighbors(Pawn p) => p?.relations == null ? NoPawns : Get(p).hostileOthers;

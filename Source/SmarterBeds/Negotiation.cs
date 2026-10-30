@@ -54,14 +54,87 @@ namespace SmarterBeds
             PruneLocks();
             PruneCooldowns();
             var s = SmarterBedsMod.Settings;
-            if (!s.enabled || !s.familyEnabled || !s.coupleHousingEnabled) return;
+            if (!s.enabled) return;
 
             foreach (var map in Find.Maps)
             {
                 if (!map.IsPlayerHome) continue;
-                try { CoupleHousing.Run(map, this); }
-                catch (System.Exception e) { SafeLog.Once("couple housing", e); }
+                if (s.freeBedMoveEnabled)
+                {
+                    try { using (PerfWatch.Measure("moving to a free bed")) MoveToFreeBeds(map, s); }
+                    catch (System.Exception e) { SafeLog.Once("moving to a free bed", e); }
+                }
+                if (s.familyEnabled && s.coupleHousingEnabled)
+                {
+                    try { CoupleHousing.Run(map, this); }
+                    catch (System.Exception e) { SafeLog.Once("couple housing", e); }
+                }
             }
+        }
+
+        /// <summary>
+        /// Whether this colonist has a reason to want a different room: a sleep-related mood penalty.
+        /// A colonist without one is content, and nothing here looks for anything better for them.
+        /// </summary>
+        public bool HasRoomDebuff(Pawn p) => HasSleepDebuff(p, includeMemories: !RecentlyMoved(p));
+
+        /// <summary>
+        /// Once an hour, colonists on their own who have a sleep penalty and a free bed that would clearly
+        /// be better (it fixes a penalty, or is a big upgrade) give up their bed and take it. Couples are
+        /// housed together by CoupleHousing instead. A few per map per hour, so nothing churns.
+        /// </summary>
+        private void MoveToFreeBeds(Map map, SmarterBedsSettings s)
+        {
+            int moved = 0;
+            foreach (var a in new List<Pawn>(map.mapPawns.FreeColonistsSpawned))
+            {
+                if (TryMoveToFreeBed(a, s) && ++moved >= 2) return;
+            }
+        }
+
+        private bool TryMoveToFreeBed(Pawn a, SmarterBedsSettings s)
+        {
+            if (!Eligible(a) || CoupleOf(a) != null || RecentlyMoved(a)) return false;
+            if (!a.Awake() || a.Downed || a.Drafted || a.InMentalState || a.InBed() || PawnBusy.Is(a)) return false;
+            if (!HasRoomDebuff(a)) return false; // content: nothing to look for
+
+            var current = a.ownership.OwnedBed;
+            float currentQuality = BedScorer.Quality(current, a, s);
+            float debuffNow = RoomComfort.DebuffPenalty(current, a, s);
+            Room currentRoom = current.GetRoom();
+
+            Building_Bed best = null;
+            float bestGain = 0f;
+            foreach (var bed in a.Map.listerBuildings.AllBuildingsColonistOfClass<Building_Bed>())
+            {
+                if (!BedScorer.IsCandidate(bed, a, a)) continue;
+                if (bed.GetRoom() == currentRoom) continue;
+
+                float gain = BedScorer.Quality(bed, a, s) - currentQuality;
+                if (gain <= bestGain) continue;
+                bool fixesAPenalty = RoomComfort.DebuffPenalty(bed, a, s) < debuffNow;
+                bool bigUpgrade = s.qualityNegotiationEnabled && gain >= s.qualityNegotiationThreshold;
+                if (!fixesAPenalty && !bigUpgrade) continue;
+                if (!a.CanReserveAndReach(bed, PathEndMode.OnCell, Danger.Some, bed.SleepingSlotsCount)) continue;
+
+                best = bed;
+                bestGain = gain;
+            }
+            if (best == null) return false;
+
+            a.ownership.UnclaimBed();
+            if (!a.ownership.ClaimBedIfNonMedical(best))
+            {
+                a.ownership.ClaimBedIfNonMedical(current); // exactly as they were
+                return false;
+            }
+
+            NoteMoved(a);
+            if (s.verboseLogging)
+                Log.Message($"[Smarter Beds] {a.LabelShort} moved to a free bed at {best.Position} (gain {bestGain:0.0})");
+            if (s.negotiationMessages)
+                BriefMessage.Show("SmarterBeds_MovedToFreeBed".Translate(a.LabelShort), new LookTargets(a), s.messageSeconds);
+            return true;
         }
 
         // ---- the player's locks
@@ -174,7 +247,8 @@ namespace SmarterBeds
             typeof(ThoughtWorker_BedroomJealous),
             typeof(ThoughtWorker_RoomFarFromFamily),
             typeof(ThoughtWorker_RoomNearDislikedFamily),
-            typeof(ThoughtWorker_RoomNearDislikedNeighbor)
+            typeof(ThoughtWorker_RoomNearDislikedNeighbor),
+            typeof(ThoughtWorker_RoomNearPrisoners)
         };
 
         private static readonly List<Thought> tmpThoughts = new List<Thought>();

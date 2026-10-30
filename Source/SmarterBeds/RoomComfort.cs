@@ -36,6 +36,7 @@ namespace SmarterBeds
             points -= JealousyPenalty(room, outdoors, pawn);
             points -= FamilyPenalty(bed, pawn, s, leaving);
             points -= NeighborPenalty(bed, pawn, s, leaving);
+            points -= PrisonerPenalty(bed, pawn, s);
             points += NeighborMood(bed, pawn, s, leaving);
             if (company) points += CompanyMood(bed, room, outdoors, pawn, s, leaving);
             return points;
@@ -50,7 +51,7 @@ namespace SmarterBeds
         {
             Room room = bed.GetRoom();
             bool outdoors = room == null || room.PsychologicallyOutdoors;
-            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn) + FamilyPenalty(bed, pawn, s, leaving) + NeighborPenalty(bed, pawn, s, leaving);
+            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn) + FamilyPenalty(bed, pawn, s, leaving) + NeighborPenalty(bed, pawn, s, leaving) + PrisonerPenalty(bed, pawn, s);
         }
 
         /// <summary>
@@ -96,6 +97,13 @@ namespace SmarterBeds
         {
             if (!s.neighborsEnabled || !Family.IsAdultColonist(pawn)) return 0f;
             return Family.CountNear(pawn, Family.HostileNeighbors(pawn), bed, s, leaving, 2) * s.neighborHostilePenalty;
+        }
+
+        /// <summary>Sleeping within the family distance of a bed that has a prisoner in it. Counted once, however many there are.</summary>
+        public static float PrisonerPenalty(Building_Bed bed, Pawn pawn, SmarterBedsSettings s)
+        {
+            if (!s.neighborsEnabled || s.prisonerNeighborPenalty <= 0f || !Family.IsAdultColonist(pawn)) return 0f;
+            return Family.PrisonersNear(bed, s) ? s.prisonerNeighborPenalty : 0f;
         }
 
         /// <summary>The comfort of sleeping near people of your own ideoligion and your own kind.</summary>
