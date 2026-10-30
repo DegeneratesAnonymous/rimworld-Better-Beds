@@ -5,6 +5,7 @@ All notable changes are listed here. Versions follow semantic versioning.
 ## [Unreleased]
 
 ### Settings
+- Every tooltip now says what lowering and raising the setting does, and the default. Sliders with a calculable effect also show a worked example for the current value (win odds, bed value, intimidation vs persuasion, days of tenure, chair vs floor)
 - New switches: royal title bedroom rules, the Jealous trait, the Assign rooms button; a slider for the chair-sleep penalty
 - The family, neighbour and chair sliders now set the real mood of their thoughts, not only the bed score
 - Family distance and the dislike threshold have their own section, since neighbours use them even with family rules off

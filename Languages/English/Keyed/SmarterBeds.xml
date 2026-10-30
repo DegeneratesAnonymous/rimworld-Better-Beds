@@ -16,61 +16,96 @@
 
   <!-- Settings window: general -->
   <SmarterBeds_S_Enabled>Enable Smarter Beds</SmarterBeds_S_Enabled>
-  <SmarterBeds_S_Enabled_Tip>Master switch. Off, the game picks beds exactly as it normally does and nobody negotiates.</SmarterBeds_S_Enabled_Tip>
+  <SmarterBeds_S_Enabled_Tip>Master switch. Off, the game picks beds exactly as it normally does and nobody negotiates, moves in together or sleeps in a chair because of this mod.</SmarterBeds_S_Enabled_Tip>
   <SmarterBeds_S_Verbose>Log decisions (debugging)</SmarterBeds_S_Verbose>
-  <SmarterBeds_S_Verbose_Tip>Writes every bed score, negotiation roll and mood effect to the dev log.</SmarterBeds_S_Verbose_Tip>
+  <SmarterBeds_S_Verbose_Tip>Writes every bed score, negotiation roll and mood effect to the dev log. Only useful for finding out why a colonist chose a bed; it makes the log very long.</SmarterBeds_S_Verbose_Tip>
 
   <!-- Settings window: scoring -->
   <SmarterBeds_S_RoomMood>Room mood weight: {0}</SmarterBeds_S_RoomMood>
-  <SmarterBeds_S_RoomMood_Tip>How much the room counts. 1 uses the game's own mood for the room as it is (a mediocre bedroom +1, a mediocre barracks -4, outdoors -4).</SmarterBeds_S_RoomMood_Tip>
+  <SmarterBeds_S_RoomMood_Tip>How much the room's quality counts when choosing a bed.
+Lower: colonists care less about the room and more about family, neighbours and title rules.
+Higher: they chase the nicest room above all else.
+1 uses the game's own mood for the room (a mediocre bedroom +1, a mediocre barracks -4, outdoors -4). Default 1.</SmarterBeds_S_RoomMood_Tip>
   <SmarterBeds_S_Rest>Bed rest effectiveness weight: {0}</SmarterBeds_S_Rest>
-  <SmarterBeds_S_Rest_Tip>Mood points per 1.0 of bed rest effectiveness. At 10, a bed that is 5% better is worth half a point.</SmarterBeds_S_Rest_Tip>
+  <SmarterBeds_S_Rest_Tip>How much the bed's rest effectiveness counts, in mood points per 1.0.
+Lower: a better bed barely matters.
+Higher: colonists fight over the best furniture. Default 10.</SmarterBeds_S_Rest_Tip>
   <SmarterBeds_S_Unmet>Royal bedroom penalty: {0}</SmarterBeds_S_Unmet>
-  <SmarterBeds_S_Unmet_Tip>Applied to a title-holder for a room that is not a personal bedroom, or that fails the title's requirements. Each is -6 in the game, so this matches it.</SmarterBeds_S_Unmet_Tip>
+  <SmarterBeds_S_Unmet_Tip>How much a bed is marked down for a title-holder when the room is not a personal bedroom, or fails the title's requirements. The game charges -6 for each, so the default matches it.
+Lower: title-holders are less pushy about their rooms.
+Higher: they will take almost any room over a bad one, and ask for it. Default 6.</SmarterBeds_S_Unmet_Tip>
 
   <!-- Settings window: negotiation -->
   <SmarterBeds_S_Negotiate>Let colonists negotiate for better rooms</SmarterBeds_S_Negotiate>
-  <SmarterBeds_S_Negotiate_Tip>A colonist who is sleeping badly can choose, as recreation, to ask another colonist for their room.</SmarterBeds_S_Negotiate_Tip>
+  <SmarterBeds_S_Negotiate_Tip>A colonist who is sleeping badly can choose, as recreation, to ask another colonist for their room. They walk over, talk, and a d20 roll decides it.
+Off: rooms never change hands by asking; the other features (bed choice, couples, chairs) still work.</SmarterBeds_S_Negotiate_Tip>
   <SmarterBeds_S_Quality>Also negotiate for a plain upgrade</SmarterBeds_S_Quality>
-  <SmarterBeds_S_Quality_Tip>Off: colonists only negotiate to fix a royal bedroom problem or jealousy. On: a big enough upgrade is reason enough.</SmarterBeds_S_Quality_Tip>
+  <SmarterBeds_S_Quality_Tip>Off: colonists only negotiate to fix a real problem (a title or jealousy penalty, or being near someone they dislike).
+On: a big enough upgrade is reason enough, which makes room swapping much more common.</SmarterBeds_S_Quality_Tip>
   <SmarterBeds_S_QualityGap>Upgrade needed to ask: {0} mood</SmarterBeds_S_QualityGap>
-  <SmarterBeds_S_QualityGap_Tip>The mood gained by taking the room. 3 is, for example, a barracks bed (-4) to a decent bedroom (+2) being a 6, but a decent bedroom to a slightly better one being a 1, which is not worth the conversation.</SmarterBeds_S_QualityGap_Tip>
+  <SmarterBeds_S_QualityGap_Tip>How big an upgrade has to be, in mood points, to be worth asking for when nothing is actually wrong.
+Lower: lots of small swaps, more chatter and more bullied colonists.
+Higher: only dramatic upgrades. A barracks bed (-4) to a decent bedroom (+2) is a 6; a decent bedroom to a slightly better one is about 1. Default 3.</SmarterBeds_S_QualityGap_Tip>
   <SmarterBeds_S_Cooldown>Days before the same two colonists negotiate again: {0}</SmarterBeds_S_Cooldown>
-  <SmarterBeds_S_Cooldown_Tip>Applies to that pair only, whichever of them asks. A colonist can still negotiate with other people.</SmarterBeds_S_Cooldown_Tip>
+  <SmarterBeds_S_Cooldown_Tip>Days before the same two colonists can negotiate with each other again, whoever asks.
+Lower: the same pair can keep trying.
+Higher: a refusal sticks for a long time. It also paces how often a moved couple is looked at again. Other pairs are not affected. Default 3.</SmarterBeds_S_Cooldown_Tip>
   <SmarterBeds_S_Rematch>Days before a loser may challenge the same winner: {0}</SmarterBeds_S_Rematch>
-  <SmarterBeds_S_Rematch_Tip>Stops two colonists passing the same room back and forth.</SmarterBeds_S_Rematch_Tip>
+  <SmarterBeds_S_Rematch_Tip>Days before a colonist who lost their room can ask that same winner for it back.
+Lower: rooms can ping-pong between two colonists.
+Higher: once taken, a room stays taken. 0 switches the block off. Default 15.</SmarterBeds_S_Rematch_Tip>
   <SmarterBeds_S_MinWin>Lowest chance worth trying: {0}</SmarterBeds_S_MinWin>
-  <SmarterBeds_S_MinWin_Tip>A colonist will not start a conversation they have less than this chance of winning.</SmarterBeds_S_MinWin_Tip>
+  <SmarterBeds_S_MinWin_Tip>A colonist will not start a conversation they have less than this chance of winning.
+Lower: hopeless attempts, and more refusals.
+Higher: only confident colonists ask, so fewer negotiations overall. Default 10%.</SmarterBeds_S_MinWin_Tip>
   <SmarterBeds_S_JoyWeight>How often it is chosen as recreation: x{0}</SmarterBeds_S_JoyWeight>
-  <SmarterBeds_S_JoyWeight_Tip>Multiplier on how likely a colonist who wants a better room is to spend their recreation on it.</SmarterBeds_S_JoyWeight_Tip>
+  <SmarterBeds_S_JoyWeight_Tip>How often a colonist who wants a better room spends recreation on asking for it, compared with other recreation.
+Lower: rare, and a colonist may sleep badly for a long time.
+Higher: they act on it quickly and negotiation fills their free time. Default 1.</SmarterBeds_S_JoyWeight_Tip>
 
   <!-- Settings window: the roll -->
   <SmarterBeds_S_Title>Title weight: {0} per step</SmarterBeds_S_Title>
-  <SmarterBeds_S_Title_Tip>Roll points per royal title step (a Yeoman is 1 step, a Knight 3, a Baron 5). At 3, a Knight beats an equal colonist about 3 times in 4.</SmarterBeds_S_Title_Tip>
+  <SmarterBeds_S_Title_Tip>Roll points per royal title step (a Yeoman is 1 step, a Knight 3, a Baron 5), for the asker and for the defender.
+Lower: titles barely matter in a negotiation.
+Higher: a title-holder nearly always gets their way, and cannot be moved from their room. Default 3.</SmarterBeds_S_Title_Tip>
   <SmarterBeds_S_Defender>Bonus for holding the room: {0}</SmarterBeds_S_Defender>
-  <SmarterBeds_S_Defender_Tip>Added to the defender, and ties go to them. At 3, two equal colonists succeed about a third of the time when asking.</SmarterBeds_S_Defender_Tip>
+  <SmarterBeds_S_Defender_Tip>Added to the defender's roll for already holding the room; ties also go to them.
+Lower: rooms change hands easily.
+Higher: asking rarely works, so fewer moves. Default 3.</SmarterBeds_S_Defender_Tip>
   <SmarterBeds_S_Intimidate>Intimidation strength: x{0} Melee</SmarterBeds_S_Intimidate>
-  <SmarterBeds_S_Intimidate_Tip>Intimidating uses Melee skill times this, against the defender's Melee. It is only chosen when clearly better than persuading, and never by kind colonists or against friends.</SmarterBeds_S_Intimidate_Tip>
+  <SmarterBeds_S_Intimidate_Tip>Intimidation uses Melee skill times this, against the defender's Melee. It is only chosen when clearly stronger than persuading (Social), and never by kind colonists, those who cannot do violence, or against friends.
+Lower: bullying is rare and weak.
+Higher: fighters take rooms by force, leaving the loser with a 'pushed out of my room' debuff. Default 0.75.</SmarterBeds_S_Intimidate_Tip>
   <SmarterBeds_S_Tenure>Most points from time in the colony: {0}</SmarterBeds_S_Tenure>
-  <SmarterBeds_S_Tenure_Tip>One point per 45 days, up to this. Rewards the longest-serving colonists a little.</SmarterBeds_S_Tenure_Tip>
+  <SmarterBeds_S_Tenure_Tip>One roll point per 45 days in the colony, up to this limit, for both sides.
+Lower: new arrivals compete with veterans on equal terms.
+Higher: long-serving colonists keep their rooms. Default 3.</SmarterBeds_S_Tenure_Tip>
   <SmarterBeds_S_Xp>Social experience for the asker: {0} (half on a fail)</SmarterBeds_S_Xp>
-  <SmarterBeds_S_Xp_Tip>Experience the colonist who asks gains in Social when they win a negotiation. They gain half as much when they fail.</SmarterBeds_S_Xp_Tip>
+  <SmarterBeds_S_Xp_Tip>Social experience the asker gains when they win. They gain half as much when they fail.
+Lower or 0: negotiating is not a way to train Social.
+Higher: a steady source of Social experience. Default 60.</SmarterBeds_S_Xp_Tip>
 
   <!-- Settings window: feedback -->
   <SmarterBeds_S_Moods>Negotiations change moods</SmarterBeds_S_Moods>
-  <SmarterBeds_S_Moods_Tip>Mood points = 0.25 x relationship + 0.25 x the mood gained from the room. The loser is bullied out (a debuff) or, if they like the winner and were persuaded, gave up the room for a friend (a buff). The winner is pleased with the new room.</SmarterBeds_S_Moods_Tip>
+  <SmarterBeds_S_Moods_Tip>Gives the people involved a mood effect: 0.25 x how much the loser likes the winner + 0.25 x how much better the room is (between 1 and 8 points, lasting 5 days).
+The loser is 'pushed out' (a debuff) or, if they like the winner and were persuaded, 'gave up the room for a friend' (a buff). The winner is pleased with the new room.
+Off: rooms change hands with no mood consequences.</SmarterBeds_S_Moods_Tip>
   <SmarterBeds_S_Messages>Show a message when a room changes hands</SmarterBeds_S_Messages>
-  <SmarterBeds_S_Messages_Tip>A short notification in the top left with the roll totals, such as "Alice talked Bob out of their bedroom. (21 vs 17)". It is also kept in the message history.</SmarterBeds_S_Messages_Tip>
+  <SmarterBeds_S_Messages_Tip>A short notification in the top left, with the roll totals, when a room changes hands or a couple moves in, such as 'Alice talked Bob out of their bedroom (21 vs 17)'. It is also kept in the message history.
+Off: no notifications; the play log and thoughts are unaffected.</SmarterBeds_S_Messages_Tip>
   <SmarterBeds_S_MessageSeconds>Notification stays for: {0} s</SmarterBeds_S_MessageSeconds>
-  <SmarterBeds_S_MessageSeconds_Tip>How long the notification stays fully visible before it fades out (the fade itself takes about half a second more). The game's normal messages stay for 13 seconds. The default is 4.</SmarterBeds_S_MessageSeconds_Tip>
+  <SmarterBeds_S_MessageSeconds_Tip>How long the notification stays fully visible before it fades out (the fade takes about half a second more).
+The game's normal messages stay for 13 seconds. Default 4.</SmarterBeds_S_MessageSeconds_Tip>
   <SmarterBeds_S_Log>Show negotiations in the log and speech bubbles</SmarterBeds_S_Log>
-  <SmarterBeds_S_Log_Tip>Adds the conversation to the colonists' social log. Interaction Bubbles, if installed, shows it as speech bubbles.</SmarterBeds_S_Log_Tip>
+  <SmarterBeds_S_Log_Tip>Adds each conversation to the colonists' social log. Interaction Bubbles, if installed, shows it as speech bubbles over their heads.
+Off: nothing is added to the log, so no bubbles appear.</SmarterBeds_S_Log_Tip>
 
   <!-- Settings window: control -->
 
   <!-- Settings window: sleeping rough -->
   <SmarterBeds_S_Chair>Sleep in a chair when there is no bed</SmarterBeds_S_Chair>
-  <SmarterBeds_S_Chair_Tip>A colonist with no bed to use dozes off in a free indoor chair instead of on the floor. They still get a mood penalty (3 by default), just a smaller one than the floor (-4).</SmarterBeds_S_Chair_Tip>
+  <SmarterBeds_S_Chair_Tip>A colonist with no bed to use dozes off in a free indoor chair instead of on the floor.
+Off: they sleep on the floor as in the base game ('slept on the ground', -4). Colonists who have a bed are never affected.</SmarterBeds_S_Chair_Tip>
 
   <!-- Messages -->
 
@@ -99,35 +134,58 @@
 
   <SmarterBeds_Sec_Neighbors>Neighbours</SmarterBeds_Sec_Neighbors>
   <SmarterBeds_S_Neighbors>Who sleeps nearby matters</SmarterBeds_S_Neighbors>
-  <SmarterBeds_S_Neighbors_Tip>Colonists want their bed away from people they dislike, and like to sleep near people of their own ideoligion and their own xenotype. "Near" is the family distance below.</SmarterBeds_S_Neighbors_Tip>
+  <SmarterBeds_S_Neighbors_Tip>Colonists want their bed away from people they dislike, and like to sleep near people of their own ideoligion and their own xenotype. 'Near' is the family distance in 'Near, far and disliked'.
+Off: none of these three count, in bed choice, negotiation or thoughts.</SmarterBeds_S_Neighbors_Tip>
   <SmarterBeds_S_NeighborHostile>Disliked colonist nearby: -{0}</SmarterBeds_S_NeighborHostile>
-  <SmarterBeds_S_NeighborHostile_Tip>Counted against a bed inside the family distance of someone who is not family and whom the colonist dislikes (up to two people). Uses the same opinion threshold as family. The matching thought is -4, double what a disliked relative costs.</SmarterBeds_S_NeighborHostile_Tip>
+  <SmarterBeds_S_NeighborHostile_Tip>Mood penalty for each colonist (up to two) the pawn dislikes, who is not family, sleeping within the family distance. It is both what a bed is marked down by and the mood of the 'sleeping too close to...' thought.
+Lower: dislikes matter less.
+Higher: colonists will move across the base to avoid someone. 0 removes the effect. Default 4.</SmarterBeds_S_NeighborHostile_Tip>
   <SmarterBeds_S_IdeoBonus>Same ideoligion nearby: +{0}</SmarterBeds_S_IdeoBonus>
-  <SmarterBeds_S_IdeoBonus_Tip>Mood points for sleeping within the family distance of someone who shares your ideoligion. Needs the Ideology DLC.</SmarterBeds_S_IdeoBonus_Tip>
+  <SmarterBeds_S_IdeoBonus_Tip>Mood bonus for sleeping within the family distance of someone who shares your ideoligion. Needs Ideology.
+Lower or 0: ideoligion does not affect where people sleep.
+Higher: believers cluster together. Default 2.</SmarterBeds_S_IdeoBonus_Tip>
   <SmarterBeds_S_GeneBonus>"People like me" nearby: +{0}</SmarterBeds_S_GeneBonus>
-  <SmarterBeds_S_GeneBonus_Tip>Mood points for sleeping within the family distance of someone of your xenotype. Baseliners are left out, since in a colony of baseliners everyone would match. Needs the Biotech DLC.</SmarterBeds_S_GeneBonus_Tip>
+  <SmarterBeds_S_GeneBonus_Tip>Mood bonus ('people like me') for sleeping within the family distance of someone of your xenotype. Needs Biotech. Baseliners are left out, since in a colony of baseliners everyone would match.
+Lower or 0: xenotype does not matter.
+Higher: xenotypes cluster together. Default 2.</SmarterBeds_S_GeneBonus_Tip>
 
   <!-- Family and couples -->
   <SmarterBeds_CoupleMoved>{0} and {1} moved into a room of their own.</SmarterBeds_CoupleMoved>
   <SmarterBeds_Sec_Family>Family and couples</SmarterBeds_Sec_Family>
   <SmarterBeds_S_Family>Family and couples affect who sleeps where</SmarterBeds_S_Family>
-  <SmarterBeds_S_Family_Tip>Colonists prefer to share a room with family they get on with, want distance from relatives they do not, and couples want a room of their own that is near family.</SmarterBeds_S_Family_Tip>
+  <SmarterBeds_S_Family_Tip>Colonists prefer to share a room with family they get on with, want distance from relatives they do not, and couples want a room of their own that is near family.
+Off: family is ignored for bed choice, negotiation and thoughts (couple housing too).</SmarterBeds_S_Family_Tip>
   <SmarterBeds_S_FamilyRadius>Family distance: {0} tiles</SmarterBeds_S_FamilyRadius>
-  <SmarterBeds_S_FamilyRadius_Tip>"Near" and "far" for family, measured between beds. Beds within this are near.</SmarterBeds_S_FamilyRadius_Tip>
+  <SmarterBeds_S_FamilyRadius_Tip>What counts as 'near' and 'far', in tiles between beds, for family, disliked colonists, ideoligion and xenotype.
+Lower: only close neighbours count, so people are easy to satisfy.
+Higher: nearly the whole base counts as near, so you cannot get away from anyone and a couple cannot be 'far from family'. Default 35.</SmarterBeds_S_FamilyRadius_Tip>
   <SmarterBeds_S_FamilyHostile>Negative relations at opinion: {0}</SmarterBeds_S_FamilyHostile>
-  <SmarterBeds_S_FamilyHostile_Tip>A colonist whose opinion of a parent, child or sibling is at or below this wants a room outside the family distance of that relative.</SmarterBeds_S_FamilyHostile_Tip>
+  <SmarterBeds_S_FamilyHostile_Tip>How low a colonist's opinion of someone has to be before they count as disliked. Used for relatives and for neighbours.
+Closer to 0: they dislike many people, so more complaints.
+Closer to -100: only real enemies count. Default -20.</SmarterBeds_S_FamilyHostile_Tip>
   <SmarterBeds_S_FamilyShare>Sharing a room with family: +{0}</SmarterBeds_S_FamilyShare>
-  <SmarterBeds_S_FamilyShare_Tip>Mood points a colonist counts for each relative (up to two) they share a room with, if they get on.</SmarterBeds_S_FamilyShare_Tip>
+  <SmarterBeds_S_FamilyShare_Tip>Mood points a colonist counts for each relative they get on with (up to two) sharing their room.
+Lower: families are not especially kept together.
+Higher: family groups share rooms where they can. Default 2.</SmarterBeds_S_FamilyShare_Tip>
   <SmarterBeds_S_FamilyNear>Too close to a disliked relative: -{0}</SmarterBeds_S_FamilyNear>
-  <SmarterBeds_S_FamilyNear_Tip>Counted against a bed inside the family distance of a relative they have negative relations with. The matching thought shows the same number. The default is lower than for a stranger: family is put up with more.</SmarterBeds_S_FamilyNear_Tip>
+  <SmarterBeds_S_FamilyNear_Tip>Mood penalty for a bed within the family distance of a relative they dislike. It is both what a bed is marked down by and the mood of the matching thought.
+Lower: family quarrels are put up with.
+Higher: they want to be far away from them. 0 removes the effect. Default 2 (less than for a stranger).</SmarterBeds_S_FamilyNear_Tip>
   <SmarterBeds_S_FamilyFar>Couple far from family: -{0}</SmarterBeds_S_FamilyFar>
-  <SmarterBeds_S_FamilyFar_Tip>Counted against a couple's bed that is outside the family distance of all their family. The matching "room far from family" thought shows the same number.</SmarterBeds_S_FamilyFar_Tip>
+  <SmarterBeds_S_FamilyFar_Tip>Mood penalty for a couple whose bed is outside the family distance of every relative they have. It is both the bed's mark-down and the mood of the 'room far from family' thought.
+Lower: couples may live anywhere.
+Higher: couples want to be near their family. 0 removes the effect. Default 4.</SmarterBeds_S_FamilyFar_Tip>
   <SmarterBeds_S_CoupleHousing>Move new couples into a room of their own</SmarterBeds_S_CoupleHousing>
-  <SmarterBeds_S_CoupleHousing_Tip>Once an hour, a couple who do not have a room to themselves are moved into a free one if there is a clearly better room. Nobody is evicted, and beds whose owner you set are left alone.</SmarterBeds_S_CoupleHousing_Tip>
+  <SmarterBeds_S_CoupleHousing_Tip>Once an hour, a couple without a room to themselves are moved into a free one if there is a clearly better room. Nobody is evicted, and beds whose owner you set are left alone.
+Off: couples are left where they are (they can still ask for rooms by negotiation).</SmarterBeds_S_CoupleHousing_Tip>
   <SmarterBeds_S_CoupleRoom>Room for just the two of them: +{0}</SmarterBeds_S_CoupleRoom>
-  <SmarterBeds_S_CoupleRoom_Tip>Mood points a coupled colonist counts for a room that holds only them and their partner.</SmarterBeds_S_CoupleRoom_Tip>
+  <SmarterBeds_S_CoupleRoom_Tip>Mood points a coupled colonist counts for a room that holds only them and their partner (half if the partner is not in it yet).
+Lower: couples care less about privacy.
+Higher: couples are moved into rooms of their own more readily. Default 3.</SmarterBeds_S_CoupleRoom_Tip>
   <SmarterBeds_S_CoupleShare>Couple sharing with others: -{0}</SmarterBeds_S_CoupleShare>
-  <SmarterBeds_S_CoupleShare_Tip>Counted against a bed in a room where someone other than their partner has a bed.</SmarterBeds_S_CoupleShare_Tip>
+  <SmarterBeds_S_CoupleShare_Tip>Mood points counted against a bed in a room where someone other than their partner also has a bed.
+Lower: couples tolerate sharing.
+Higher: couples avoid barracks and shared rooms. Default 3.</SmarterBeds_S_CoupleShare_Tip>
 
   <!-- Dev tools (god mode) -->
   <SmarterBeds_ForceNegotiation>Force negotiation</SmarterBeds_ForceNegotiation>
@@ -144,12 +202,33 @@
   <!-- Settings window: extra switches -->
   <SmarterBeds_Sec_Near>Near, far and disliked</SmarterBeds_Sec_Near>
   <SmarterBeds_S_Titles>Royal title bedroom rules count</SmarterBeds_S_Titles>
-  <SmarterBeds_S_Titles_Tip>Needs Royalty. When on, a title-holder wants a personal bedroom that meets their title's requirements, and negotiation can be used to get one. Turn off to ignore titles when choosing beds.</SmarterBeds_S_Titles_Tip>
+  <SmarterBeds_S_Titles_Tip>Needs Royalty. When on, a title-holder wants a personal bedroom that meets their title's requirements, and negotiation can be used to get one.
+Off: titles are ignored when choosing beds and for negotiation. The game's own title mood penalty still applies; this only stops this mod acting on it.</SmarterBeds_S_Titles_Tip>
   <SmarterBeds_S_Jealousy>Jealous trait counts</SmarterBeds_S_Jealousy>
-  <SmarterBeds_S_Jealousy_Tip>When on, a Jealous colonist counts another colonist's much nicer room against their own, as the game does, and may ask for a better one.</SmarterBeds_S_Jealousy_Tip>
+  <SmarterBeds_S_Jealousy_Tip>When on, a Jealous colonist counts another colonist's much nicer room (10% more impressive) against their own, as the game does, and may ask for a better one.
+Off: Jealous colonists are given beds like anyone else.</SmarterBeds_S_Jealousy_Tip>
   <SmarterBeds_S_ChairPenalty>Night in a chair: -{0}</SmarterBeds_S_ChairPenalty>
-  <SmarterBeds_S_ChairPenalty_Tip>The mood penalty for dozing in a chair. The floor is -4 in the game. Applies to new nights only.</SmarterBeds_S_ChairPenalty_Tip>
+  <SmarterBeds_S_ChairPenalty_Tip>The mood penalty for a night in a chair.
+Lower: sleeping in a chair is almost as good as a bed, so bedless colonists mind less.
+Higher: at 4 or more it is no better than the floor, so keep it under 4. Applies to new nights only. Default 3.</SmarterBeds_S_ChairPenalty_Tip>
   <SmarterBeds_Sec_Interface>Interface</SmarterBeds_Sec_Interface>
   <SmarterBeds_S_RoomsButton>Show the Assign rooms button</SmarterBeds_S_RoomsButton>
-  <SmarterBeds_S_RoomsButton_Tip>The button on the Assign tab that opens the room list. Turn off if another mod uses that space.</SmarterBeds_S_RoomsButton_Tip>
+  <SmarterBeds_S_RoomsButton_Tip>The 'Assign rooms' button at the top of the Assign tab, which opens the list of rooms.
+Off: the button is hidden (the rest of the mod is unaffected). Turn it off if another mod uses that space.</SmarterBeds_S_RoomsButton_Tip>
+  <!-- Settings window: live examples shown under a tooltip -->
+  <SmarterBeds_Live_Header>At this setting:</SmarterBeds_Live_Header>
+  <SmarterBeds_Live_Rest>A bed with 5% better rest effectiveness is worth {0} mood.</SmarterBeds_Live_Rest>
+  <SmarterBeds_Live_MinWin>A colonist needs at least a {0} chance of winning before they ask.</SmarterBeds_Live_MinWin>
+  <SmarterBeds_Live_Title>Each title step is worth +{0} roll points. Against an equal colonist that moves the asker's chance of winning from {1} to {2}.</SmarterBeds_Live_Title>
+  <SmarterBeds_Live_Defender>Two equal colonists: the asker wins about {0} of the time.</SmarterBeds_Live_Defender>
+  <SmarterBeds_Live_Intimidate>A Melee 12 colonist intimidates at {0}, against Social 12 for persuading, so they would {1}.</SmarterBeds_Live_Intimidate>
+  <SmarterBeds_Live_IntimidatePick>pick intimidation</SmarterBeds_Live_IntimidatePick>
+  <SmarterBeds_Live_IntimidateNo>still persuade</SmarterBeds_Live_IntimidateNo>
+  <SmarterBeds_Live_Tenure>Reaches the limit after {0} days in the colony.</SmarterBeds_Live_Tenure>
+  <SmarterBeds_Live_Xp>A win gives {0} Social experience, a failure {1}.</SmarterBeds_Live_Xp>
+  <SmarterBeds_Live_Chair>A night in a chair is {0} the floor (-4).</SmarterBeds_Live_Chair>
+  <SmarterBeds_Live_ChairBetter>{0} mood better than</SmarterBeds_Live_ChairBetter>
+  <SmarterBeds_Live_ChairWorse>{0} mood worse than (no reason to use a chair)</SmarterBeds_Live_ChairWorse>
+  <SmarterBeds_Live_ChairSame>the same as</SmarterBeds_Live_ChairSame>
+  <SmarterBeds_Live_Radius>Roughly the width of {0} standard 7x7 bedrooms side by side.</SmarterBeds_Live_Radius>
 </LanguageData>
