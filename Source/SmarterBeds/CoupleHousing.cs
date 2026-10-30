@@ -62,7 +62,9 @@ namespace SmarterBeds
             var oldB = Family.BedOf(b);
             if (BedLocks.IsLocked(oldA, a) || BedLocks.IsLocked(oldB, b)) return false; // the player decided
 
-            float current = ValueNow(a, oldA, s) + ValueNow(b, oldB, s);
+            // The candidates below include the couple-room bonus, so what they have now has to include it
+            // too when they already live in a room of their own, or they could "move up" to a worse room.
+            float current = ValueNow(a, oldA, s) + ValueNow(b, oldB, s) + (Family.IsInCoupleRoom(a) ? 2f * s.coupleRoomBonus : 0f);
 
             Plan? best = null;
             foreach (var room in RoomsWithBeds(a.Map))
@@ -128,6 +130,10 @@ namespace SmarterBeds
                 if (oldB != null) b.ownership.ClaimBedIfNonMedical(oldB);
                 return false;
             }
+
+            var negotiation = GameComponent_BedNegotiation.Instance;
+            negotiation?.NoteMoved(a);
+            negotiation?.NoteMoved(b);
 
             if (s.verboseLogging)
                 Log.Message($"[Smarter Beds] couple: {a.LabelShort} and {b.LabelShort} moved into a room of their own at {plan.bedA.Position}");

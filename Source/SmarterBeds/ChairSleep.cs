@@ -48,6 +48,7 @@ namespace SmarterBeds
                 if (!pawn.CanReserveAndReach(b, PathEndMode.OnCell, Danger.None)) continue;
 
                 float score = b.GetStatValue(StatDefOf.Comfort) * 10f - (b.Position - pawn.Position).LengthHorizontal * 0.1f;
+                if (b.Position == pawn.Position) score += 100f; // already dozing in this one: stay put
                 if (score > bestScore)
                 {
                     bestScore = score;

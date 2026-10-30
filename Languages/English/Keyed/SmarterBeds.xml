@@ -128,5 +128,5 @@
 
   <!-- Diagnostics -->
   <SmarterBeds_Sec_Diag>Compatibility</SmarterBeds_Sec_Diag>
-  <SmarterBeds_Diag_Summary>Patches active: {0}. Skipped: {1}. Hover for details.</SmarterBeds_Diag_Summary>
+  <SmarterBeds_Diag_Summary>Hooks active: {0} of {1}. Hover for details.</SmarterBeds_Diag_Summary>
 </LanguageData>

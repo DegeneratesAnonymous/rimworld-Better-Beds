@@ -55,7 +55,7 @@ namespace SmarterBeds
             {
                 if (!map.IsPlayerHome) continue;
                 try { CoupleHousing.Run(map, this); }
-                catch (System.Exception e) { Log.Error($"[Smarter Beds] couple housing failed: {e}"); }
+                catch (System.Exception e) { SafeLog.Once("couple housing", e); }
             }
         }
 
@@ -129,11 +129,16 @@ namespace SmarterBeds
             pairCooldownUntil[PairKey(a, b)] = Now + (int)(SmarterBedsMod.Settings.negotiationCooldownDays * GenDate.TicksPerDay);
 
         // Memory thoughts that mean "the place I slept was bad". SleepDisturbed is noise, not the room.
-        private static readonly List<ThoughtDef> SleepDebuffMemories = new List<ThoughtDef>
-        {
-            ThoughtDefOf.SleptInBarracks, ThoughtDefOf.SleptOutside, ThoughtDefOf.SleptOnGround,
-            ThoughtDefOf.SleptInCold, ThoughtDefOf.SleptInHeat, ThoughtDefOf.SleptInRoomWithSlave
-        };
+        // Built on first use rather than when the class loads, so it never reads the game's DefOf
+        // fields before they have been filled in. A def missing from this game version is just skipped.
+        private static List<ThoughtDef> sleepDebuffMemories;
+
+        private static List<ThoughtDef> SleepDebuffMemories =>
+            sleepDebuffMemories ?? (sleepDebuffMemories = new List<ThoughtDef>
+            {
+                ThoughtDefOf.SleptInBarracks, ThoughtDefOf.SleptOutside, ThoughtDefOf.SleptOnGround,
+                ThoughtDefOf.SleptInCold, ThoughtDefOf.SleptInHeat, ThoughtDefOf.SleptInRoomWithSlave
+            }.Where(d => d != null).ToList());
 
         // Situational thoughts about a bedroom: the game's (a title without a personal bedroom or with
         // unmet requirements, the Jealous trait envying someone's room) and this mod's two family ones.
@@ -148,16 +153,23 @@ namespace SmarterBeds
 
         private static readonly List<Thought> tmpThoughts = new List<Thought>();
 
-        /// <summary>True when the pawn is currently suffering a mood penalty about where they sleep.</summary>
-        public static bool HasSleepDebuff(Pawn p)
+        /// <summary>
+        /// True when the pawn is currently suffering a mood penalty about where they sleep.
+        /// <paramref name="includeMemories"/> is off for someone who has just moved: last night's
+        /// "slept in barracks" memory is about the room they left, and says nothing about the new one.
+        /// </summary>
+        public static bool HasSleepDebuff(Pawn p, bool includeMemories = true)
         {
             var handler = p.needs?.mood?.thoughts;
             if (handler == null) return false;
 
-            var memories = handler.memories;
-            foreach (var def in SleepDebuffMemories)
+            if (includeMemories)
             {
-                if (def != null && memories.GetFirstMemoryOfDef(def) != null) return true;
+                var memories = handler.memories;
+                foreach (var def in SleepDebuffMemories)
+                {
+                    if (memories.GetFirstMemoryOfDef(def) != null) return true;
+                }
             }
 
             tmpThoughts.Clear();
@@ -202,6 +214,15 @@ namespace SmarterBeds
         }
 
         /// <summary>Cheap check: is this pawn in a position where negotiating makes sense at all?</summary>
+        // Not saved: when each pawn last moved to a new room, so old sleep memories do not count against the new one.
+        private readonly Dictionary<int, int> movedAt = new Dictionary<int, int>();
+        private const int MemoryIgnoreTicks = GenDate.TicksPerDay;
+
+        public void NoteMoved(Pawn p) => movedAt[p.thingIDNumber] = Now;
+
+        private bool RecentlyMoved(Pawn p) =>
+            movedAt.TryGetValue(p.thingIDNumber, out int at) && Now - at < MemoryIgnoreTicks;
+
         public bool WantsToNegotiate(Pawn a)
         {
             var s = SmarterBedsMod.Settings;
@@ -210,7 +231,7 @@ namespace SmarterBeds
             // A couple who have a room of their own are not going to break it up.
             if (Family.IsInCoupleRoom(a)) return false;
             // Only negotiate when something is actually wrong with how they sleep.
-            return HasSleepDebuff(a);
+            return HasSleepDebuff(a, includeMemories: !RecentlyMoved(a));
         }
 
         /// <summary>Finds who this pawn would negotiate with, or null. Throttled to once an hour per pawn.</summary>
@@ -223,7 +244,7 @@ namespace SmarterBeds
             try { return FindLoser(a, a.ownership.OwnedBed, SmarterBedsMod.Settings, out _, out _); }
             catch (System.Exception e)
             {
-                Log.Error($"[Smarter Beds] finding a negotiation target failed: {e}");
+                SafeLog.Once("finding someone to negotiate with", e);
                 return null;
             }
         }
@@ -278,7 +299,7 @@ namespace SmarterBeds
             var s = SmarterBedsMod.Settings;
             try
             {
-                if ((forced || WantsToNegotiate(a)) && Eligible(b))
+                if ((forced ? Eligible(a) : WantsToNegotiate(a)) && Eligible(b))
                 {
                     var target = FindLoser(a, a.ownership.OwnedBed, s, out float gain, out var contest, only: b, force: forced);
                     if (target == b)
@@ -293,7 +314,7 @@ namespace SmarterBeds
             }
             catch (System.Exception e)
             {
-                Log.Error($"[Smarter Beds] negotiation failed: {e}");
+                SafeLog.Once("settling a negotiation", e);
             }
             finally
             {
@@ -441,6 +462,7 @@ namespace SmarterBeds
                 return false;
             }
 
+            NoteMoved(winner);
             // The loser can't just turn around and take it back.
             rematchUntil[RematchKey(loser, winner)] = Now + (int)(s.rematchDays * GenDate.TicksPerDay);
             PruneCooldowns();

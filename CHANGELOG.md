@@ -28,3 +28,4 @@ All notable changes are listed here. Versions follow semantic versioning.
 - The colonist being asked stops and faces the asker while they talk, then carries on with what they were doing
 - Negotiation notification stays 4 seconds by default (was 1)
 - Compatibility: locks stored in the save instead of on every bed; patches applied individually and fail soft; features catch their own errors; compatibility summary in the options
+- Fixes from a full code review: a couple already in their own room is no longer moved to a slightly worse one; a colonist who just moved ignores last night's sleep memory about the old room; forced negotiation checks the asker still has a bed; a colonist dozing in a chair stays in it; errors are reported once instead of every hour; the compatibility readout counts hooks that are really in place

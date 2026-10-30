@@ -33,6 +33,8 @@ namespace SmarterBeds
     {
         public static readonly List<string> Applied = new List<string>();
         public static readonly List<string> Failed = new List<string>();
+        public static int Hooks;   // methods actually patched
+        public static int Classes; // patch classes this mod has
 
         /// <summary>Mods this one knows how to work alongside, found by package id.</summary>
         private static readonly string[] KnownMods =
@@ -49,6 +51,7 @@ namespace SmarterBeds
             foreach (var type in typeof(SafePatcher).Assembly.GetTypes())
             {
                 if (type.GetCustomAttributes(typeof(HarmonyPatch), true).Length == 0) continue;
+                Classes++;
                 try
                 {
                     harmony.CreateClassProcessor(type).Patch();
@@ -61,6 +64,10 @@ namespace SmarterBeds
                 }
             }
 
+            // A patch class can also be skipped quietly (its Prepare says the target is not there),
+            // so count the methods that really ended up patched.
+            Hooks = harmony.GetPatchedMethods().Count();
+
             foreach (var id in KnownMods)
             {
                 try
@@ -70,8 +77,8 @@ namespace SmarterBeds
                 catch { /* detection is only for the report */ }
             }
 
-            Log.Message($"[Smarter Beds] {Applied.Count} patches active" +
-                        (Failed.Count > 0 ? $", {Failed.Count} skipped" : "") +
+            Log.Message($"[Smarter Beds] {Hooks} of {Classes} hooks active" +
+                        (Failed.Count > 0 ? $", {Failed.Count} failed" : "") +
                         (DetectedMods.Count > 0 ? "; works alongside: " + string.Join(", ", DetectedMods) : "") + ".");
         }
 
@@ -84,7 +91,7 @@ namespace SmarterBeds
 
         /// <summary>One line for the options window.</summary>
         public static string Summary() =>
-            "SmarterBeds_Diag_Summary".Translate(Applied.Count, Failed.Count).ToString();
+            "SmarterBeds_Diag_Summary".Translate(Hooks, Classes).ToString();
 
         public static string Details()
         {

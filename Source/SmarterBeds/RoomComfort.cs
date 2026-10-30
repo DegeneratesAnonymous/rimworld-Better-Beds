@@ -178,6 +178,7 @@ namespace SmarterBeds
         public static float JealousyPenalty(Room room, bool outdoors, Pawn pawn)
         {
             if (pawn.story?.traits == null || !pawn.story.traits.HasTrait(TraitDefOf.Jealous)) return 0f;
+            if (pawn.Map == null) return 0f;
             float own = outdoors ? 0f : room.GetStat(RoomStatDefOf.Impressiveness);
 
             foreach (var other in pawn.Map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer))
