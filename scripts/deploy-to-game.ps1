@@ -21,6 +21,12 @@ $dest = Join-Path $Game 'Mods\SmarterBeds'
 
 if (-not (Test-Path (Join-Path $Game 'Mods'))) { throw "No Mods folder at $Game. Pass -Game with your RimWorld folder." }
 
+# The game keeps the mod's DLL open while it runs, so copying over it fails (and robocopy's
+# default is to retry for a very long time). Close the game first.
+if (Get-Process -Name 'RimWorld*' -ErrorAction SilentlyContinue) {
+    throw "RimWorld is running and has the mod's DLL locked. Close the game, then run this again."
+}
+
 if ((Test-Path $dest) -and (Get-Item $dest -Force).LinkType) {
     throw "$dest is a junction or symlink, which RimWorld 1.7 cannot read. Delete the link (not its contents) and run again."
 }
@@ -34,7 +40,7 @@ if (-not $NoBuild) {
 }
 
 # Only what the game needs: no source, no git data, no docs.
-robocopy $repo $dest /MIR /XD .git .github Source docs scripts obj bin /XF *.md .gitignore *.deps.json /NFL /NDL /NJH /NJS | Out-Null
+robocopy $repo $dest /MIR /XD .git .github Source docs scripts obj bin /XF *.md .gitignore *.deps.json /R:2 /W:1 /NFL /NDL /NJH /NJS | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "Copy failed (robocopy exit code $LASTEXITCODE)" }
 
 Write-Host "Deployed to $dest"
