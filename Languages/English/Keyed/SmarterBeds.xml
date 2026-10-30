@@ -95,6 +95,18 @@
   <SmarterBeds_RoomsCells>{0} cells</SmarterBeds_RoomsCells>
   <SmarterBeds_RoomsHint>Hover a room to see its beds in the world. Double-click to jump there. Assigning an owner locks the bed against negotiation.</SmarterBeds_RoomsHint>
 
+  <!-- Neighbours -->
+
+  <SmarterBeds_Sec_Neighbors>Neighbours</SmarterBeds_Sec_Neighbors>
+  <SmarterBeds_S_Neighbors>Who sleeps nearby matters</SmarterBeds_S_Neighbors>
+  <SmarterBeds_S_Neighbors_Tip>Colonists want their bed away from people they dislike, and like to sleep near people of their own ideoligion and their own xenotype. "Near" is the family distance below.</SmarterBeds_S_Neighbors_Tip>
+  <SmarterBeds_S_NeighborHostile>Disliked colonist nearby: -{0}</SmarterBeds_S_NeighborHostile>
+  <SmarterBeds_S_NeighborHostile_Tip>Counted against a bed inside the family distance of someone who is not family and whom the colonist dislikes (up to two people). Uses the same opinion threshold as family. The matching thought is -4, double what a disliked relative costs.</SmarterBeds_S_NeighborHostile_Tip>
+  <SmarterBeds_S_IdeoBonus>Same ideoligion nearby: +{0}</SmarterBeds_S_IdeoBonus>
+  <SmarterBeds_S_IdeoBonus_Tip>Mood points for sleeping within the family distance of someone who shares your ideoligion. Needs the Ideology DLC.</SmarterBeds_S_IdeoBonus_Tip>
+  <SmarterBeds_S_GeneBonus>"People like me" nearby: +{0}</SmarterBeds_S_GeneBonus>
+  <SmarterBeds_S_GeneBonus_Tip>Mood points for sleeping within the family distance of someone of your xenotype. Baseliners are left out, since in a colony of baseliners everyone would match. Needs the Biotech DLC.</SmarterBeds_S_GeneBonus_Tip>
+
   <!-- Family and couples -->
   <SmarterBeds_CoupleMoved>{0} and {1} moved into a room of their own.</SmarterBeds_CoupleMoved>
   <SmarterBeds_Sec_Family>Family and couples</SmarterBeds_Sec_Family>
@@ -107,7 +119,7 @@
   <SmarterBeds_S_FamilyShare>Sharing a room with family: +{0}</SmarterBeds_S_FamilyShare>
   <SmarterBeds_S_FamilyShare_Tip>Mood points a colonist counts for each relative (up to two) they share a room with, if they get on.</SmarterBeds_S_FamilyShare_Tip>
   <SmarterBeds_S_FamilyNear>Too close to a disliked relative: -{0}</SmarterBeds_S_FamilyNear>
-  <SmarterBeds_S_FamilyNear_Tip>Counted against a bed inside the family distance of a relative they have negative relations with. The matching thought is -4.</SmarterBeds_S_FamilyNear_Tip>
+  <SmarterBeds_S_FamilyNear_Tip>Counted against a bed inside the family distance of a relative they have negative relations with. The matching thought is -2: family is put up with more than a stranger is.</SmarterBeds_S_FamilyNear_Tip>
   <SmarterBeds_S_FamilyFar>Couple far from family: -{0}</SmarterBeds_S_FamilyFar>
   <SmarterBeds_S_FamilyFar_Tip>Counted against a couple's bed that is outside the family distance of all their family. The matching "room far from family" thought is -4.</SmarterBeds_S_FamilyFar_Tip>
   <SmarterBeds_S_CoupleHousing>Move new couples into a room of their own</SmarterBeds_S_CoupleHousing>

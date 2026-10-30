@@ -48,4 +48,63 @@ namespace SmarterBeds
             }
         }
     }
+
+    /// <summary>A colonist the pawn dislikes (not family) sleeps within the family radius of their bed.</summary>
+    public class ThoughtWorker_RoomNearDislikedNeighbor : ThoughtWorker
+    {
+        protected override ThoughtState CurrentStateInternal(Pawn p)
+        {
+            try
+            {
+                using (PerfWatch.Measure("family thoughts"))
+                {
+                    var other = Family.FirstNear(p, Family.HostileNeighbors(p), SmarterBedsMod.Settings);
+                    return other != null ? ThoughtState.ActiveWithReason(other.LabelShort) : ThoughtState.Inactive;
+                }
+            }
+            catch (System.Exception e)
+            {
+                SafeLog.Once("too close to colonist thought", e);
+                return ThoughtState.Inactive;
+            }
+        }
+    }
+
+    /// <summary>Someone of the pawn's ideoligion sleeps within the family radius of their bed.</summary>
+    public class ThoughtWorker_RoomAmongOwnIdeo : ThoughtWorker
+    {
+        protected override ThoughtState CurrentStateInternal(Pawn p)
+        {
+            try
+            {
+                using (PerfWatch.Measure("family thoughts"))
+                    return Family.FirstNear(p, Family.SameIdeoNeighbors(p), SmarterBedsMod.Settings) != null && SmarterBedsMod.Settings.ideoNeighborBonus > 0f
+                        ? ThoughtState.ActiveAtStage(0) : ThoughtState.Inactive;
+            }
+            catch (System.Exception e)
+            {
+                SafeLog.Once("fellow believers thought", e);
+                return ThoughtState.Inactive;
+            }
+        }
+    }
+
+    /// <summary>Someone of the pawn's xenotype sleeps within the family radius of their bed.</summary>
+    public class ThoughtWorker_RoomAmongSimilarGenes : ThoughtWorker
+    {
+        protected override ThoughtState CurrentStateInternal(Pawn p)
+        {
+            try
+            {
+                using (PerfWatch.Measure("family thoughts"))
+                    return Family.FirstNear(p, Family.SameGeneNeighbors(p), SmarterBedsMod.Settings) != null && SmarterBedsMod.Settings.geneNeighborBonus > 0f
+                        ? ThoughtState.ActiveAtStage(0) : ThoughtState.Inactive;
+            }
+            catch (System.Exception e)
+            {
+                SafeLog.Once("people like me thought", e);
+                return ThoughtState.Inactive;
+            }
+        }
+    }
 }

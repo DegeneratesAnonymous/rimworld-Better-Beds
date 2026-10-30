@@ -23,8 +23,13 @@ namespace SmarterBeds
         public float familyRadius = 35f;               // tiles between beds
         public float familyHostileOpinion = -20f;      // opinion at or below this counts as negative relations
         public float familyShareBonus = 2f;            // mood points for sharing a room with family you get on with
-        public float familyHostilePenalty = 4f;        // mirrors the "too close to a relative" thought
+        public float familyHostilePenalty = 2f;        // mirrors the "too close to a relative" thought (less than for a stranger)
         public float familyFarPenalty = 4f;            // mirrors the "room far from family" thought
+        // Neighbours: who sleeps near you, within the same family distance
+        public bool neighborsEnabled = true;
+        public float neighborHostilePenalty = 4f;      // each disliked colonist (up to two) whose bed is near
+        public float ideoNeighborBonus = 2f;           // someone of your ideoligion sleeps near
+        public float geneNeighborBonus = 2f;           // someone of your xenotype sleeps near
         public bool coupleHousingEnabled = true;       // move a new couple into a room of their own
         public float coupleRoomBonus = 3f;             // a room for just the two of them
         public float coupleSharePenalty = 3f;          // a couple sharing a room with anyone else
@@ -69,8 +74,12 @@ namespace SmarterBeds
             Scribe_Values.Look(ref familyRadius, "familyRadius", 35f);
             Scribe_Values.Look(ref familyHostileOpinion, "familyHostileOpinion", -20f);
             Scribe_Values.Look(ref familyShareBonus, "familyShareBonus", 2f);
-            Scribe_Values.Look(ref familyHostilePenalty, "familyHostilePenalty", 4f);
+            Scribe_Values.Look(ref familyHostilePenalty, "familyHostilePenaltyV2", 2f);
             Scribe_Values.Look(ref familyFarPenalty, "familyFarPenalty", 4f);
+            Scribe_Values.Look(ref neighborsEnabled, "neighborsEnabled", true);
+            Scribe_Values.Look(ref neighborHostilePenalty, "neighborHostilePenalty", 4f);
+            Scribe_Values.Look(ref ideoNeighborBonus, "ideoNeighborBonus", 2f);
+            Scribe_Values.Look(ref geneNeighborBonus, "geneNeighborBonus", 2f);
             Scribe_Values.Look(ref coupleHousingEnabled, "coupleHousingEnabled", true);
             Scribe_Values.Look(ref coupleRoomBonus, "coupleRoomBonus", 3f);
             Scribe_Values.Look(ref coupleSharePenalty, "coupleSharePenalty", 3f);

@@ -5,6 +5,8 @@ All notable changes are listed here. Versions follow semantic versioning.
 ## [Unreleased]
 
 ### Added
+- Neighbours: a colonist dislikes sleeping within the family distance (35 tiles) of someone they dislike who is not family (-4, up to two people), and likes sleeping near someone of their own ideoligion (+2) or xenotype (+2, "people like me", baseliners excluded). All three count in bed choice, couple housing and negotiation, and show as thoughts
+- A disliked relative nearby now costs less than a disliked stranger (-2 against -4, setting renamed so old saved values do not carry over)
 - Initial scaffold
 - RimWorld 1.7 (Waylith engine, .NET 10) as the default build target, with 1.6 still supported
 - Bed choice scored in mood points from the game's own room thoughts, replacing arbitrary weights

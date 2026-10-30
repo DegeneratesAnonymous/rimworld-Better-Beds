@@ -172,7 +172,8 @@ namespace SmarterBeds
             typeof(ThoughtWorker_NoPersonalBedroom),
             typeof(ThoughtWorker_BedroomJealous),
             typeof(ThoughtWorker_RoomFarFromFamily),
-            typeof(ThoughtWorker_RoomNearDislikedFamily)
+            typeof(ThoughtWorker_RoomNearDislikedFamily),
+            typeof(ThoughtWorker_RoomNearDislikedNeighbor)
         };
 
         private static readonly List<Thought> tmpThoughts = new List<Thought>();

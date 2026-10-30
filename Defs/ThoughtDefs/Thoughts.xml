@@ -93,8 +93,47 @@
     <stages>
       <li>
         <label>sleeping too close to {0}</label>
-        <description>I do not get on with {0}, and my bed is too close to theirs.</description>
+        <description>I do not get on with {0}, and my bed is too close to theirs. We are family, so I put up with it.</description>
+        <baseMoodEffect>-2</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <ThoughtDef>
+    <defName>SmarterBeds_RoomNearDislikedNeighbor</defName>
+    <workerClass>SmarterBeds.ThoughtWorker_RoomNearDislikedNeighbor</workerClass>
+    <developmentalStageFilter>Adult</developmentalStageFilter>
+    <stages>
+      <li>
+        <label>sleeping too close to {0}</label>
+        <description>I cannot stand {0}, and my bed is too close to theirs.</description>
         <baseMoodEffect>-4</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <ThoughtDef MayRequire="Ludeon.RimWorld.Ideology">
+    <defName>SmarterBeds_RoomAmongOwnIdeo</defName>
+    <workerClass>SmarterBeds.ThoughtWorker_RoomAmongOwnIdeo</workerClass>
+    <developmentalStageFilter>Adult</developmentalStageFilter>
+    <stages>
+      <li>
+        <label>sleeping among believers</label>
+        <description>People who share my beliefs sleep close by. It is comforting.</description>
+        <baseMoodEffect>2</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <ThoughtDef MayRequire="Ludeon.RimWorld.Biotech">
+    <defName>SmarterBeds_RoomAmongSimilarGenes</defName>
+    <workerClass>SmarterBeds.ThoughtWorker_RoomAmongSimilarGenes</workerClass>
+    <developmentalStageFilter>Adult</developmentalStageFilter>
+    <stages>
+      <li>
+        <label>people like me</label>
+        <description>Others of my kind sleep close by. I feel at home.</description>
+        <baseMoodEffect>2</baseMoodEffect>
       </li>
     </stages>
   </ThoughtDef>
