@@ -47,6 +47,7 @@ namespace SmarterBeds
             if (s.titleRulesEnabled)
                 Slide(list, "SmarterBeds_S_Unmet", ref s.unmetRequirementPenalty, 0f, 20f, "0.0");
             Check(list, "SmarterBeds_S_Jealousy", ref s.jealousyEnabled);
+            Check(list, "SmarterBeds_S_FreeBeds", ref s.freeBedMoveEnabled);
 
             // Used by both family and neighbours, so it is not hidden behind either switch.
             Section(list, "SmarterBeds_Sec_Near");
@@ -74,6 +75,7 @@ namespace SmarterBeds
                 Slide(list, "SmarterBeds_S_NeighborHostile", ref s.neighborHostilePenalty, 0f, 10f, "0.0");
                 Slide(list, "SmarterBeds_S_IdeoBonus", ref s.ideoNeighborBonus, 0f, 6f, "0.0");
                 Slide(list, "SmarterBeds_S_GeneBonus", ref s.geneNeighborBonus, 0f, 6f, "0.0");
+                Slide(list, "SmarterBeds_S_PrisonerNear", ref s.prisonerNeighborPenalty, 0f, 10f, "0.0");
             }
 
             Section(list, "SmarterBeds_Sec_Negotiation");

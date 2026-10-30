@@ -176,7 +176,7 @@ Higher: they want to be far away from them. 0 removes the effect. Default 2 (les
 Lower: couples may live anywhere.
 Higher: couples want to be near their family. 0 removes the effect. Default 4.</SmarterBeds_S_FamilyFar_Tip>
   <SmarterBeds_S_CoupleHousing>Move new couples into a room of their own</SmarterBeds_S_CoupleHousing>
-  <SmarterBeds_S_CoupleHousing_Tip>Once an hour, a couple without a room to themselves are moved into a free one if there is a clearly better room. Nobody is evicted, and beds whose owner you set are left alone.
+  <SmarterBeds_S_CoupleHousing_Tip>Once an hour, a couple without a room to themselves who have a sleep penalty are moved into a free room if there is a clearly better one. Nobody is evicted, and beds whose owner you set are left alone.
 Off: couples are left where they are (they can still ask for rooms by negotiation).</SmarterBeds_S_CoupleHousing_Tip>
   <SmarterBeds_S_CoupleRoom>Room for just the two of them: +{0}</SmarterBeds_S_CoupleRoom>
   <SmarterBeds_S_CoupleRoom_Tip>Mood points a coupled colonist counts for a room that holds only them and their partner (half if the partner is not in it yet).
@@ -245,4 +245,9 @@ Off: the button is hidden (the rest of the mod is unaffected). Turn it off if an
   <SmarterBeds_Sec_Guests>Guests and visitors</SmarterBeds_Sec_Guests>
   <SmarterBeds_S_VisitorBeds>Visitors rent a guest bed (Hospitality)</SmarterBeds_S_VisitorBeds>
   <SmarterBeds_S_VisitorBeds_Tip>Needs Hospitality's guest beds. Visitors who are not Hospitality guests, such as spaceport visitors and trade caravans, sleep on the floor even when they carry silver. With this on they rent a free guest bed when they can pay the rent, leaving the silver beside it as a guest would. One who cannot pay, and any guest without a bed, sleeps in a free chair if there is one (see Sleeping rough).\nHospitality's own guests are not affected: their bed choice is Hospitality's.\nOff: these visitors sleep where the game puts them.</SmarterBeds_S_VisitorBeds_Tip>
+  <SmarterBeds_S_PrisonerNear>Prisoners sleeping nearby: -{0}</SmarterBeds_S_PrisonerNear>
+  <SmarterBeds_S_PrisonerNear_Tip>Mood penalty for a bed within the family distance of a bed that has a prisoner assigned to it. Counted once however many there are. It is both what a bed is marked down by and the mood of the 'sleeping near prisoners' thought, and it applies to couples as it does to anyone.\nLower: prisoners nearby bother colonists less.\nHigher: they want their beds well away from the cells. 0 removes the effect. Default 3.</SmarterBeds_S_PrisonerNear_Tip>
+  <SmarterBeds_S_FreeBeds>Colonists with a sleep problem move to a better free bed</SmarterBeds_S_FreeBeds>
+  <SmarterBeds_S_FreeBeds_Tip>Once an hour, a colonist on their own who has a sleep-related mood penalty (a bad room, a title or jealousy problem, a disliked or prisoner neighbour) looks for an unowned bed that would fix it, or be a big upgrade, and moves there. A content colonist is never looked at, and couples are handled by 'Move new couples into a room of their own', which now also waits for a sleep penalty. Beds whose owner you set are never touched.\nOff: colonists keep their bed until they ask someone for theirs.</SmarterBeds_S_FreeBeds_Tip>
+  <SmarterBeds_MovedToFreeBed>{0} moved to a better room.</SmarterBeds_MovedToFreeBed>
 </LanguageData>

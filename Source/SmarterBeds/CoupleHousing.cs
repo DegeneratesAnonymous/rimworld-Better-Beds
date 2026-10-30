@@ -34,6 +34,8 @@ namespace SmarterBeds
                 if (a.thingIDNumber > b.thingIDNumber) continue; // once per pair
                 if (!Family.IsAdultColonist(b) || b.Map != a.Map) continue;
                 if (!a.Awake() || !b.Awake()) continue;
+                // Content, so nothing to look for: only a couple with a sleep penalty are moved.
+                if (!comp.HasRoomDebuff(a) && !comp.HasRoomDebuff(b)) continue;
                 // Already in a room of their own: only look again if family distance is still a problem.
                 if (Family.IsInCoupleRoom(a) && !FamilyProblem(a, b, s)) continue;
                 if (comp.CoupleOnCooldown(a, b)) continue;

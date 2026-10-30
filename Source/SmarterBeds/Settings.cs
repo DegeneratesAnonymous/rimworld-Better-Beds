@@ -32,6 +32,8 @@ namespace SmarterBeds
         public float neighborHostilePenalty = 4f;      // each disliked colonist (up to two) whose bed is near
         public float ideoNeighborBonus = 2f;           // someone of your ideoligion sleeps near
         public float geneNeighborBonus = 2f;           // someone of your xenotype sleeps near
+        public float prisonerNeighborPenalty = 3f;     // an occupied prisoner bed within the family distance
+        public bool freeBedMoveEnabled = true;         // a colonist with a sleep problem moves to a better free bed
         public bool coupleHousingEnabled = true;       // move a new couple into a room of their own
         public bool coupleNegotiationEnabled = true;   // a couple negotiates together, the better talker asking
         public float coupleRoomBonus = 3f;             // a room for just the two of them
@@ -92,6 +94,8 @@ namespace SmarterBeds
             Scribe_Values.Look(ref neighborHostilePenalty, "neighborHostilePenalty", 4f);
             Scribe_Values.Look(ref ideoNeighborBonus, "ideoNeighborBonus", 2f);
             Scribe_Values.Look(ref geneNeighborBonus, "geneNeighborBonus", 2f);
+            Scribe_Values.Look(ref prisonerNeighborPenalty, "prisonerNeighborPenalty", 3f);
+            Scribe_Values.Look(ref freeBedMoveEnabled, "freeBedMoveEnabled", true);
             Scribe_Values.Look(ref coupleHousingEnabled, "coupleHousingEnabled", true);
             Scribe_Values.Look(ref coupleNegotiationEnabled, "coupleNegotiationEnabled", true);
             Scribe_Values.Look(ref coupleRoomBonus, "coupleRoomBonus", 3f);

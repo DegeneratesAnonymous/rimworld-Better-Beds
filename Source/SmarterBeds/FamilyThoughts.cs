@@ -31,6 +31,7 @@ namespace SmarterBeds
                 case "SmarterBeds_RoomFarFromFamily": return -s.familyFarPenalty;
                 case "SmarterBeds_RoomNearDislikedFamily": return -s.familyHostilePenalty;
                 case "SmarterBeds_RoomNearDislikedNeighbor": return -s.neighborHostilePenalty;
+                case "SmarterBeds_RoomNearPrisoners": return -s.prisonerNeighborPenalty;
                 case "SmarterBeds_RoomAmongOwnIdeo": return s.ideoNeighborBonus;
                 case "SmarterBeds_RoomAmongSimilarGenes": return s.geneNeighborBonus;
                 default: return base.MoodOffset();
@@ -100,6 +101,29 @@ namespace SmarterBeds
             catch (System.Exception e)
             {
                 SafeLog.Once("too close to colonist thought", e);
+                return ThoughtState.Inactive;
+            }
+        }
+    }
+
+    /// <summary>A bed with a prisoner in it is within the family radius of the colonist's bed.</summary>
+    public class ThoughtWorker_RoomNearPrisoners : ThoughtWorker
+    {
+        protected override ThoughtState CurrentStateInternal(Pawn p)
+        {
+            try
+            {
+                using (PerfWatch.Measure("family thoughts"))
+                {
+                    var s = SmarterBedsMod.Settings;
+                    if (!s.neighborsEnabled || s.prisonerNeighborPenalty <= 0f || !Family.IsAdultColonist(p)) return ThoughtState.Inactive;
+                    var bed = Family.BedOf(p);
+                    return bed != null && Family.PrisonersNear(bed, s) ? ThoughtState.ActiveAtStage(0) : ThoughtState.Inactive;
+                }
+            }
+            catch (System.Exception e)
+            {
+                SafeLog.Once("sleeping near prisoners thought", e);
                 return ThoughtState.Inactive;
             }
         }

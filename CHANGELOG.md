@@ -22,6 +22,8 @@ All notable changes are listed here. Versions follow semantic versioning.
 - Couple housing scores each bed once per person instead of once per pair of beds
 
 ### Added
+- Sleeping near prisoners: a bed within the family distance of an occupied prisoner bed costs -3, with a matching thought, counted in bed choice, couple housing and negotiation, and for couples as for anyone
+- Colonists with a sleep penalty move to a better free bed (it fixes a penalty or is a big upgrade); a colonist with no sleep penalty is never looked at, and couple housing now waits for a sleep penalty too
 - Visitors who are not Hospitality guests (spaceport visitors, trade caravans) rent a free guest bed when they can pay, instead of sleeping on the floor; bedless guests and visitors who cannot pay sleep in a chair. Hospitality's own bed choice for its guests is unchanged
 - Couples negotiate together: when both want a better room the one with the higher Social skill asks, and a win moves both of them in. When only one wants to move they first talk their partner round (intimidation only if the partner does not think well of them), then the better talker asks. The room must hold nobody but its owner and have space for two. New setting to turn it off, and the dev Force negotiation gizmo handles couples
 - Neighbours: a colonist dislikes sleeping within the family distance (35 tiles) of someone they dislike who is not family (-4, up to two people), and likes sleeping near someone of their own ideoligion (+2) or xenotype (+2, "people like me", baseliners excluded). All three count in bed choice, couple housing and negotiation, and show as thoughts
