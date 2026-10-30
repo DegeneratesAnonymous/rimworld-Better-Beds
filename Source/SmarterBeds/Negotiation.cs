@@ -108,8 +108,17 @@ namespace SmarterBeds
 
         // Caches in this file are per game; the shared ones are cleared whenever a game loads, because
         // pawn ids are reused between saves.
-        public override void LoadedGame() { Family.ClearCache(); BedScorer.ClearCache(); }
-        public override void StartedNewGame() { Family.ClearCache(); BedScorer.ClearCache(); }
+        public override void LoadedGame() { ResetCaches(); }
+        public override void StartedNewGame() { ResetCaches(); }
+
+        private void ResetCaches()
+        {
+            Family.ClearCache();
+            BedScorer.ClearCache();
+            movedAt.Clear();
+            lastChecked.Clear();
+            wantsCache.Clear();
+        }
 
         public override void ExposeData()
         {
