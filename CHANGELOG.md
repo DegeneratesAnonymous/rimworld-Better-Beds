@@ -4,6 +4,9 @@ All notable changes are listed here. Versions follow semantic versioning.
 
 ## [Unreleased]
 
+### Added
+- Temperature is part of choosing a room: a bed in a room that is too cold or too hot for the sleeper right now (the game's own test for slept in the cold or heat) is marked down by 4, in bed choice, free-bed moves and negotiation, with a switch and a slider
+
 ## [1.0.0] - 2026-10-30
 
 First release, as Wil's Better Beds.

@@ -31,7 +31,7 @@ Everything is measured in mood points, the game's own unit. A colonist is only p
 
 WHAT IT CHANGES
 - Bed choice: a bedless colonist takes the nicest free bed they can reach, not the nearest. A colonist with a sleep penalty moves to a free bed that clearly fixes it.
-- Royalty titles need a personal bedroom that meets their requirements. The Jealous trait envies better rooms.
+- Royalty titles need a personal bedroom that meets their requirements. The Jealous trait envies better rooms. A room that is too cold or too hot for the sleeper counts against it, as the game's own cold and heat sleeping penalties do.
 - Within 35 tiles of a bed: relatives you dislike -2, disliked colonists -4, sleeping near an occupied prisoner bed -3, people of your ideoligion +2, people of your xenotype +2. Each is a real thought, and every number is adjustable.
 - Room negotiation: a colonist with a sleep penalty can spend recreation asking someone for their room. A d20 contest decides it (Social, or Melee to intimidate, plus opinion, title and time in the colony). Winners gain Social experience; both sides feel it in their mood.
 - Couples negotiate together: when both want a room, the better talker asks and a win moves both. When only one wants to move, they first talk their partner round, then the better talker asks. Couples with a sleep penalty are also moved into a free room of their own.
