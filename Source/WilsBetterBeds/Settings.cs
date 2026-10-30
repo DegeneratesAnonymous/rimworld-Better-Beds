@@ -19,6 +19,8 @@ namespace WilsBetterBeds
         public float unmetRequirementPenalty = 6f;   // the game's own title bedroom penalty
         public bool titleRulesEnabled = true;        // Royalty: a title-holder's bedroom rules count in the score
         public bool jealousyEnabled = true;          // the Jealous trait counts in the score
+        public bool traitsEnabled = true;            // the Greedy and Ascetic traits' own bedroom moods count in the score
+        public float expectationWeight = 0f;         // how much high expectations lower the upgrade a colonist will ask for
         public bool temperatureEnabled = true;       // a bed that is too cold or too hot for the sleeper counts against it
         public float temperaturePenalty = 4f;        // the game's own 'slept in the cold / heat' is -4
 
@@ -85,6 +87,8 @@ namespace WilsBetterBeds
             Scribe_Values.Look(ref unmetRequirementPenalty, "unmetRequirementPenalty", 6f);
             Scribe_Values.Look(ref titleRulesEnabled, "titleRulesEnabled", true);
             Scribe_Values.Look(ref jealousyEnabled, "jealousyEnabled", true);
+            Scribe_Values.Look(ref traitsEnabled, "traitsEnabled", true);
+            Scribe_Values.Look(ref expectationWeight, "expectationWeight", 0f);
             Scribe_Values.Look(ref temperatureEnabled, "temperatureEnabled", true);
             Scribe_Values.Look(ref temperaturePenalty, "temperaturePenalty", 4f);
 

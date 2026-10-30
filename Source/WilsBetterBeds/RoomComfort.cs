@@ -1,5 +1,6 @@
 using System.Linq;
 using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace WilsBetterBeds
@@ -34,6 +35,7 @@ namespace WilsBetterBeds
             points += (bed.GetStatValue(StatDefOf.BedRestEffectiveness) - 1f) * s.restEffectivenessWeight;
             points -= TitlePenalty(bed, room, outdoors, pawn, s);
             points -= JealousyPenalty(room, outdoors, pawn);
+            points += TraitMood(room, outdoors, pawn, s);
             points -= TemperaturePenalty(bed, pawn, s);
             points -= FamilyPenalty(bed, pawn, s, leaving);
             points -= NeighborPenalty(bed, pawn, s, leaving);
@@ -52,7 +54,7 @@ namespace WilsBetterBeds
         {
             Room room = bed.GetRoom();
             bool outdoors = room == null || room.PsychologicallyOutdoors;
-            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn) + TemperaturePenalty(bed, pawn, s) + FamilyPenalty(bed, pawn, s, leaving) + NeighborPenalty(bed, pawn, s, leaving) + PrisonerPenalty(bed, pawn, s);
+            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn) - TraitMood(room, outdoors, pawn, s) + TemperaturePenalty(bed, pawn, s) + FamilyPenalty(bed, pawn, s, leaving) + NeighborPenalty(bed, pawn, s, leaving) + PrisonerPenalty(bed, pawn, s);
         }
 
         /// <summary>
@@ -153,6 +155,62 @@ namespace WilsBetterBeds
             }
             mood += System.Math.Min(family, 2) * s.familyShareBonus;
             return mood;
+        }
+
+        private static ThoughtDef greedyThought, asceticThought;
+        private static bool traitThoughtsLoaded;
+
+        /// <summary>
+        /// The mood the Greedy and Ascetic traits give for this room, read from the game's own thoughts
+        /// ("greedy for impressive bedroom": -4 to -8 unless the room is impressive; "ascetic has ... bedroom":
+        /// +3 to +5 for a humble one, -5 for an impressive one), by the room's impressiveness stage.
+        /// Positive is good for the sleeper.
+        /// </summary>
+        public static float TraitMood(Room room, bool outdoors, Pawn pawn, WilsBetterBedsSettings s)
+        {
+            if (!s.traitsEnabled || pawn.story?.traits == null) return 0f;
+            if (!traitThoughtsLoaded)
+            {
+                greedyThought = DefDatabase<ThoughtDef>.GetNamedSilentFail("Greedy");
+                asceticThought = DefDatabase<ThoughtDef>.GetNamedSilentFail("Ascetic");
+                traitThoughtsLoaded = true;
+            }
+
+            float mood = 0f;
+            bool hasRoom = room != null && !outdoors;
+            int stage = hasRoom ? RoomStatDefOf.Impressiveness.GetScoreStageIndex(room.GetStat(RoomStatDefOf.Impressiveness)) : -1;
+
+            // The game's workers: Greedy has no room at stage 0 and counts the room's stage from 1; Ascetic has nothing without a room.
+            if (greedyThought != null && pawn.story.traits.HasTrait(TraitDefOf.Greedy))
+                mood += StageEffect(greedyThought, stage + 1);
+            if (asceticThought != null && hasRoom && pawn.story.traits.HasTrait(TraitDefOf.Ascetic))
+                mood += StageEffect(asceticThought, stage);
+            return mood;
+        }
+
+        private static float StageEffect(ThoughtDef def, int index)
+        {
+            if (def?.stages == null || index < 0 || index >= def.stages.Count) return 0f;
+            return def.stages[index]?.baseMoodEffect ?? 0f;
+        }
+
+        /// <summary>
+        /// How big an upgrade, in mood points, this colonist asks for when nothing is wrong with their room.
+        /// High expectations (an ideoligion role, a royal title, a rich colony) make them pickier, by the
+        /// "expectations" setting: at 100%, a colonist with supreme expectations asks for about a fifth of it.
+        /// </summary>
+        public static float UpgradeThreshold(Pawn pawn, WilsBetterBedsSettings s)
+        {
+            float threshold = s.qualityNegotiationThreshold;
+            if (s.expectationWeight <= 0f) return threshold;
+            try
+            {
+                var expectation = ExpectationsUtility.CurrentExpectationFor(pawn);
+                if (expectation == null) return threshold;
+                float level = Mathf.Clamp01(expectation.order / 9f); // from extremely low (0) to royal (9)
+                return Mathf.Max(0.5f, threshold * (1f - s.expectationWeight * level));
+            }
+            catch (System.Exception) { return threshold; }
         }
 
         /// <summary>

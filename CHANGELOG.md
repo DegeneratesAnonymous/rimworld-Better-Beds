@@ -5,6 +5,10 @@ All notable changes are listed here. Versions follow semantic versioning.
 ## [Unreleased]
 
 ### Added
+- Greedy and Ascetic: the game's own bedroom moods for those traits (Greedy -4 to -8 unless impressive; Ascetic +3 to +5 humble, -5 impressive) now count in choosing a room, free-bed moves and negotiation, and are a reason to ask for a better room
+- Optional "high expectations" setting (off by default): colonists with high expectations ask for, or move to, smaller upgrades when nothing is wrong
+
+### Added
 - Temperature is part of choosing a room: a bed in a room that is too cold or too hot for the sleeper right now (the game's own test for slept in the cold or heat) is marked down by 4, in bed choice, free-bed moves and negotiation, with a switch and a slider
 
 ## [1.0.0] - 2026-10-30
