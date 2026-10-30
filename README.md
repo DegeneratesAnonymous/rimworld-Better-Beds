@@ -1,4 +1,4 @@
-# Smarter Beds
+# Wil's Better Beds
 
 A RimWorld mod for 1.7 (unstable branch) and 1.6 about who sleeps where.
 
@@ -22,7 +22,7 @@ Prisoner, guest, slave, medical, and child bed choice is left entirely to vanill
 
 ## Compatibility
 
-Smarter Beds is built to coexist with other bed mods rather than overrule them. The approach:
+Wil's Better Beds is built to coexist with other bed mods rather than overrule them. The approach:
 
 - Bed choice is a *postfix*, running last on `RestUtility.FindBedFor`. Vanilla and every other mod decide first; we only replace the answer when it is a free bed (or none) for a bedless colonist, and never a bed someone already owns, such as a partner's.
 - Which beds a colonist may use is decided by the game's own `IsValidBedFor`, which other mods patch. Anything they forbid, we forbid.
@@ -63,7 +63,7 @@ Run the deploy script. It builds both versions and copies the mod into RimWorld'
 scripts\deploy-to-game.ps1
 ```
 
-Use `-Game "D:\path\to\RimWorld"` if your game is not at the default location, or `-NoBuild` to copy without rebuilding. In your mod manager, refresh, activate **Smarter Beds**, sort, and launch. To play 1.7, switch RimWorld to the `unstable` branch in Steam (Properties, Betas tab).
+Use `-Game "D:\path\to\RimWorld"` if your game is not at the default location, or `-NoBuild` to copy without rebuilding. In your mod manager, refresh, activate **Wil's Better Beds**, sort, and launch. To play 1.7, switch RimWorld to the `unstable` branch in Steam (Properties, Betas tab).
 
 **Do not use a junction or symlink to the repo.** RimWorld 1.7 runs on .NET 10, which refuses to read a folder reached through one ("The path cannot be traversed because it contains an untrusted mount point") and the game starts to a black screen. The deploy script refuses to run if the destination is a link.
 

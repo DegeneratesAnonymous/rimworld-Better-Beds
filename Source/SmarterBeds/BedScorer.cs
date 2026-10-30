@@ -64,7 +64,7 @@ namespace SmarterBeds
 
                 float score = Score(bed, sleeper, traveler, s);
                 if (s.verboseLogging)
-                    Log.Message($"[Smarter Beds] {sleeper.LabelShort}: {bed.LabelShort} at {bed.Position} scored {score:0.0}");
+                    Log.Message($"[Wil's Better Beds] {sleeper.LabelShort}: {bed.LabelShort} at {bed.Position} scored {score:0.0}");
 
                 if (score > bestScore)
                 {
@@ -74,7 +74,7 @@ namespace SmarterBeds
             }
 
             if (s.verboseLogging)
-                Log.Message($"[Smarter Beds] {sleeper.LabelShort} -> {(best == null ? "vanilla choice" : best.LabelShort + " at " + best.Position)}");
+                Log.Message($"[Wil's Better Beds] {sleeper.LabelShort} -> {(best == null ? "vanilla choice" : best.LabelShort + " at " + best.Position)}");
 
             return best;
         }

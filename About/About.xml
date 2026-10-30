@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-  <name>Smarter Beds</name>
+  <name>Wil's Better Beds</name>
   <author>Spaceman_Wil</author>
   <packageId>SpacemanWil.SmarterBeds</packageId>
   <supportedVersions>
@@ -24,20 +24,28 @@
     <li>Orion.Hospitality</li>
     <li>Jaxe.Bubbles</li>
   </loadAfter>
-  <description>Colonists pick the bed that would actually make them happiest, and a colonist who sleeps badly can ask someone else to swap rooms. You always have the last word.
+  <description>Where a colonist sleeps now matters to them, and they do something about it. Beds are chosen by how happy they would make the person in them, a colonist who sleeps badly can ask someone for their room (or move to an empty one), couples look for a room together, and who sleeps nearby counts. You always have the last word.
 
-- Better bed choice: every free bed is scored in mood points using the game's own room numbers, instead of picking the nearest.
-- Royalty and traits: title-holders need a personal bedroom that meets their title, and Jealous colonists envy better rooms. Scored exactly as the game scores them.
-- Room negotiation: a colonist with a sleep-related mood penalty can spend recreation asking another colonist for their room. A d20 contest decides it, using Social (or Melee to intimidate), opinion, royal title and time in the colony. Winners gain Social experience, and both sides feel it in their mood.
-- You decide: when you set a bed's owner with the Set Owner button, the assignment is locked. Nobody negotiates for that room and its owner does not negotiate.
-- No bed? A colonist dozes in a chair instead of on the floor, for a smaller mood penalty.
-- Family and couples: colonists prefer to share with family they get on with and want distance from relatives they do not. A couple wants a room of their own near family, and new couples are moved into one.
-- Assign rooms: a button on the Assign tab lists every room with beds, with hover highlights, double-click to jump to it, and per-room owner assignment.
-- Negotiations appear in the social log, and as speech bubbles with Interaction Bubbles.
+Everything is measured in mood points, the game's own unit. A colonist is only pushed to change rooms when they have a sleep-related penalty; if nothing is wrong, they are content and left alone.
 
-Works alongside other bed mods: bed choice runs last and defers to the game's own bed check, so Hospitality's guest beds and similar rules are respected. Prisoners, guests, slaves, children and medical beds are left to vanilla.
+WHAT IT CHANGES
+- Bed choice: a bedless colonist takes the nicest free bed they can reach, not the nearest. A colonist with a sleep penalty moves to a free bed that clearly fixes it.
+- Royalty titles need a personal bedroom that meets their requirements. The Jealous trait envies better rooms.
+- Within 35 tiles of a bed: relatives you dislike -2, disliked colonists -4, sleeping near an occupied prisoner bed -3, people of your ideoligion +2, people of your xenotype +2. Each is a real thought, and every number is adjustable.
+- Room negotiation: a colonist with a sleep penalty can spend recreation asking someone for their room. A d20 contest decides it (Social, or Melee to intimidate, plus opinion, title and time in the colony). Winners gain Social experience; both sides feel it in their mood.
+- Couples negotiate together: when both want a room, the better talker asks and a win moves both. When only one wants to move, they first talk their partner round, then the better talker asks. Couples with a sleep penalty are also moved into a free room of their own.
+- You decide: Set Owner locks a bed. Nobody negotiates for it, and its owner does not negotiate or move.
+- No bed: dozing in a chair instead of the floor, for a smaller penalty. Applies to guests and visitors too.
+- Assign rooms: a button on the Assign tab lists every room with beds, with hover highlights, double-click to jump, and per-room owner assignment.
 
-Everything is adjustable in the mod options. Load after Harmony and any bed or room mods.
+WORKS WITH
+- Hospitality: your guests keep Hospitality's bed choice, rent and rules. A guest with no bed sleeps in a chair.
+- Spaceports and trade caravans: visitors who are not Hospitality guests used to sleep on the floor whatever they carried. They now rent a free guest bed when they can pay; those who cannot sleep in a chair.
+- Dubs Bad Hygiene: nobody is pulled into a conversation while using the toilet, shower or bath.
+- Interaction Bubbles: negotiations show as speech bubbles. Dubs Mint Menus, Vanilla Factions Expanded - Empire, Royalty, Ideology and Biotech are supported.
+- Other bed mods: bed choice runs last and defers to the game's own bed check, so whatever another mod forbids, this mod forbids too. Every patch is isolated; if one breaks, that one feature is skipped and logged and the rest keep working.
+
+Prisoners, slaves, children and medical beds are left to vanilla. Everything is adjustable in the mod options, with a tooltip on every setting. Load after Harmony and any bed or room mods.
 
 To report a bug, turn on "Log decisions" in the mod options, reproduce it, and press Ctrl+F12 for a log.</description>
 </ModMetaData>

@@ -15,10 +15,10 @@ namespace SmarterBeds
         {
             Settings = GetSettings<SmarterBedsSettings>();
             SafePatcher.PatchAll(new Harmony("SpacemanWil.SmarterBeds"));
-            Log.Message("[Smarter Beds] Loaded.");
+            Log.Message("[Wil's Better Beds] Loaded.");
         }
 
-        public override string SettingsCategory() => "Smarter Beds";
+        public override string SettingsCategory() => "Wil's Better Beds";
 
         public override void DoSettingsWindowContents(Rect inRect)
         {

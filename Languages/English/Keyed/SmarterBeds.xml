@@ -15,7 +15,7 @@
   <SmarterBeds_Intro>Colonists pick the best free bed by how happy it would make them, and a colonist who sleeps badly can ask another colonist to swap rooms. Hover any setting for what it does. Everything here is scored in mood points, the same unit as the game's own thoughts.</SmarterBeds_Intro>
 
   <!-- Settings window: general -->
-  <SmarterBeds_S_Enabled>Enable Smarter Beds</SmarterBeds_S_Enabled>
+  <SmarterBeds_S_Enabled>Enable Wil's Better Beds</SmarterBeds_S_Enabled>
   <SmarterBeds_S_Enabled_Tip>Master switch. Off, the game picks beds exactly as it normally does and nobody negotiates, moves in together or sleeps in a chair because of this mod.</SmarterBeds_S_Enabled_Tip>
   <SmarterBeds_S_Verbose>Log decisions (debugging)</SmarterBeds_S_Verbose>
   <SmarterBeds_S_Verbose_Tip>Writes every bed score, negotiation roll and mood effect to the dev log. Only useful for finding out why a colonist chose a bed; it makes the log very long.</SmarterBeds_S_Verbose_Tip>

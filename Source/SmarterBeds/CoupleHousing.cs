@@ -145,7 +145,7 @@ namespace SmarterBeds
             negotiation?.NoteMoved(b);
 
             if (s.verboseLogging)
-                Log.Message($"[Smarter Beds] couple: {a.LabelShort} and {b.LabelShort} moved into a room of their own at {plan.bedA.Position}");
+                Log.Message($"[Wil's Better Beds] couple: {a.LabelShort} and {b.LabelShort} moved into a room of their own at {plan.bedA.Position}");
 
             if (s.negotiationMessages)
                 BriefMessage.Show("SmarterBeds_CoupleMoved".Translate(a.LabelShort, b.LabelShort), new LookTargets(a, b), s.messageSeconds);
