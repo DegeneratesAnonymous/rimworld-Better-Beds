@@ -33,6 +33,7 @@ namespace SmarterBeds
         public float ideoNeighborBonus = 2f;           // someone of your ideoligion sleeps near
         public float geneNeighborBonus = 2f;           // someone of your xenotype sleeps near
         public bool coupleHousingEnabled = true;       // move a new couple into a room of their own
+        public bool coupleNegotiationEnabled = true;   // a couple negotiates together, the better talker asking
         public float coupleRoomBonus = 3f;             // a room for just the two of them
         public float coupleSharePenalty = 3f;          // a couple sharing a room with anyone else
 
@@ -63,6 +64,9 @@ namespace SmarterBeds
         public bool chairSleepEnabled = true;
         public float chairSleepPenalty = 3f;           // mood for a night in a chair (the floor is 4)
 
+        // Guests (Hospitality)
+        public bool visitorsUseGuestBeds = true;       // visitors who are not Hospitality guests rent a guest bed
+
         // Interface
         public bool showRoomsButton = true;            // the Assign rooms button on the Assign tab
 
@@ -89,6 +93,7 @@ namespace SmarterBeds
             Scribe_Values.Look(ref ideoNeighborBonus, "ideoNeighborBonus", 2f);
             Scribe_Values.Look(ref geneNeighborBonus, "geneNeighborBonus", 2f);
             Scribe_Values.Look(ref coupleHousingEnabled, "coupleHousingEnabled", true);
+            Scribe_Values.Look(ref coupleNegotiationEnabled, "coupleNegotiationEnabled", true);
             Scribe_Values.Look(ref coupleRoomBonus, "coupleRoomBonus", 3f);
             Scribe_Values.Look(ref coupleSharePenalty, "coupleSharePenalty", 3f);
 
@@ -114,6 +119,7 @@ namespace SmarterBeds
             Scribe_Values.Look(ref chairSleepEnabled, "chairSleepEnabled", true);
             Scribe_Values.Look(ref chairSleepPenalty, "chairSleepPenalty", 3f);
             Scribe_Values.Look(ref showRoomsButton, "showRoomsButton", true);
+            Scribe_Values.Look(ref visitorsUseGuestBeds, "visitorsUseGuestBeds", true);
         }
 
         /// <summary>Puts every setting back to the value in its field initializer.</summary>

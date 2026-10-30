@@ -62,6 +62,7 @@ namespace SmarterBeds
                 Slide(list, "SmarterBeds_S_FamilyNear", ref s.familyHostilePenalty, 0f, 10f, "0.0");
                 Slide(list, "SmarterBeds_S_FamilyFar", ref s.familyFarPenalty, 0f, 10f, "0.0");
                 Check(list, "SmarterBeds_S_CoupleHousing", ref s.coupleHousingEnabled);
+                if (s.negotiationEnabled) Check(list, "SmarterBeds_S_CoupleNegotiate", ref s.coupleNegotiationEnabled);
                 Slide(list, "SmarterBeds_S_CoupleRoom", ref s.coupleRoomBonus, 0f, 8f, "0.0");
                 Slide(list, "SmarterBeds_S_CoupleShare", ref s.coupleSharePenalty, 0f, 8f, "0.0");
             }
@@ -116,6 +117,9 @@ namespace SmarterBeds
             Check(list, "SmarterBeds_S_Chair", ref s.chairSleepEnabled);
             if (s.chairSleepEnabled)
                 Slide(list, "SmarterBeds_S_ChairPenalty", ref s.chairSleepPenalty, 0f, 8f, "0.0", ChairExample);
+
+            Section(list, "SmarterBeds_Sec_Guests");
+            Check(list, "SmarterBeds_S_VisitorBeds", ref s.visitorsUseGuestBeds);
 
             Section(list, "SmarterBeds_Sec_Interface");
             Check(list, "SmarterBeds_S_RoomsButton", ref s.showRoomsButton);

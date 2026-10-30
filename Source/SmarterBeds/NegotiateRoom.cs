@@ -30,9 +30,7 @@ namespace SmarterBeds
         {
             try
             {
-                var target = GameComponent_BedNegotiation.Instance?.FindNegotiationTarget(pawn);
-                if (target == null) return null;
-                return JobMaker.MakeJob(def.jobDef, target);
+                return GameComponent_BedNegotiation.Instance?.MakeNegotiationJob(pawn);
             }
             catch (System.Exception e)
             {
@@ -56,7 +54,7 @@ namespace SmarterBeds
             try
             {
                 if (listener == null || speaker == null || !listener.Spawned) return;
-                if (listener.Drafted || listener.InMentalState || listener.Downed || !listener.Awake()) return;
+                if (listener.Drafted || listener.InMentalState || listener.Downed || !listener.Awake() || PawnBusy.Is(listener)) return;
 
                 var def = DefDatabase<JobDef>.GetNamedSilentFail(JobDefName);
                 if (def == null || listener.CurJobDef == def) return;
@@ -108,7 +106,8 @@ namespace SmarterBeds
         protected override IEnumerable<Toil> MakeNewToils()
         {
             this.FailOnDespawnedOrNull(TargetIndex.A);
-            this.FailOn(() => Target == null || !Target.Awake() || Target.Downed);
+            // If the other colonist has gone to the toilet or the shower in the meantime, this is not the moment.
+            this.FailOn(() => Target == null || !Target.Awake() || Target.Downed || PawnBusy.Is(Target));
             // However this ends, let the other colonist go.
             this.AddFinishAction(condition => TalkHold.Release(Target));
 
@@ -131,7 +130,7 @@ namespace SmarterBeds
                 initAction = () =>
                 {
                     if (!listenerHeld) { listenerHeld = true; TalkHold.Start(Target, pawn, TalkTicks); }
-                    GameComponent_BedNegotiation.Instance?.BeginConversation(pawn, Target);
+                    GameComponent_BedNegotiation.Instance?.BeginConversation(pawn, Target, job.count);
                 }
             };
 
@@ -152,8 +151,9 @@ namespace SmarterBeds
                 defaultCompleteMode = ToilCompleteMode.Instant,
                 initAction = () =>
                 {
-                    GameComponent_BedNegotiation.Instance?.ResolveNegotiation(pawn, Target, job.count == 1);
+                    // Let them go first: settling it may send one of them off on a new errand.
                     TalkHold.Release(Target);
+                    GameComponent_BedNegotiation.Instance?.ResolveNegotiation(pawn, Target, job.count);
                 }
             };
         }
