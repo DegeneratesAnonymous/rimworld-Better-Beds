@@ -119,7 +119,7 @@ namespace SmarterBeds
                 Slide(list, "SmarterBeds_S_ChairPenalty", ref s.chairSleepPenalty, 0f, 8f, "0.0", ChairExample);
 
             Section(list, "SmarterBeds_Sec_Guests");
-            Check(list, "SmarterBeds_S_GuestBeds", ref s.guestBedsEnabled);
+            Check(list, "SmarterBeds_S_VisitorBeds", ref s.visitorsUseGuestBeds);
 
             Section(list, "SmarterBeds_Sec_Interface");
             Check(list, "SmarterBeds_S_RoomsButton", ref s.showRoomsButton);
