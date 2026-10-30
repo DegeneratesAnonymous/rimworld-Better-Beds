@@ -22,6 +22,11 @@ namespace SmarterBeds
             public readonly List<Pawn> relatives = new List<Pawn>();
             public readonly Dictionary<Pawn, int> opinion = new Dictionary<Pawn, int>();
             public readonly List<Pawn> lovers = new List<Pawn>();
+            // Other adult colonists who are not family and the pawn dislikes, and those the pawn does not
+            // dislike who share their ideoligion or are of their xenotype (family included).
+            public readonly List<Pawn> hostileOthers = new List<Pawn>();
+            public readonly List<Pawn> sameIdeo = new List<Pawn>();
+            public readonly List<Pawn> sameGenes = new List<Pawn>();
         }
 
         private const int SnapshotTicks = 600;
@@ -79,6 +84,8 @@ namespace SmarterBeds
                 {
                     if (rel.otherPawn != null && !rel.otherPawn.Dead) snap.lovers.Add(rel.otherPawn);
                 }
+
+                BuildNeighbors(p, snap);
             }
             catch (System.Exception e)
             {
@@ -87,8 +94,87 @@ namespace SmarterBeds
                 snap.relatives.Clear();
                 snap.opinion.Clear();
                 snap.lovers.Clear();
+                snap.hostileOthers.Clear();
+                snap.sameIdeo.Clear();
+                snap.sameGenes.Clear();
             }
             return snap;
+        }
+
+        /// <summary>Who in the colony the pawn dislikes, shares their ideoligion with, or is the same kind of person as.</summary>
+        private static void BuildNeighbors(Pawn p, Snapshot snap)
+        {
+            var s = SmarterBedsMod.Settings;
+            if (!s.neighborsEnabled || !IsAdultColonist(p)) return;
+
+            var ideo = ModsConfig.IdeologyActive ? p.Ideo : null;
+            string genes = GeneKey(p);
+            foreach (var other in p.Map.mapPawns.FreeColonistsSpawned)
+            {
+                if (other == p || !IsAdultColonist(other)) continue;
+                bool relative = snap.opinion.TryGetValue(other, out int known);
+                int opinion = relative ? known : p.relations.OpinionOf(other);
+                if (opinion <= s.familyHostileOpinion)
+                {
+                    if (!relative) snap.hostileOthers.Add(other);
+                    continue; // nobody they dislike counts as "someone like me"
+                }
+                if (ideo != null && other.Ideo == ideo) snap.sameIdeo.Add(other);
+                if (genes != null && GeneKey(other) == genes) snap.sameGenes.Add(other);
+            }
+        }
+
+        /// <summary>
+        /// A name for the kind of person this is, or null when there is nothing to match on. Baseliners
+        /// are left out on purpose: in a colony of baseliners everyone would match everyone, which tells
+        /// the pawn nothing about where to sleep. A pawn with their own one-off set of genes matches nobody.
+        /// </summary>
+        private static string GeneKey(Pawn p)
+        {
+            try
+            {
+                var genes = p.genes;
+                if (!ModsConfig.BiotechActive || genes == null || genes.UniqueXenotype) return null;
+                string key = genes.Xenotype?.defName ?? genes.XenotypeLabel;
+                return string.IsNullOrEmpty(key) || key == "Baseliner" ? null : key;
+            }
+            catch { return null; }
+        }
+
+        public static List<Pawn> HostileNeighbors(Pawn p) => p?.relations == null ? NoPawns : Get(p).hostileOthers;
+        public static List<Pawn> SameIdeoNeighbors(Pawn p) => p?.relations == null ? NoPawns : Get(p).sameIdeo;
+        public static List<Pawn> SameGeneNeighbors(Pawn p) => p?.relations == null ? NoPawns : Get(p).sameGenes;
+
+        /// <summary>How many in the list (stopping at <paramref name="cap"/>) sleep within the family radius of this bed.</summary>
+        public static int CountNear(Pawn p, List<Pawn> others, Building_Bed bed, SmarterBedsSettings s, Pawn leaving, int cap)
+        {
+            int count = 0;
+            foreach (var r in others)
+            {
+                if (r == leaving || !Lives(p, r)) continue;
+                var theirs = BedOf(r);
+                if (theirs == null) continue;
+                if (theirs == bed || Distance(bed, theirs) <= s.familyRadius)
+                {
+                    if (++count >= cap) break;
+                }
+            }
+            return count;
+        }
+
+        /// <summary>The first one in the list who sleeps within the radius of the pawn's own bed.</summary>
+        public static Pawn FirstNear(Pawn p, List<Pawn> others, SmarterBedsSettings s)
+        {
+            if (!s.neighborsEnabled || !IsAdultColonist(p)) return null;
+            var bed = BedOf(p);
+            if (bed == null) return null;
+            foreach (var r in others)
+            {
+                if (!Lives(p, r)) continue;
+                var theirs = BedOf(r);
+                if (theirs != null && (theirs == bed || Distance(bed, theirs) <= s.familyRadius)) return r;
+            }
+            return null;
         }
 
         public static bool IsAdultColonist(Pawn p) =>

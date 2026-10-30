@@ -56,6 +56,15 @@ namespace SmarterBeds
                 Slide(list, "SmarterBeds_S_CoupleShare", ref s.coupleSharePenalty, 0f, 8f, "0.0");
             }
 
+            Section(list, "SmarterBeds_Sec_Neighbors");
+            Check(list, "SmarterBeds_S_Neighbors", ref s.neighborsEnabled);
+            if (s.neighborsEnabled)
+            {
+                Slide(list, "SmarterBeds_S_NeighborHostile", ref s.neighborHostilePenalty, 0f, 10f, "0.0");
+                Slide(list, "SmarterBeds_S_IdeoBonus", ref s.ideoNeighborBonus, 0f, 6f, "0.0");
+                Slide(list, "SmarterBeds_S_GeneBonus", ref s.geneNeighborBonus, 0f, 6f, "0.0");
+            }
+
             Section(list, "SmarterBeds_Sec_Negotiation");
             Check(list, "SmarterBeds_S_Negotiate", ref s.negotiationEnabled);
             if (s.negotiationEnabled)

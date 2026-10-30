@@ -35,6 +35,8 @@ namespace SmarterBeds
             points -= TitlePenalty(bed, room, outdoors, pawn, s);
             points -= JealousyPenalty(room, outdoors, pawn);
             points -= FamilyPenalty(bed, pawn, s, leaving);
+            points -= NeighborPenalty(bed, pawn, s, leaving);
+            points += NeighborMood(bed, pawn, s, leaving);
             if (company) points += CompanyMood(bed, room, outdoors, pawn, s, leaving);
             return points;
         }
@@ -48,7 +50,7 @@ namespace SmarterBeds
         {
             Room room = bed.GetRoom();
             bool outdoors = room == null || room.PsychologicallyOutdoors;
-            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn) + FamilyPenalty(bed, pawn, s, leaving);
+            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn) + FamilyPenalty(bed, pawn, s, leaving) + NeighborPenalty(bed, pawn, s, leaving);
         }
 
         /// <summary>
@@ -83,6 +85,27 @@ namespace SmarterBeds
             // A couple with family around, none of it within range: "room far from family".
             if (anyFriendly && !anyFriendlyNear && Family.SoleLover(pawn) != null) penalty += s.familyFarPenalty;
             return penalty;
+        }
+
+        /// <summary>
+        /// Colonists the pawn dislikes (and who are not family) sleeping within the family distance.
+        /// Counted for up to two of them, and worth more than the same dislike of a relative, since
+        /// family is put up with.
+        /// </summary>
+        public static float NeighborPenalty(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, Pawn leaving = null)
+        {
+            if (!s.neighborsEnabled || !Family.IsAdultColonist(pawn)) return 0f;
+            return Family.CountNear(pawn, Family.HostileNeighbors(pawn), bed, s, leaving, 2) * s.neighborHostilePenalty;
+        }
+
+        /// <summary>The comfort of sleeping near people of your own ideoligion and your own kind.</summary>
+        public static float NeighborMood(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, Pawn leaving = null)
+        {
+            if (!s.neighborsEnabled || !Family.IsAdultColonist(pawn)) return 0f;
+            float mood = 0f;
+            if (Family.CountNear(pawn, Family.SameIdeoNeighbors(pawn), bed, s, leaving, 1) > 0) mood += s.ideoNeighborBonus;
+            if (Family.CountNear(pawn, Family.SameGeneNeighbors(pawn), bed, s, leaving, 1) > 0) mood += s.geneNeighborBonus;
+            return mood;
         }
 
         /// <summary>
