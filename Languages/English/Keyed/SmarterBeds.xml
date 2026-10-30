@@ -13,11 +13,9 @@
   <SmarterBeds_NegotiationEnabled>Let colonists negotiate for better rooms</SmarterBeds_NegotiationEnabled>
   <SmarterBeds_QualityNegotiation>Also negotiate on room quality alone (equal rank)</SmarterBeds_QualityNegotiation>
   <SmarterBeds_QualityThreshold>Quality gap needed to negotiate: {0}</SmarterBeds_QualityThreshold>
-  <SmarterBeds_Cooldown>Days before a colonist negotiates again: {0}</SmarterBeds_Cooldown>
-  <SmarterBeds_LostRoomThought>Losing a room causes a mild mood penalty</SmarterBeds_LostRoomThought>
+  <SmarterBeds_Cooldown>Days before the same two colonists negotiate again: {0}</SmarterBeds_Cooldown>
+  <SmarterBeds_MoodEffects>Negotiations change the mood of the colonist who gave up their room</SmarterBeds_MoodEffects>
   <SmarterBeds_Messages>Show a message when a room changes hands</SmarterBeds_Messages>
-  <SmarterBeds_RoomTaken>{0} talked {1} out of their bedroom. {1} will find another room at bedtime.</SmarterBeds_RoomTaken>
-  <SmarterBeds_UseRoll>Decide negotiations with a dice roll (off = strict rules: higher title, then longest-serving)</SmarterBeds_UseRoll>
   <SmarterBeds_TitleWeight>Title weight in the roll (points per title step): {0}</SmarterBeds_TitleWeight>
   <SmarterBeds_RoomWonPersuade>{0} talked {1} out of their bedroom. ({2} vs {3})</SmarterBeds_RoomWonPersuade>
   <SmarterBeds_RoomWonIntimidate>{0} pushed {1} out of their bedroom. ({2} vs {3})</SmarterBeds_RoomWonIntimidate>

@@ -16,18 +16,16 @@ Primary target: RimWorld 1.7 on the unstable branch. 1.6 builds are kept until 1
 
 1. Requirements are a pawn property, read from the game. Royalty title bedroom requirements are used now; Ideology role room requirements are not exposed on the role precept in the reference API, so they are a follow-up. An unmet requirement is a heavy score penalty in the bedtime search, not a ban.
 2. A pawn with no bed searches for the best available room (existing search plus the requirement penalty). A pawn who lost a room gets no special handling.
-3. Negotiation is a recreation activity. A pawn who owns a bed and has a sleep-related mood debuff (barracks, cold, heat, slave in room, outside, ground) or an unmet title requirement can choose "negotiate for a better room" during joy time. They walk to the other pawn, talk for a while, and the swap is decided at the end of the conversation.
-   - The other pawn must own a bed, not be using it right now, and not be the initiator's love partner. Shared beds (two owners) are excluded; a double bed with a single owner is fine.
-   - **Roll mode (default):** anyone may challenge anyone they have a reason to, and a contested d20 decides. Asker = best of Persuade (Social skill + the defender's opinion of them / 10) or Intimidate (Melee x 0.75); defender = the matching skill (Social or Melee). Both add title (seniority / 100 x title weight, default 3), up to +5 for time in the colony, and the defender gets +3 for holding the room. Ties go to the defender. Targets are ranked by gain x win chance; a challenge under 10% is not attempted.
-   - Asker earns Social XP whether or not they win. Intimidation leaves the target with a 15 day opinion penalty toward the asker. A loser can't challenge the same winner for 15 days.
-   - **Strict rules mode (toggle off the roll):** the original behavior below: higher title, then longest-serving, decided before anyone talks.
-   - Requirement case: A's room fails A's requirements, B's room is better for A, and A outranks B (title seniority).
-   - Quality case (own toggle, large threshold): equal rank, and the quality gain exceeds the threshold. Ties are broken by time in the colony, then id, so no pair can swap back and forth.
-   - Skipped if a free room is at least as good for A.
+3. Negotiation is a recreation activity, always decided by a contested d20 roll. A pawn who owns a bed and has a sleep-related mood debuff (barracks, cold, heat, slave in room, outside, ground) or an unmet title requirement can choose "negotiate for a better room" during joy time. They walk to the other pawn, talk for a while, and the roll decides at the end.
+   - The other pawn must own a bed (alone; shared beds are excluded, a double bed with one owner is fine), not be using it right now, and not be the initiator's love partner. Skipped if a free room is at least as good.
+   - Anyone may challenge anyone they have a reason to. Reasons: the room fixes an unmet title requirement, or (own toggle) the quality gain is above a threshold.
+   - Roll: asker = best of Persuade (Social skill + the defender's opinion of them / 10) or Intimidate (Melee x 0.75); defender = the matching skill. Both add title (seniority / 100 x title weight, default 3) and up to +5 for time in the colony; the defender gets +3 for holding the room. Ties go to the defender. Targets are ranked by gain x win chance; under 10% is not attempted.
+   - Social XP for the asker: 60 on a win, 30 on a fail.
+   - Mood for the loser on a win: 20 x (0.25 x relationship + 0.25 x room quality), relationship = opinion / 100, room quality = gain / 500. Intimidation is always a debuff; persuasion is a buff only if the loser likes the asker. Intimidation also leaves a 15 day opinion penalty, win or lose.
+   - Cooldown: 3 days between the same two pawns (either direction), after every conversation. A pawn can still negotiate with others. A loser can't challenge the same winner for 15 days.
    - The winner takes the loser's bed and releases their old one; the loser is left bedless and finds a room at their own bedtime.
-   - 3 day cooldown (setting) for the initiator after every conversation, and for both after a swap. Looking for someone to talk to is throttled to once an hour per pawn.
    - Excluded: prisoners, guests, slaves, children, medical beds.
-   - Optional mild "lost my room" thought (off by default) and an optional message.
+   - Optional messages (on) and mood effects (on) can each be turned off in settings.
 
 ## 1.7 checks
 

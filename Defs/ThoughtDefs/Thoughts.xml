@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
+  <!-- Mood points are the stage's baseMoodEffect (+/-1) times a factor set in code. -->
   <ThoughtDef>
-    <defName>SmarterBeds_LostRoom</defName>
+    <defName>SmarterBeds_BulliedOutOfRoom</defName>
     <thoughtClass>Thought_Memory</thoughtClass>
-    <durationDays>2</durationDays>
+    <durationDays>5</durationDays>
     <stackLimit>1</stackLimit>
     <stages>
       <li>
-        <label>lost my room</label>
-        <description>Someone with a stronger claim took my bedroom.</description>
-        <baseMoodEffect>-3</baseMoodEffect>
+        <label>pushed out of my room</label>
+        <description>Someone leaned on me until I gave up my bedroom.</description>
+        <baseMoodEffect>-1</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+  <ThoughtDef>
+    <defName>SmarterBeds_GaveUpRoomHappily</defName>
+    <thoughtClass>Thought_Memory</thoughtClass>
+    <durationDays>5</durationDays>
+    <stackLimit>1</stackLimit>
+    <stages>
+      <li>
+        <label>gave up my room for a friend</label>
+        <description>I let someone I like have my bedroom. It felt good to help.</description>
+        <baseMoodEffect>1</baseMoodEffect>
       </li>
     </stages>
   </ThoughtDef>

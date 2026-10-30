@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -9,22 +10,32 @@ namespace SmarterBeds
     /// <summary>
     /// Room negotiation. A pawn who owns a bed and has a sleep-related mood debuff (or an unmet title
     /// requirement) can pick "negotiate for a better room" as a recreation activity (see
-    /// JoyGiver_NegotiateRoom). If they get to talk to someone they outrank, the winner takes the
-    /// loser's bed and the loser is left bedless to find a room at their own bedtime.
+    /// JoyGiver_NegotiateRoom). They walk over, talk, and a contested roll (see NegotiationRoll)
+    /// decides it. A winner takes the loser's bed; the loser is left bedless to find a room at
+    /// their own bedtime.
     /// </summary>
     public class GameComponent_BedNegotiation : GameComponent
     {
         public static GameComponent_BedNegotiation Instance => Current.Game?.GetComponent<GameComponent_BedNegotiation>();
 
-        // Saved: pawn thingIDNumber -> tick when they may negotiate again after a swap.
-        private Dictionary<int, int> cooldownUntil = new Dictionary<int, int>();
+        // Saved: "lowId:highId" -> tick when these two may negotiate with each other again.
+        private Dictionary<string, int> pairCooldownUntil = new Dictionary<string, int>();
 
         // Saved: "loserId>winnerId" -> tick until which the loser may not challenge that winner again.
         private Dictionary<string, int> rematchUntil = new Dictionary<string, int>();
         private const int RematchDays = 15;
         private const float MinWinChance = 0.1f;
 
-        // Not saved: stops a pawn from re-running the search every time the game asks for a bed.
+        // Mood effect of a negotiation = MaxMoodEffect x (0.25 x relationship + 0.25 x room quality),
+        // both measured 0..1. Relationship is the loser's opinion of the asker / 100; room quality is
+        // the quality gain of the room that changed hands / QualityForFullEffect.
+        private const float MaxMoodEffect = 20f;
+        private const float QualityForFullEffect = 500f;
+
+        // Experience for the asker. A failed attempt is worth half.
+        private const float SocialXpOnWin = 60f;
+
+        // Not saved: stops a pawn from re-running the search every time the joy system asks.
         private readonly Dictionary<int, int> lastChecked = new Dictionary<int, int>();
         private const int RecheckTicks = GenDate.TicksPerHour;
 
@@ -32,19 +43,27 @@ namespace SmarterBeds
 
         public override void ExposeData()
         {
-            Scribe_Collections.Look(ref cooldownUntil, "cooldownUntil", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref pairCooldownUntil, "pairCooldownUntil", LookMode.Value, LookMode.Value);
             Scribe_Collections.Look(ref rematchUntil, "rematchUntil", LookMode.Value, LookMode.Value);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
-                if (cooldownUntil == null) cooldownUntil = new Dictionary<int, int>();
+                if (pairCooldownUntil == null) pairCooldownUntil = new Dictionary<string, int>();
                 if (rematchUntil == null) rematchUntil = new Dictionary<string, int>();
             }
         }
 
         private static int Now => Find.TickManager.TicksGame;
 
-        private bool OnCooldown(Pawn p) =>
-            cooldownUntil.TryGetValue(p.thingIDNumber, out int until) && Now < until;
+        private static string PairKey(Pawn a, Pawn b) =>
+            a.thingIDNumber < b.thingIDNumber ? a.thingIDNumber + ":" + b.thingIDNumber : b.thingIDNumber + ":" + a.thingIDNumber;
+
+        private static string RematchKey(Pawn loser, Pawn winner) => loser.thingIDNumber + ">" + winner.thingIDNumber;
+
+        private bool PairOnCooldown(Pawn a, Pawn b) =>
+            pairCooldownUntil.TryGetValue(PairKey(a, b), out int until) && Now < until;
+
+        private void StartPairCooldown(Pawn a, Pawn b) =>
+            pairCooldownUntil[PairKey(a, b)] = Now + (int)(SmarterBedsMod.Settings.negotiationCooldownDays * GenDate.TicksPerDay);
 
         // Thoughts that mean "the place I slept was bad". SleepDisturbed is noise, not the room.
         private static readonly List<ThoughtDef> SleepDebuffs = new List<ThoughtDef>
@@ -64,22 +83,7 @@ namespace SmarterBeds
             return false;
         }
 
-        /// <summary>
-        /// Total order used to break ties between equal-rank pawns: longer time in the colony wins,
-        /// then the lower id. Because it is strict, two pawns can never take the same room back and
-        /// forth.
-        /// </summary>
-        private static bool HasPriorityOver(Pawn a, Pawn b)
-        {
-            int rankA = Requirements.Rank(a), rankB = Requirements.Rank(b);
-            if (rankA != rankB) return rankA > rankB;
-            int tenureA = a.records.GetAsInt(RecordDefOf.TimeAsColonistOrColonyAnimal);
-            int tenureB = b.records.GetAsInt(RecordDefOf.TimeAsColonistOrColonyAnimal);
-            if (tenureA != tenureB) return tenureA > tenureB;
-            return a.thingIDNumber < b.thingIDNumber;
-        }
-
-        /// <summary>Common checks for both sides: a settled adult colonist alone in a single bed.</summary>
+        /// <summary>Common checks for both sides: a settled adult colonist who is the only owner of their bed.</summary>
         private static bool Eligible(Pawn p)
         {
             if (p == null || !p.Spawned || p.Dead || !p.IsColonist || p.IsPrisoner || p.IsSlave) return false;
@@ -108,7 +112,7 @@ namespace SmarterBeds
         {
             var s = SmarterBedsMod.Settings;
             if (!s.enabled || !s.negotiationEnabled) return false;
-            if (!Eligible(a) || OnCooldown(a)) return false;
+            if (!Eligible(a)) return false;
             // Only negotiate when something is actually wrong with how they sleep.
             return Requirements.Unmet(a, a.ownership.OwnedBed.GetRoom()) > 0 || HasSleepDebuff(a);
         }
@@ -129,31 +133,24 @@ namespace SmarterBeds
         }
 
         /// <summary>
-        /// End of the conversation: re-checks everything (the world moved while they walked over) and,
-        /// if it still holds, swaps. The initiator is on cooldown afterwards whether or not it worked.
+        /// End of the conversation: re-checks everything (the world moved while they walked over),
+        /// rolls, and swaps on a win. The two are on cooldown with each other afterwards either way.
         /// </summary>
         public void ResolveNegotiation(Pawn a, Pawn b)
         {
             var s = SmarterBedsMod.Settings;
             try
             {
-                if (WantsToNegotiate(a) && Eligible(b) && !OnCooldown(b))
+                if (WantsToNegotiate(a) && Eligible(b))
                 {
                     var target = FindLoser(a, a.ownership.OwnedBed, s, out float gain, out var contest, only: b);
                     if (target == b)
                     {
-                        if (!s.useNegotiationRoll)
-                        {
-                            Swap(a, b, gain, s, null, 0, 0);
-                        }
-                        else
-                        {
-                            bool won = NegotiationRoll.Roll(contest, out int askerTotal, out int defenderTotal);
-                            GiveSocialExperience(a, won);
-                            if (contest.approach == NegotiationApproach.Intimidate) Resent(b, a);
-                            if (won) Swap(a, b, gain, s, contest, askerTotal, defenderTotal);
-                            else ReportFailure(a, b, contest, askerTotal, defenderTotal, s);
-                        }
+                        bool won = NegotiationRoll.Roll(contest, out int askerTotal, out int defenderTotal);
+                        GiveSocialExperience(a, won);
+                        if (contest.approach == NegotiationApproach.Intimidate) Resent(b, a);
+                        if (won) Swap(a, b, gain, s, contest, askerTotal, defenderTotal);
+                        else ReportFailure(a, b, contest, askerTotal, defenderTotal, s);
                     }
                 }
             }
@@ -163,21 +160,55 @@ namespace SmarterBeds
             }
             finally
             {
-                SetCooldown(a);
+                StartPairCooldown(a, b);
             }
         }
 
         private static void GiveSocialExperience(Pawn asker, bool won)
         {
-            // Winning is more instructive than being turned down, but both are practice.
-            asker.skills?.Learn(SkillDefOf.Social, won ? 60f : 35f);
+            // Practice either way; half as much when turned down.
+            asker.skills?.Learn(SkillDefOf.Social, won ? SocialXpOnWin : SocialXpOnWin / 2f);
         }
 
-        /// <summary>Someone who was leaned on remembers it.</summary>
+        /// <summary>Someone who was leaned on remembers it, win or lose.</summary>
         private static void Resent(Pawn victim, Pawn bully)
         {
             victim.needs?.mood?.thoughts?.memories?.TryGainMemory(
                 DefDatabase<ThoughtDef>.GetNamed("SmarterBeds_PushedAround"), bully);
+        }
+
+        /// <summary>
+        /// The loser's mood after a successful negotiation, scaled 0.25 x relationship + 0.25 x room quality.
+        /// Intimidation is always a debuff. Persuasion is a buff when the loser likes the asker;
+        /// someone who doesn't gives the room up with no particular feeling either way.
+        /// </summary>
+        private static void ApplyMoodEffect(Pawn loser, Pawn winner, NegotiationContest c, float gain, SmarterBedsSettings s)
+        {
+            if (!s.negotiationMoodEffects || loser.needs?.mood?.thoughts?.memories == null) return;
+
+            float relationship = loser.relations != null ? Mathf.Clamp(loser.relations.OpinionOf(winner) / 100f, -1f, 1f) : 0f;
+            float quality = Mathf.Clamp01(gain / QualityForFullEffect);
+
+            ThoughtDef def;
+            float magnitude;
+            if (c.approach == NegotiationApproach.Intimidate)
+            {
+                def = DefDatabase<ThoughtDef>.GetNamed("SmarterBeds_BulliedOutOfRoom");
+                magnitude = MaxMoodEffect * (0.25f * Mathf.Abs(relationship) + 0.25f * quality);
+            }
+            else
+            {
+                if (relationship <= 0f) return;
+                def = DefDatabase<ThoughtDef>.GetNamed("SmarterBeds_GaveUpRoomHappily");
+                magnitude = MaxMoodEffect * (0.25f * relationship + 0.25f * quality);
+            }
+
+            var thought = (Thought_Memory)ThoughtMaker.MakeThought(def);
+            thought.moodPowerFactor = Mathf.Max(1f, magnitude); // the stage is +/-1, so this is the mood points
+            loser.needs.mood.thoughts.memories.TryGainMemory(thought, winner);
+
+            if (s.verboseLogging)
+                Log.Message($"[Smarter Beds] {loser.LabelShort} mood effect {(c.approach == NegotiationApproach.Intimidate ? "-" : "+")}{thought.moodPowerFactor:0.0} (relationship {relationship:0.00}, quality {quality:0.00})");
         }
 
         private static void ReportFailure(Pawn asker, Pawn defender, NegotiationContest c, int askerTotal, int defenderTotal, SmarterBedsSettings s)
@@ -189,17 +220,11 @@ namespace SmarterBeds
                     new LookTargets(asker, defender), MessageTypeDefOf.NeutralEvent, false);
         }
 
-        private void SetCooldown(Pawn p)
-        {
-            cooldownUntil[p.thingIDNumber] = Now + (int)(SmarterBedsMod.Settings.negotiationCooldownDays * GenDate.TicksPerDay);
-        }
-
         private Pawn FindLoser(Pawn a, Building_Bed bedA, SmarterBedsSettings s, out float bestGain, out NegotiationContest bestContest, Pawn only = null)
         {
             bestGain = 0f;
             bestContest = default;
             float bestValue = 0f;
-            bool roll = s.useNegotiationRoll;
             int unmetNow = Requirements.Unmet(a, bedA.GetRoom());
             Pawn best = null;
 
@@ -209,7 +234,8 @@ namespace SmarterBeds
 
             foreach (var b in a.Map.mapPawns.FreeColonistsSpawned)
             {
-                if (b == a || (only != null && b != only) || !Eligible(b) || OnCooldown(b)) continue;
+                if (b == a || (only != null && b != only) || !Eligible(b)) continue;
+                if (PairOnCooldown(a, b)) continue;
                 if (AreLovePartners(a, b)) continue; // never split a couple's rooms
                 if (rematchUntil.TryGetValue(RematchKey(a, b), out int rematch) && Now < rematch) continue;
 
@@ -221,29 +247,20 @@ namespace SmarterBeds
                 float gain = BedScorer.Quality(bedB, a, s) - currentA;
                 if (gain <= 0f) continue;
                 if (bestFree >= currentA + gain) continue;
-                // Strict rules: higher title, then longer-serving, decides before anyone talks.
-                // Roll mode lets anyone try; the title is just one of the numbers in the roll.
-                if (!roll && !HasPriorityOver(a, b)) continue;
 
+                // Anyone may try; rank only matters as a number in the roll.
                 int unmetAfter = Requirements.Unmet(a, bedB.GetRoom());
-                bool requirementCase = unmetNow > unmetAfter && (roll || Requirements.Rank(a) > Requirements.Rank(b));
+                bool requirementCase = unmetNow > unmetAfter;
                 bool qualityCase = s.qualityNegotiationEnabled
-                    && (roll || Requirements.Rank(a) == Requirements.Rank(b))
                     && gain >= s.qualityNegotiationThreshold
                     && unmetNow == 0 && unmetAfter == 0;
-
                 if (!requirementCase && !qualityCase) continue;
 
-                var contest = default(NegotiationContest);
-                float value = gain;
-                if (roll)
-                {
-                    contest = NegotiationRoll.Build(a, b, s);
-                    // Don't spend three days on a conversation that has almost no chance.
-                    if (!contest.possible || contest.winChance < MinWinChance) continue;
-                    value = gain * contest.winChance;
-                }
+                var contest = NegotiationRoll.Build(a, b, s);
+                // Don't spend a conversation on something with almost no chance.
+                if (!contest.possible || contest.winChance < MinWinChance) continue;
 
+                float value = gain * contest.winChance;
                 if (value > bestValue)
                 {
                     bestValue = value;
@@ -255,7 +272,7 @@ namespace SmarterBeds
             return best;
         }
 
-        private bool Swap(Pawn winner, Pawn loser, float gain, SmarterBedsSettings s, NegotiationContest? contest, int winnerTotal, int loserTotal)
+        private bool Swap(Pawn winner, Pawn loser, float gain, SmarterBedsSettings s, NegotiationContest contest, int winnerTotal, int loserTotal)
         {
             var wonBed = loser.ownership.OwnedBed;
             var oldBed = winner.ownership.OwnedBed;
@@ -270,8 +287,6 @@ namespace SmarterBeds
                 return false;
             }
 
-            SetCooldown(winner);
-            SetCooldown(loser);
             // The loser can't just turn around and take it back.
             rematchUntil[RematchKey(loser, winner)] = Now + RematchDays * GenDate.TicksPerDay;
             PruneCooldowns();
@@ -279,30 +294,22 @@ namespace SmarterBeds
             if (s.verboseLogging)
                 Log.Message($"[Smarter Beds] negotiation: {winner.LabelShort} took {loser.LabelShort}'s bed at {wonBed.Position} (gain {gain:0.0})");
 
-            if (s.lostRoomThought && loser.needs?.mood?.thoughts?.memories != null)
-                loser.needs.mood.thoughts.memories.TryGainMemory(DefDatabase<ThoughtDef>.GetNamed("SmarterBeds_LostRoom"));
+            ApplyMoodEffect(loser, winner, contest, gain, s);
 
             if (s.negotiationMessages)
             {
-                string text;
-                if (contest == null)
-                    text = "SmarterBeds_RoomTaken".Translate(winner.LabelShort, loser.LabelShort);
-                else if (contest.Value.approach == NegotiationApproach.Intimidate)
-                    text = "SmarterBeds_RoomWonIntimidate".Translate(winner.LabelShort, loser.LabelShort, winnerTotal, loserTotal);
-                else
-                    text = "SmarterBeds_RoomWonPersuade".Translate(winner.LabelShort, loser.LabelShort, winnerTotal, loserTotal);
-                Messages.Message(text, new LookTargets(winner, loser), MessageTypeDefOf.NeutralEvent, false);
+                string key = contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_RoomWonIntimidate" : "SmarterBeds_RoomWonPersuade";
+                Messages.Message(key.Translate(winner.LabelShort, loser.LabelShort, winnerTotal, loserTotal),
+                    new LookTargets(winner, loser), MessageTypeDefOf.NeutralEvent, false);
             }
             return true;
         }
 
-        private static string RematchKey(Pawn loser, Pawn winner) => loser.thingIDNumber + ">" + winner.thingIDNumber;
-
         private void PruneCooldowns()
         {
             int now = Now;
-            foreach (var key in cooldownUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
-                cooldownUntil.Remove(key);
+            foreach (var key in pairCooldownUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
+                pairCooldownUntil.Remove(key);
             foreach (var key in rematchUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
                 rematchUntil.Remove(key);
         }

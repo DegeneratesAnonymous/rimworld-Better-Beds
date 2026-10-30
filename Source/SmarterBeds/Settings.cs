@@ -21,9 +21,8 @@ namespace SmarterBeds
         public bool qualityNegotiationEnabled = true;
         public float qualityNegotiationThreshold = 250f;
         public float negotiationCooldownDays = 3f;
-        public bool useNegotiationRoll = true;
         public float titleRollWeight = 3f;
-        public bool lostRoomThought = false;
+        public bool negotiationMoodEffects = true;
         public bool negotiationMessages = true;
 
         public override void ExposeData()
@@ -41,9 +40,8 @@ namespace SmarterBeds
             Scribe_Values.Look(ref qualityNegotiationEnabled, "qualityNegotiationEnabled", true);
             Scribe_Values.Look(ref qualityNegotiationThreshold, "qualityNegotiationThreshold", 250f);
             Scribe_Values.Look(ref negotiationCooldownDays, "negotiationCooldownDays", 3f);
-            Scribe_Values.Look(ref useNegotiationRoll, "useNegotiationRoll", true);
             Scribe_Values.Look(ref titleRollWeight, "titleRollWeight", 3f);
-            Scribe_Values.Look(ref lostRoomThought, "lostRoomThought", false);
+            Scribe_Values.Look(ref negotiationMoodEffects, "negotiationMoodEffects", true);
             Scribe_Values.Look(ref negotiationMessages, "negotiationMessages", true);
         }
     }
