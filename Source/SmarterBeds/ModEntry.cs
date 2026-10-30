@@ -25,7 +25,9 @@ namespace SmarterBeds
             var view = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref scrollPosition, view);
 
-            var list = new Listing_Standard { ColumnWidth = view.width };
+            // One column only: once the list is taller than the view, Listing_Standard would start a second
+            // column off to the right, and the measured height (below) would collapse with it.
+            var list = new Listing_Standard { ColumnWidth = view.width, maxOneColumn = true };
             list.Begin(view);
             var s = Settings;
 

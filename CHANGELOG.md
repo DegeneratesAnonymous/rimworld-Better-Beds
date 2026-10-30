@@ -12,6 +12,8 @@ All notable changes are listed here. Versions follow semantic versioning.
 - Messages and the chair options no longer disappear when negotiation is off
 
 ### Fixed
+- The settings window went blank after the General heading once it grew past its starting height (the list wrapped into a hidden second column)
+- "Collection was modified" errors when searching for someone to negotiate with, or housing couples
 - The tooltip of the "sleeping too close to ..." thoughts named the colonist themselves instead of the person they dislike
 - A negotiation could end without being settled if the asker's recreation filled up mid-conversation; it now always reaches the roll
 - Nobody asks someone who is asleep, drafted, downed or in a mental break

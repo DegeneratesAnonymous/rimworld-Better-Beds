@@ -109,7 +109,7 @@ namespace SmarterBeds
 
             var ideo = ModsConfig.IdeologyActive ? p.Ideo : null;
             string genes = GeneKey(p);
-            foreach (var other in p.Map.mapPawns.FreeColonistsSpawned)
+            foreach (var other in new List<Pawn>(p.Map.mapPawns.FreeColonistsSpawned))
             {
                 if (other == p || !IsAdultColonist(other)) continue;
                 bool relative = snap.opinion.TryGetValue(other, out int known);

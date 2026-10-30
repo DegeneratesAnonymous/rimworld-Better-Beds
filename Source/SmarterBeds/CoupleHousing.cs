@@ -23,7 +23,7 @@ namespace SmarterBeds
         public static void Run(Map map, GameComponent_BedNegotiation comp)
         {
             var s = SmarterBedsMod.Settings;
-            foreach (var a in map.mapPawns.FreeColonistsSpawned)
+            foreach (var a in new List<Pawn>(map.mapPawns.FreeColonistsSpawned))
             {
                 if (!Family.IsAdultColonist(a)) continue;
                 Family.Refresh(a); // this runs once an hour, so read the relations afresh

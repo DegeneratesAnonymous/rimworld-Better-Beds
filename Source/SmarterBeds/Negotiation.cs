@@ -451,7 +451,8 @@ namespace SmarterBeds
             // A free room that is at least as good for A makes taking someone's room pointless.
             float bestFree = BedScorer.BestFreeQuality(a, s);
 
-            foreach (var b in a.Map.mapPawns.FreeColonistsSpawned)
+            // A copy: scoring a bed reads the same game list again, which can change it under this loop.
+            foreach (var b in new List<Pawn>(a.Map.mapPawns.FreeColonistsSpawned))
             {
                 if (b == a || (only != null && b != only) || !Eligible(b)) continue;
                 // Someone asleep, drafted, downed or in a mental break cannot be talked to.
