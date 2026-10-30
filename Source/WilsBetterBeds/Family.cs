@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// Who is family, who is a couple, and how far apart their beds are. Everything here only looks
@@ -104,7 +104,7 @@ namespace SmarterBeds
         /// <summary>Who in the colony the pawn dislikes, shares their ideoligion with, or is the same kind of person as.</summary>
         private static void BuildNeighbors(Pawn p, Snapshot snap)
         {
-            var s = SmarterBedsMod.Settings;
+            var s = WilsBetterBedsMod.Settings;
             if (!s.neighborsEnabled || !IsAdultColonist(p)) return;
 
             var ideo = ModsConfig.IdeologyActive ? p.Ideo : null;
@@ -163,7 +163,7 @@ namespace SmarterBeds
         }
 
         /// <summary>Is a bed with a prisoner assigned to it within the family distance of this bed?</summary>
-        public static bool PrisonersNear(Building_Bed bed, SmarterBedsSettings s)
+        public static bool PrisonersNear(Building_Bed bed, WilsBetterBedsSettings s)
         {
             if (bed == null || bed.Map == null) return false;
             foreach (var prisonBed in OccupiedPrisonerBeds(bed.Map))
@@ -178,7 +178,7 @@ namespace SmarterBeds
         public static List<Pawn> SameGeneNeighbors(Pawn p) => p?.relations == null ? NoPawns : Get(p).sameGenes;
 
         /// <summary>How many in the list (stopping at <paramref name="cap"/>) sleep within the family radius of this bed.</summary>
-        public static int CountNear(Pawn p, List<Pawn> others, Building_Bed bed, SmarterBedsSettings s, Pawn leaving, int cap)
+        public static int CountNear(Pawn p, List<Pawn> others, Building_Bed bed, WilsBetterBedsSettings s, Pawn leaving, int cap)
         {
             int count = 0;
             foreach (var r in others)
@@ -195,7 +195,7 @@ namespace SmarterBeds
         }
 
         /// <summary>The first one in the list who sleeps within the radius of the pawn's own bed.</summary>
-        public static Pawn FirstNear(Pawn p, List<Pawn> others, SmarterBedsSettings s)
+        public static Pawn FirstNear(Pawn p, List<Pawn> others, WilsBetterBedsSettings s)
         {
             if (!s.neighborsEnabled || !IsAdultColonist(p)) return null;
             var bed = BedOf(p);
@@ -220,7 +220,7 @@ namespace SmarterBeds
         public static List<Pawn> CloseRelatives(Pawn p) => p?.relations == null ? NoPawns : Get(p).relatives;
 
         /// <summary>Negative relations: the pawn's opinion of this relative is at or below the threshold.</summary>
-        public static bool IsHostile(Pawn p, Pawn relative, SmarterBedsSettings s)
+        public static bool IsHostile(Pawn p, Pawn relative, WilsBetterBedsSettings s)
         {
             if (p.relations == null) return false;
             int opinion = Get(p).opinion.TryGetValue(relative, out int known) ? known : p.relations.OpinionOf(relative);
@@ -245,7 +245,7 @@ namespace SmarterBeds
         /// A couple with family in the colony, whose own bed is further than the family radius from
         /// every one of those relatives. This is the situation the "room far from family" thought describes.
         /// </summary>
-        public static bool IsFarFromFamily(Pawn p, SmarterBedsSettings s)
+        public static bool IsFarFromFamily(Pawn p, WilsBetterBedsSettings s)
         {
             if (!s.familyEnabled || !IsAdultColonist(p)) return false;
             var bed = BedOf(p);
@@ -263,7 +263,7 @@ namespace SmarterBeds
         }
 
         /// <summary>A relative the pawn has negative relations with whose bed is within the family radius.</summary>
-        public static Pawn NearbyDislikedRelative(Pawn p, SmarterBedsSettings s)
+        public static Pawn NearbyDislikedRelative(Pawn p, WilsBetterBedsSettings s)
         {
             if (!s.familyEnabled || !IsAdultColonist(p)) return null;
             var bed = BedOf(p);

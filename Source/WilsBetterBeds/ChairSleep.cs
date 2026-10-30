@@ -5,7 +5,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// Last resort for a colonist with no bed to use: doze off in a chair instead of on the floor.
@@ -14,14 +14,14 @@ namespace SmarterBeds
     /// </summary>
     public static class ChairSleep
     {
-        public const string JobDefName = "SmarterBeds_SleepInChair";
-        public const string ThoughtDefName = "SmarterBeds_SleptInChair";
+        public const string JobDefName = "WilsBetterBeds_SleepInChair";
+        public const string ThoughtDefName = "WilsBetterBeds_SleptInChair";
 
         public static JobDef JobDef => DefDatabase<JobDef>.GetNamedSilentFail(JobDefName);
 
         public static bool Eligible(Pawn pawn)
         {
-            if (!SmarterBedsMod.Settings.enabled || !SmarterBedsMod.Settings.chairSleepEnabled) return false;
+            if (!WilsBetterBedsMod.Settings.enabled || !WilsBetterBedsMod.Settings.chairSleepEnabled) return false;
             if (pawn == null || !pawn.Spawned || pawn.Downed || pawn.Dead) return false;
             if (!pawn.RaceProps.Humanlike || pawn.IsPrisoner || pawn.IsSlave) return false;
             if ((pawn.DevelopmentalStage & DevelopmentalStage.Adult) == 0) return false;
@@ -81,7 +81,7 @@ namespace SmarterBeds
 
         public override string GetReport()
         {
-            return asleep ? "ReportSleeping".Translate() : "SmarterBeds_ReportDozing".Translate();
+            return asleep ? "ReportSleeping".Translate() : "WilsBetterBeds_ReportDozing".Translate();
         }
     }
 
@@ -169,7 +169,7 @@ namespace SmarterBeds
 
                 memories.RemoveMemoriesOfDef(ThoughtDefOf.SleptOnGround);
                 var def = DefDatabase<ThoughtDef>.GetNamedSilentFail(ChairSleep.ThoughtDefName);
-                var penalty = SmarterBedsMod.Settings.chairSleepPenalty;
+                var penalty = WilsBetterBedsMod.Settings.chairSleepPenalty;
                 if (def == null || penalty <= 0f) return;
                 var thought = (Thought_Memory)ThoughtMaker.MakeThought(def);
                 thought.moodPowerFactor = penalty; // the stage is worth exactly -1

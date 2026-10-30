@@ -1,13 +1,13 @@
 using System.Reflection;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// All tunables. Scoring numbers are mood points (see RoomComfort); defaults are explained in
     /// the settings window and in PLAN.md.
     /// </summary>
-    public class SmarterBedsSettings : ModSettings
+    public class WilsBetterBedsSettings : ModSettings
     {
         // General
         public bool enabled = true;
@@ -129,8 +129,8 @@ namespace SmarterBeds
         /// <summary>Puts every setting back to the value in its field initializer.</summary>
         public void ResetToDefaults()
         {
-            var fresh = new SmarterBedsSettings();
-            foreach (var field in typeof(SmarterBedsSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
+            var fresh = new WilsBetterBedsSettings();
+            foreach (var field in typeof(WilsBetterBedsSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
                 field.SetValue(this, field.GetValue(fresh));
             }

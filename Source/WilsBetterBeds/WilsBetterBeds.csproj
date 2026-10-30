@@ -21,8 +21,8 @@
 
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
-    <RootNamespace>SmarterBeds</RootNamespace>
-    <AssemblyName>SmarterBeds</AssemblyName>
+    <RootNamespace>WilsBetterBeds</RootNamespace>
+    <AssemblyName>WilsBetterBeds</AssemblyName>
     <OutputPath>../../$(GameVersion)/Assemblies/</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DebugType>none</DebugType>

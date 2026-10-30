@@ -2,7 +2,7 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds.Patches
+namespace WilsBetterBeds.Patches
 {
     /// <summary>
     /// When the player picks a bed's owner with the "Set owner" button (vanilla's window, or one

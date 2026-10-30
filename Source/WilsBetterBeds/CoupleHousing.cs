@@ -3,7 +3,7 @@ using System.Linq;
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// When a colonist has a partner and the two do not live in a room of their own, find them one.
@@ -22,7 +22,7 @@ namespace SmarterBeds
 
         public static void Run(Map map, GameComponent_BedNegotiation comp)
         {
-            var s = SmarterBedsMod.Settings;
+            var s = WilsBetterBedsMod.Settings;
             foreach (var a in new List<Pawn>(map.mapPawns.FreeColonistsSpawned))
             {
                 if (!Family.IsAdultColonist(a)) continue;
@@ -47,7 +47,7 @@ namespace SmarterBeds
             }
         }
 
-        private static bool FamilyProblem(Pawn a, Pawn b, SmarterBedsSettings s)
+        private static bool FamilyProblem(Pawn a, Pawn b, WilsBetterBedsSettings s)
         {
             var bedA = Family.BedOf(a);
             var bedB = Family.BedOf(b);
@@ -62,7 +62,7 @@ namespace SmarterBeds
             public float value;
         }
 
-        private static bool TryHouse(Pawn a, Pawn b, SmarterBedsSettings s)
+        private static bool TryHouse(Pawn a, Pawn b, WilsBetterBedsSettings s)
         {
             var oldA = Family.BedOf(a);
             var oldB = Family.BedOf(b);
@@ -103,7 +103,7 @@ namespace SmarterBeds
         }
 
         /// <summary>What the pawn has now, in the same units (their company is not counted: they are not yet a couple room).</summary>
-        private static float ValueNow(Pawn p, Building_Bed bed, SmarterBedsSettings s) =>
+        private static float ValueNow(Pawn p, Building_Bed bed, WilsBetterBedsSettings s) =>
             bed == null ? NoBedMood : RoomComfort.Points(bed, p, s, company: false);
 
         private static IEnumerable<Room> RoomsWithBeds(Map map)
@@ -124,7 +124,7 @@ namespace SmarterBeds
             return BedScorer.IsCandidate(bed, a, a) && BedScorer.IsCandidate(bed, b, b);
         }
 
-        private static bool Move(Pawn a, Pawn b, Building_Bed oldA, Building_Bed oldB, Plan plan, SmarterBedsSettings s)
+        private static bool Move(Pawn a, Pawn b, Building_Bed oldA, Building_Bed oldB, Plan plan, WilsBetterBedsSettings s)
         {
             a.ownership.UnclaimBed();
             b.ownership.UnclaimBed();
@@ -148,7 +148,7 @@ namespace SmarterBeds
                 Log.Message($"[Wil's Better Beds] couple: {a.LabelShort} and {b.LabelShort} moved into a room of their own at {plan.bedA.Position}");
 
             if (s.negotiationMessages)
-                BriefMessage.Show("SmarterBeds_CoupleMoved".Translate(a.LabelShort, b.LabelShort), new LookTargets(a, b), s.messageSeconds);
+                BriefMessage.Show("WilsBetterBeds_CoupleMoved".Translate(a.LabelShort, b.LabelShort), new LookTargets(a, b), s.messageSeconds);
             return true;
         }
     }

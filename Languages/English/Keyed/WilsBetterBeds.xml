@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <!-- Bed inspector -->
+  <WilsBetterBeds_LockedInspect>Owner set by you: nobody negotiates for this room.</WilsBetterBeds_LockedInspect>
+  <WilsBetterBeds_ReportDozing>dozing in a chair.</WilsBetterBeds_ReportDozing>
+
+  <!-- Settings window: headings -->
+  <WilsBetterBeds_Sec_General>General</WilsBetterBeds_Sec_General>
+  <WilsBetterBeds_Sec_Scoring>Choosing a bed (scored in mood points)</WilsBetterBeds_Sec_Scoring>
+  <WilsBetterBeds_Sec_Negotiation>Negotiating for rooms</WilsBetterBeds_Sec_Negotiation>
+  <WilsBetterBeds_Sec_Roll>The roll</WilsBetterBeds_Sec_Roll>
+  <WilsBetterBeds_Sec_Feedback>Moods, messages and the log</WilsBetterBeds_Sec_Feedback>
+  <WilsBetterBeds_Sec_Rough>Sleeping rough</WilsBetterBeds_Sec_Rough>
+  <WilsBetterBeds_ResetDefaults>Reset all to defaults</WilsBetterBeds_ResetDefaults>
+  <WilsBetterBeds_Intro>Colonists pick the best free bed by how happy it would make them, and a colonist who sleeps badly can ask another colonist to swap rooms. Hover any setting for what it does. Everything here is scored in mood points, the same unit as the game's own thoughts.</WilsBetterBeds_Intro>
+
+  <!-- Settings window: general -->
+  <WilsBetterBeds_S_Enabled>Enable Wil's Better Beds</WilsBetterBeds_S_Enabled>
+  <WilsBetterBeds_S_Enabled_Tip>Master switch. Off, the game picks beds exactly as it normally does and nobody negotiates, moves in together or sleeps in a chair because of this mod.</WilsBetterBeds_S_Enabled_Tip>
+  <WilsBetterBeds_S_Verbose>Log decisions (debugging)</WilsBetterBeds_S_Verbose>
+  <WilsBetterBeds_S_Verbose_Tip>Writes every bed score, negotiation roll and mood effect to the dev log. Only useful for finding out why a colonist chose a bed; it makes the log very long.</WilsBetterBeds_S_Verbose_Tip>
+
+  <!-- Settings window: scoring -->
+  <WilsBetterBeds_S_RoomMood>Room mood weight: {0}</WilsBetterBeds_S_RoomMood>
+  <WilsBetterBeds_S_RoomMood_Tip>How much the room's quality counts when choosing a bed.
+Lower: colonists care less about the room and more about family, neighbours and title rules.
+Higher: they chase the nicest room above all else.
+1 uses the game's own mood for the room (a mediocre bedroom +1, a mediocre barracks -4, outdoors -4). Default 1.</WilsBetterBeds_S_RoomMood_Tip>
+  <WilsBetterBeds_S_Rest>Bed rest effectiveness weight: {0}</WilsBetterBeds_S_Rest>
+  <WilsBetterBeds_S_Rest_Tip>How much the bed's rest effectiveness counts, in mood points per 1.0.
+Lower: a better bed barely matters.
+Higher: colonists fight over the best furniture. Default 10.</WilsBetterBeds_S_Rest_Tip>
+  <WilsBetterBeds_S_Unmet>Royal bedroom penalty: {0}</WilsBetterBeds_S_Unmet>
+  <WilsBetterBeds_S_Unmet_Tip>How much a bed is marked down for a title-holder when the room is not a personal bedroom, or fails the title's requirements. The game charges -6 for each, so the default matches it.
+Lower: title-holders are less pushy about their rooms.
+Higher: they will take almost any room over a bad one, and ask for it. Default 6.</WilsBetterBeds_S_Unmet_Tip>
+
+  <!-- Settings window: negotiation -->
+  <WilsBetterBeds_S_Negotiate>Let colonists negotiate for better rooms</WilsBetterBeds_S_Negotiate>
+  <WilsBetterBeds_S_Negotiate_Tip>A colonist who is sleeping badly can choose, as recreation, to ask another colonist for their room. They walk over, talk, and a d20 roll decides it.
+Off: rooms never change hands by asking; the other features (bed choice, couples, chairs) still work.</WilsBetterBeds_S_Negotiate_Tip>
+  <WilsBetterBeds_S_Quality>Also negotiate for a plain upgrade</WilsBetterBeds_S_Quality>
+  <WilsBetterBeds_S_Quality_Tip>Off: colonists only negotiate to fix a real problem (a title or jealousy penalty, or being near someone they dislike).
+On: a big enough upgrade is reason enough, which makes room swapping much more common.</WilsBetterBeds_S_Quality_Tip>
+  <WilsBetterBeds_S_QualityGap>Upgrade needed to ask: {0} mood</WilsBetterBeds_S_QualityGap>
+  <WilsBetterBeds_S_QualityGap_Tip>How big an upgrade has to be, in mood points, to be worth asking for when nothing is actually wrong.
+Lower: lots of small swaps, more chatter and more bullied colonists.
+Higher: only dramatic upgrades. A barracks bed (-4) to a decent bedroom (+2) is a 6; a decent bedroom to a slightly better one is about 1. Default 3.</WilsBetterBeds_S_QualityGap_Tip>
+  <WilsBetterBeds_S_Cooldown>Days before the same two colonists negotiate again: {0}</WilsBetterBeds_S_Cooldown>
+  <WilsBetterBeds_S_Cooldown_Tip>Days before the same two colonists can negotiate with each other again, whoever asks.
+Lower: the same pair can keep trying.
+Higher: a refusal sticks for a long time. It also paces how often a moved couple is looked at again. Other pairs are not affected. Default 3.</WilsBetterBeds_S_Cooldown_Tip>
+  <WilsBetterBeds_S_Rematch>Days before a loser may challenge the same winner: {0}</WilsBetterBeds_S_Rematch>
+  <WilsBetterBeds_S_Rematch_Tip>Days before a colonist who lost their room can ask that same winner for it back.
+Lower: rooms can ping-pong between two colonists.
+Higher: once taken, a room stays taken. 0 switches the block off. Default 15.</WilsBetterBeds_S_Rematch_Tip>
+  <WilsBetterBeds_S_MinWin>Lowest chance worth trying: {0}</WilsBetterBeds_S_MinWin>
+  <WilsBetterBeds_S_MinWin_Tip>A colonist will not start a conversation they have less than this chance of winning.
+Lower: hopeless attempts, and more refusals.
+Higher: only confident colonists ask, so fewer negotiations overall. Default 10%.</WilsBetterBeds_S_MinWin_Tip>
+  <WilsBetterBeds_S_JoyWeight>How often it is chosen as recreation: x{0}</WilsBetterBeds_S_JoyWeight>
+  <WilsBetterBeds_S_JoyWeight_Tip>How often a colonist who wants a better room spends recreation on asking for it, compared with other recreation.
+Lower: rare, and a colonist may sleep badly for a long time.
+Higher: they act on it quickly and negotiation fills their free time. Default 1.</WilsBetterBeds_S_JoyWeight_Tip>
+
+  <!-- Settings window: the roll -->
+  <WilsBetterBeds_S_Title>Title weight: {0} per step</WilsBetterBeds_S_Title>
+  <WilsBetterBeds_S_Title_Tip>Roll points per royal title step (a Yeoman is 1 step, a Knight 3, a Baron 5), for the asker and for the defender.
+Lower: titles barely matter in a negotiation.
+Higher: a title-holder nearly always gets their way, and cannot be moved from their room. Default 3.</WilsBetterBeds_S_Title_Tip>
+  <WilsBetterBeds_S_Defender>Bonus for holding the room: {0}</WilsBetterBeds_S_Defender>
+  <WilsBetterBeds_S_Defender_Tip>Added to the defender's roll for already holding the room; ties also go to them.
+Lower: rooms change hands easily.
+Higher: asking rarely works, so fewer moves. Default 3.</WilsBetterBeds_S_Defender_Tip>
+  <WilsBetterBeds_S_Intimidate>Intimidation strength: x{0} Melee</WilsBetterBeds_S_Intimidate>
+  <WilsBetterBeds_S_Intimidate_Tip>Intimidation uses Melee skill times this, against the defender's Melee. It is only chosen when clearly stronger than persuading (Social), and never by kind colonists, those who cannot do violence, or against friends.
+Lower: bullying is rare and weak.
+Higher: fighters take rooms by force, leaving the loser with a 'pushed out of my room' debuff. Default 0.75.</WilsBetterBeds_S_Intimidate_Tip>
+  <WilsBetterBeds_S_Tenure>Most points from time in the colony: {0}</WilsBetterBeds_S_Tenure>
+  <WilsBetterBeds_S_Tenure_Tip>One roll point per 45 days in the colony, up to this limit, for both sides.
+Lower: new arrivals compete with veterans on equal terms.
+Higher: long-serving colonists keep their rooms. Default 3.</WilsBetterBeds_S_Tenure_Tip>
+  <WilsBetterBeds_S_Xp>Social experience for the asker: {0} (half on a fail)</WilsBetterBeds_S_Xp>
+  <WilsBetterBeds_S_Xp_Tip>Social experience the asker gains when they win. They gain half as much when they fail.
+Lower or 0: negotiating is not a way to train Social.
+Higher: a steady source of Social experience. Default 60.</WilsBetterBeds_S_Xp_Tip>
+
+  <!-- Settings window: feedback -->
+  <WilsBetterBeds_S_Moods>Negotiations change moods</WilsBetterBeds_S_Moods>
+  <WilsBetterBeds_S_Moods_Tip>Gives the people involved a mood effect: 0.25 x how much the loser likes the winner + 0.25 x how much better the room is (between 1 and 8 points, lasting 5 days).
+The loser is 'pushed out' (a debuff) or, if they like the winner and were persuaded, 'gave up the room for a friend' (a buff). The winner is pleased with the new room.
+Off: rooms change hands with no mood consequences.</WilsBetterBeds_S_Moods_Tip>
+  <WilsBetterBeds_S_Messages>Show a message when a room changes hands</WilsBetterBeds_S_Messages>
+  <WilsBetterBeds_S_Messages_Tip>A short notification in the top left, with the roll totals, when a room changes hands or a couple moves in, such as 'Alice talked Bob out of their bedroom (21 vs 17)'. It is also kept in the message history.
+Off: no notifications; the play log and thoughts are unaffected.</WilsBetterBeds_S_Messages_Tip>
+  <WilsBetterBeds_S_MessageSeconds>Notification stays for: {0} s</WilsBetterBeds_S_MessageSeconds>
+  <WilsBetterBeds_S_MessageSeconds_Tip>How long the notification stays fully visible before it fades out (the fade takes about half a second more).
+The game's normal messages stay for 13 seconds. Default 4.</WilsBetterBeds_S_MessageSeconds_Tip>
+  <WilsBetterBeds_S_Log>Show negotiations in the log and speech bubbles</WilsBetterBeds_S_Log>
+  <WilsBetterBeds_S_Log_Tip>Adds each conversation to the colonists' social log. Interaction Bubbles, if installed, shows it as speech bubbles over their heads.
+Off: nothing is added to the log, so no bubbles appear.</WilsBetterBeds_S_Log_Tip>
+
+  <!-- Settings window: control -->
+
+  <!-- Settings window: sleeping rough -->
+  <WilsBetterBeds_S_Chair>Sleep in a chair when there is no bed</WilsBetterBeds_S_Chair>
+  <WilsBetterBeds_S_Chair_Tip>A colonist with no bed to use dozes off in a free indoor chair instead of on the floor.
+Off: they sleep on the floor as in the base game ('slept on the ground', -4). Colonists who have a bed are never affected.</WilsBetterBeds_S_Chair_Tip>
+
+  <!-- Messages -->
+
+  <WilsBetterBeds_RoomWonPersuade>{0} talked {1} out of their bedroom. ({2} vs {3})</WilsBetterBeds_RoomWonPersuade>
+  <WilsBetterBeds_RoomWonIntimidate>{0} pushed {1} out of their bedroom. ({2} vs {3})</WilsBetterBeds_RoomWonIntimidate>
+  <WilsBetterBeds_RoomFailed>{0} tried to take {1}'s bedroom, but {1} held firm. ({2} vs {3})</WilsBetterBeds_RoomFailed>
+
+  <!-- Assign tab: rooms -->
+  <WilsBetterBeds_AssignRooms>Assign rooms</WilsBetterBeds_AssignRooms>
+  <WilsBetterBeds_AssignRooms_Tip>List every room that has beds, with who lives there, and assign owners room by room.</WilsBetterBeds_AssignRooms_Tip>
+  <WilsBetterBeds_RoomsTitle>Rooms with beds</WilsBetterBeds_RoomsTitle>
+  <WilsBetterBeds_RoomsBeds>Beds</WilsBetterBeds_RoomsBeds>
+  <WilsBetterBeds_RoomsBeds_Tip>Owners / sleeping spaces in the room's beds (not cribs). A double bed counts as two spaces. Sorts by free spaces.</WilsBetterBeds_RoomsBeds_Tip>
+  <WilsBetterBeds_RoomsScore>Room score</WilsBetterBeds_RoomsScore>
+  <WilsBetterBeds_RoomsScore_Tip>The room's impressiveness, the number the game uses for how nice a room is.</WilsBetterBeds_RoomsScore_Tip>
+  <WilsBetterBeds_RoomsSize>Size</WilsBetterBeds_RoomsSize>
+  <WilsBetterBeds_RoomsSize_Tip>Width x height of the room. Sorts by the number of cells.</WilsBetterBeds_RoomsSize_Tip>
+  <WilsBetterBeds_RoomsOwners>Owners</WilsBetterBeds_RoomsOwners>
+  <WilsBetterBeds_RoomsAssign>Assign</WilsBetterBeds_RoomsAssign>
+  <WilsBetterBeds_RoomsNoOwners>nobody</WilsBetterBeds_RoomsNoOwners>
+  <WilsBetterBeds_RoomsNone>No rooms with beds.</WilsBetterBeds_RoomsNone>
+  <WilsBetterBeds_RoomsCells>{0} cells</WilsBetterBeds_RoomsCells>
+  <WilsBetterBeds_RoomsHint>Hover a room to see its beds in the world. Double-click to jump there. Assigning an owner locks the bed against negotiation.</WilsBetterBeds_RoomsHint>
+
+  <!-- Neighbours -->
+
+  <WilsBetterBeds_Sec_Neighbors>Neighbours</WilsBetterBeds_Sec_Neighbors>
+  <WilsBetterBeds_S_Neighbors>Who sleeps nearby matters</WilsBetterBeds_S_Neighbors>
+  <WilsBetterBeds_S_Neighbors_Tip>Colonists want their bed away from people they dislike, and like to sleep near people of their own ideoligion and their own xenotype. 'Near' is the family distance in 'Near, far and disliked'.
+Off: none of these three count, in bed choice, negotiation or thoughts.</WilsBetterBeds_S_Neighbors_Tip>
+  <WilsBetterBeds_S_NeighborHostile>Disliked colonist nearby: -{0}</WilsBetterBeds_S_NeighborHostile>
+  <WilsBetterBeds_S_NeighborHostile_Tip>Mood penalty for each colonist (up to two) the pawn dislikes, who is not family, sleeping within the family distance. It is both what a bed is marked down by and the mood of the 'sleeping too close to...' thought.
+Lower: dislikes matter less.
+Higher: colonists will move across the base to avoid someone. 0 removes the effect. Default 4.</WilsBetterBeds_S_NeighborHostile_Tip>
+  <WilsBetterBeds_S_IdeoBonus>Same ideoligion nearby: +{0}</WilsBetterBeds_S_IdeoBonus>
+  <WilsBetterBeds_S_IdeoBonus_Tip>Mood bonus for sleeping within the family distance of someone who shares your ideoligion. Needs Ideology.
+Lower or 0: ideoligion does not affect where people sleep.
+Higher: believers cluster together. Default 2.</WilsBetterBeds_S_IdeoBonus_Tip>
+  <WilsBetterBeds_S_GeneBonus>"People like me" nearby: +{0}</WilsBetterBeds_S_GeneBonus>
+  <WilsBetterBeds_S_GeneBonus_Tip>Mood bonus ('people like me') for sleeping within the family distance of someone of your xenotype. Needs Biotech. Baseliners are left out, since in a colony of baseliners everyone would match.
+Lower or 0: xenotype does not matter.
+Higher: xenotypes cluster together. Default 2.</WilsBetterBeds_S_GeneBonus_Tip>
+
+  <!-- Family and couples -->
+  <WilsBetterBeds_CoupleMoved>{0} and {1} moved into a room of their own.</WilsBetterBeds_CoupleMoved>
+  <WilsBetterBeds_Sec_Family>Family and couples</WilsBetterBeds_Sec_Family>
+  <WilsBetterBeds_S_Family>Family and couples affect who sleeps where</WilsBetterBeds_S_Family>
+  <WilsBetterBeds_S_Family_Tip>Colonists prefer to share a room with family they get on with, want distance from relatives they do not, and couples want a room of their own that is near family.
+Off: family is ignored for bed choice, negotiation and thoughts (couple housing too).</WilsBetterBeds_S_Family_Tip>
+  <WilsBetterBeds_S_FamilyRadius>Family distance: {0} tiles</WilsBetterBeds_S_FamilyRadius>
+  <WilsBetterBeds_S_FamilyRadius_Tip>What counts as 'near' and 'far', in tiles between beds, for family, disliked colonists, ideoligion and xenotype.
+Lower: only close neighbours count, so people are easy to satisfy.
+Higher: nearly the whole base counts as near, so you cannot get away from anyone and a couple cannot be 'far from family'. Default 35.</WilsBetterBeds_S_FamilyRadius_Tip>
+  <WilsBetterBeds_S_FamilyHostile>Negative relations at opinion: {0}</WilsBetterBeds_S_FamilyHostile>
+  <WilsBetterBeds_S_FamilyHostile_Tip>How low a colonist's opinion of someone has to be before they count as disliked. Used for relatives and for neighbours.
+Closer to 0: they dislike many people, so more complaints.
+Closer to -100: only real enemies count. Default -20.</WilsBetterBeds_S_FamilyHostile_Tip>
+  <WilsBetterBeds_S_FamilyShare>Sharing a room with family: +{0}</WilsBetterBeds_S_FamilyShare>
+  <WilsBetterBeds_S_FamilyShare_Tip>Mood points a colonist counts for each relative they get on with (up to two) sharing their room.
+Lower: families are not especially kept together.
+Higher: family groups share rooms where they can. Default 2.</WilsBetterBeds_S_FamilyShare_Tip>
+  <WilsBetterBeds_S_FamilyNear>Too close to a disliked relative: -{0}</WilsBetterBeds_S_FamilyNear>
+  <WilsBetterBeds_S_FamilyNear_Tip>Mood penalty for a bed within the family distance of a relative they dislike. It is both what a bed is marked down by and the mood of the matching thought.
+Lower: family quarrels are put up with.
+Higher: they want to be far away from them. 0 removes the effect. Default 2 (less than for a stranger).</WilsBetterBeds_S_FamilyNear_Tip>
+  <WilsBetterBeds_S_FamilyFar>Couple far from family: -{0}</WilsBetterBeds_S_FamilyFar>
+  <WilsBetterBeds_S_FamilyFar_Tip>Mood penalty for a couple whose bed is outside the family distance of every relative they have. It is both the bed's mark-down and the mood of the 'room far from family' thought.
+Lower: couples may live anywhere.
+Higher: couples want to be near their family. 0 removes the effect. Default 4.</WilsBetterBeds_S_FamilyFar_Tip>
+  <WilsBetterBeds_S_CoupleHousing>Move new couples into a room of their own</WilsBetterBeds_S_CoupleHousing>
+  <WilsBetterBeds_S_CoupleHousing_Tip>Once an hour, a couple without a room to themselves who have a sleep penalty are moved into a free room if there is a clearly better one. Nobody is evicted, and beds whose owner you set are left alone.
+Off: couples are left where they are (they can still ask for rooms by negotiation).</WilsBetterBeds_S_CoupleHousing_Tip>
+  <WilsBetterBeds_S_CoupleRoom>Room for just the two of them: +{0}</WilsBetterBeds_S_CoupleRoom>
+  <WilsBetterBeds_S_CoupleRoom_Tip>Mood points a coupled colonist counts for a room that holds only them and their partner (half if the partner is not in it yet).
+Lower: couples care less about privacy.
+Higher: couples are moved into rooms of their own more readily. Default 3.</WilsBetterBeds_S_CoupleRoom_Tip>
+  <WilsBetterBeds_S_CoupleShare>Couple sharing with others: -{0}</WilsBetterBeds_S_CoupleShare>
+  <WilsBetterBeds_S_CoupleShare_Tip>Mood points counted against a bed in a room where someone other than their partner also has a bed.
+Lower: couples tolerate sharing.
+Higher: couples avoid barracks and shared rooms. Default 3.</WilsBetterBeds_S_CoupleShare_Tip>
+
+  <!-- Dev tools (god mode) -->
+  <WilsBetterBeds_ForceNegotiation>Force negotiation</WilsBetterBeds_ForceNegotiation>
+  <WilsBetterBeds_ForceNegotiation_Desc>Dev: send this colonist to negotiate for a better room right now. Skips the usual reasons, cooldowns and odds checks; they still walk over and roll.</WilsBetterBeds_ForceNegotiation_Desc>
+  <WilsBetterBeds_Force_NotEligible>{0} has no bed of their own that can be negotiated (shared, locked because you set the owner, or they cannot take part).</WilsBetterBeds_Force_NotEligible>
+  <WilsBetterBeds_Force_NoTarget>{0} has nobody to ask: no one else has a better bed that can be taken.</WilsBetterBeds_Force_NoTarget>
+
+  <WilsBetterBeds_RoomsCribs>Cribs</WilsBetterBeds_RoomsCribs>
+  <WilsBetterBeds_RoomsCribs_Tip>Babies / cribs in the room. Sorts by free cribs. Use Assign to put a baby in a crib.</WilsBetterBeds_RoomsCribs_Tip>
+
+  <!-- Diagnostics -->
+  <WilsBetterBeds_Sec_Diag>Compatibility</WilsBetterBeds_Sec_Diag>
+  <WilsBetterBeds_Diag_Summary>Hooks active: {0} of {1}. Hover for details.</WilsBetterBeds_Diag_Summary>
+  <!-- Settings window: extra switches -->
+  <WilsBetterBeds_Sec_Near>Near, far and disliked</WilsBetterBeds_Sec_Near>
+  <WilsBetterBeds_S_Titles>Royal title bedroom rules count</WilsBetterBeds_S_Titles>
+  <WilsBetterBeds_S_Titles_Tip>Needs Royalty. When on, a title-holder wants a personal bedroom that meets their title's requirements, and negotiation can be used to get one.
+Off: titles are ignored when choosing beds and for negotiation. The game's own title mood penalty still applies; this only stops this mod acting on it.</WilsBetterBeds_S_Titles_Tip>
+  <WilsBetterBeds_S_Jealousy>Jealous trait counts</WilsBetterBeds_S_Jealousy>
+  <WilsBetterBeds_S_Jealousy_Tip>When on, a Jealous colonist counts another colonist's much nicer room (10% more impressive) against their own, as the game does, and may ask for a better one.
+Off: Jealous colonists are given beds like anyone else.</WilsBetterBeds_S_Jealousy_Tip>
+  <WilsBetterBeds_S_ChairPenalty>Night in a chair: -{0}</WilsBetterBeds_S_ChairPenalty>
+  <WilsBetterBeds_S_ChairPenalty_Tip>The mood penalty for a night in a chair.
+Lower: sleeping in a chair is almost as good as a bed, so bedless colonists mind less.
+Higher: at 4 or more it is no better than the floor, so keep it under 4. Applies to new nights only. Default 3.</WilsBetterBeds_S_ChairPenalty_Tip>
+  <WilsBetterBeds_Sec_Interface>Interface</WilsBetterBeds_Sec_Interface>
+  <WilsBetterBeds_S_RoomsButton>Show the Assign rooms button</WilsBetterBeds_S_RoomsButton>
+  <WilsBetterBeds_S_RoomsButton_Tip>The 'Assign rooms' button at the top of the Assign tab, which opens the list of rooms.
+Off: the button is hidden (the rest of the mod is unaffected). Turn it off if another mod uses that space.</WilsBetterBeds_S_RoomsButton_Tip>
+  <!-- Settings window: live examples shown under a tooltip -->
+  <WilsBetterBeds_Live_Header>At this setting:</WilsBetterBeds_Live_Header>
+  <WilsBetterBeds_Live_Rest>A bed with 5% better rest effectiveness is worth {0} mood.</WilsBetterBeds_Live_Rest>
+  <WilsBetterBeds_Live_MinWin>A colonist needs at least a {0} chance of winning before they ask.</WilsBetterBeds_Live_MinWin>
+  <WilsBetterBeds_Live_Title>Each title step is worth +{0} roll points. Against an equal colonist that moves the asker's chance of winning from {1} to {2}.</WilsBetterBeds_Live_Title>
+  <WilsBetterBeds_Live_Defender>Two equal colonists: the asker wins about {0} of the time.</WilsBetterBeds_Live_Defender>
+  <WilsBetterBeds_Live_Intimidate>A Melee 12 colonist intimidates at {0}, against Social 12 for persuading, so they would {1}.</WilsBetterBeds_Live_Intimidate>
+  <WilsBetterBeds_Live_IntimidatePick>pick intimidation</WilsBetterBeds_Live_IntimidatePick>
+  <WilsBetterBeds_Live_IntimidateNo>still persuade</WilsBetterBeds_Live_IntimidateNo>
+  <WilsBetterBeds_Live_Tenure>Reaches the limit after {0} days in the colony.</WilsBetterBeds_Live_Tenure>
+  <WilsBetterBeds_Live_Xp>A win gives {0} Social experience, a failure {1}.</WilsBetterBeds_Live_Xp>
+  <WilsBetterBeds_Live_Chair>A night in a chair is {0} the floor (-4).</WilsBetterBeds_Live_Chair>
+  <WilsBetterBeds_Live_ChairBetter>{0} mood better than</WilsBetterBeds_Live_ChairBetter>
+  <WilsBetterBeds_Live_ChairWorse>{0} mood worse than (no reason to use a chair)</WilsBetterBeds_Live_ChairWorse>
+  <WilsBetterBeds_Live_ChairSame>the same as</WilsBetterBeds_Live_ChairSame>
+  <WilsBetterBeds_Live_Radius>Roughly the width of {0} standard 7x7 bedrooms side by side.</WilsBetterBeds_Live_Radius>
+
+  <!-- Couples negotiating together -->
+  <WilsBetterBeds_ConvinceWon>{0} talked {1} into moving to a better room. ({2} vs {3})</WilsBetterBeds_ConvinceWon>
+  <WilsBetterBeds_ConvinceWonIntimidate>{0} pushed {1} into agreeing to move. ({2} vs {3})</WilsBetterBeds_ConvinceWonIntimidate>
+  <WilsBetterBeds_ConvinceFailed>{1} would not hear of moving rooms with {0}. ({2} vs {3})</WilsBetterBeds_ConvinceFailed>
+  <WilsBetterBeds_CoupleRoomWonPersuade>{0} talked {1} out of their bedroom for {4} and themselves. ({2} vs {3})</WilsBetterBeds_CoupleRoomWonPersuade>
+  <WilsBetterBeds_CoupleRoomWonIntimidate>{0} pushed {1} out of their bedroom for {4} and themselves. ({2} vs {3})</WilsBetterBeds_CoupleRoomWonIntimidate>
+  <WilsBetterBeds_CoupleRoomFailed>{0} tried to take {1}'s bedroom for {4} and themselves, but {1} held firm. ({2} vs {3})</WilsBetterBeds_CoupleRoomFailed>
+  <WilsBetterBeds_S_CoupleNegotiate>Couples negotiate together</WilsBetterBeds_S_CoupleNegotiate>
+  <WilsBetterBeds_S_CoupleNegotiate_Tip>When both of a couple want a better room, the one who talks better (Social skill) asks for it, and if they win both move in. When only one wants to move, they first have to talk their partner round (leaning on them is possible only if the partner does not think well of them), and then the better talker asks. The room has to hold nobody but its owner and have space for two.\nOff: a colonist with a partner negotiates alone, as before, and only moves themselves.</WilsBetterBeds_S_CoupleNegotiate_Tip>
+  <!-- Guests (Hospitality) -->
+  <WilsBetterBeds_Sec_Guests>Guests and visitors</WilsBetterBeds_Sec_Guests>
+  <WilsBetterBeds_S_VisitorBeds>Visitors rent a guest bed (Hospitality)</WilsBetterBeds_S_VisitorBeds>
+  <WilsBetterBeds_S_VisitorBeds_Tip>Needs Hospitality's guest beds. Visitors who are not Hospitality guests, such as spaceport visitors and trade caravans, sleep on the floor even when they carry silver. With this on they rent a free guest bed when they can pay the rent, leaving the silver beside it as a guest would. One who cannot pay, and any guest without a bed, sleeps in a free chair if there is one (see Sleeping rough).\nHospitality's own guests are not affected: their bed choice is Hospitality's.\nOff: these visitors sleep where the game puts them.</WilsBetterBeds_S_VisitorBeds_Tip>
+  <WilsBetterBeds_S_PrisonerNear>Prisoners sleeping nearby: -{0}</WilsBetterBeds_S_PrisonerNear>
+  <WilsBetterBeds_S_PrisonerNear_Tip>Mood penalty for a bed within the family distance of a bed that has a prisoner assigned to it. Counted once however many there are. It is both what a bed is marked down by and the mood of the 'sleeping near prisoners' thought, and it applies to couples as it does to anyone.\nLower: prisoners nearby bother colonists less.\nHigher: they want their beds well away from the cells. 0 removes the effect. Default 3.</WilsBetterBeds_S_PrisonerNear_Tip>
+  <WilsBetterBeds_S_FreeBeds>Colonists with a sleep problem move to a better free bed</WilsBetterBeds_S_FreeBeds>
+  <WilsBetterBeds_S_FreeBeds_Tip>Once an hour, a colonist on their own who has a sleep-related mood penalty (a bad room, a title or jealousy problem, a disliked or prisoner neighbour) looks for an unowned bed that would fix it, or be a big upgrade, and moves there. A content colonist is never looked at, and couples are handled by 'Move new couples into a room of their own', which now also waits for a sleep penalty. Beds whose owner you set are never touched.\nOff: colonists keep their bed until they ask someone for theirs.</WilsBetterBeds_S_FreeBeds_Tip>
+  <WilsBetterBeds_MovedToFreeBed>{0} moved to a better room.</WilsBetterBeds_MovedToFreeBed>
+</LanguageData>

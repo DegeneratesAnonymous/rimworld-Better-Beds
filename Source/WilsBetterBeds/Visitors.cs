@@ -6,7 +6,7 @@ using RimWorld;
 using Verse;
 using Verse.AI.Group;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// Visitors: people who are on the map without belonging to the colony, and what they sleep in.

@@ -6,7 +6,7 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// A problem in one of this mod's own features should never break the game or fill the log. Code
@@ -98,7 +98,7 @@ namespace SmarterBeds
 
         /// <summary>One line for the options window.</summary>
         public static string Summary() =>
-            "SmarterBeds_Diag_Summary".Translate(Hooks, Classes).ToString();
+            "WilsBetterBeds_Diag_Summary".Translate(Hooks, Classes).ToString();
 
         public static string Details()
         {

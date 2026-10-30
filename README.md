@@ -49,8 +49,8 @@ RimWorld 1.7 moved from Unity to Ludeon's Waylith engine, which runs on .NET 10.
 You need the **.NET 10 SDK**. For an IDE, use Visual Studio 2026 or Rider 2026; Visual Studio 2022 and older Rider versions can't build .NET 10 projects. No RimWorld install is required to compile: game references come from the `Krafs.Rimworld.Ref` NuGet package.
 
 ```
-dotnet build Source/SmarterBeds/SmarterBeds.csproj -c Release                      # 1.7 -> 1.7/Assemblies/
-dotnet build Source/SmarterBeds/SmarterBeds.csproj -c Release -p:GameVersion=1.6   # 1.6 -> 1.6/Assemblies/
+dotnet build Source/WilsBetterBeds/WilsBetterBeds.csproj -c Release                      # 1.7 -> 1.7/Assemblies/
+dotnet build Source/WilsBetterBeds/WilsBetterBeds.csproj -c Release -p:GameVersion=1.6   # 1.6 -> 1.6/Assemblies/
 ```
 
 1.7 is unstable and changes often. When Ludeon pushes a 1.7 update, bump `RimWorldRefVersion` in the `.csproj` to the newest `1.7.*-unstable` Krafs.Rimworld.Ref package and rebuild. Code that must differ between versions can use `#if RW_1_7` / `#if RW_1_6`.
@@ -78,8 +78,8 @@ Enable dev mode, turn on **Log decisions** in mod settings, and watch the debug 
 | `About/` | Mod metadata and preview image |
 | `1.7/Assemblies/`, `1.6/Assemblies/` | Built DLLs per game version (ignored by git, built by CI) |
 | `Languages/English/Keyed/` | All player-facing text |
-| `Source/SmarterBeds/` | C# source |
-| `Source/SmarterBeds/Patches/` | Harmony patches |
+| `Source/WilsBetterBeds/` | C# source |
+| `Source/WilsBetterBeds/Patches/` | Harmony patches |
 | `scripts/` | `deploy-to-game.ps1`, builds and installs the mod into your game |
 
 ## Releasing

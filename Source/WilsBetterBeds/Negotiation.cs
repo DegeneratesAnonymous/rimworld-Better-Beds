@@ -5,7 +5,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// Room negotiation. A pawn who owns a bed and has a sleep-related mood debuff (or an unmet title
@@ -53,7 +53,7 @@ namespace SmarterBeds
             if (Find.TickManager.TicksGame % GenDate.TicksPerHour != 0) return;
             PruneLocks();
             PruneCooldowns();
-            var s = SmarterBedsMod.Settings;
+            var s = WilsBetterBedsMod.Settings;
             if (!s.enabled) return;
 
             foreach (var map in Find.Maps)
@@ -83,7 +83,7 @@ namespace SmarterBeds
         /// be better (it fixes a penalty, or is a big upgrade) give up their bed and take it. Couples are
         /// housed together by CoupleHousing instead. A few per map per hour, so nothing churns.
         /// </summary>
-        private void MoveToFreeBeds(Map map, SmarterBedsSettings s)
+        private void MoveToFreeBeds(Map map, WilsBetterBedsSettings s)
         {
             int moved = 0;
             foreach (var a in new List<Pawn>(map.mapPawns.FreeColonistsSpawned))
@@ -92,7 +92,7 @@ namespace SmarterBeds
             }
         }
 
-        private bool TryMoveToFreeBed(Pawn a, SmarterBedsSettings s)
+        private bool TryMoveToFreeBed(Pawn a, WilsBetterBedsSettings s)
         {
             if (!Eligible(a) || CoupleOf(a) != null || RecentlyMoved(a)) return false;
             if (!a.Awake() || a.Downed || a.Drafted || a.InMentalState || a.InBed() || PawnBusy.Is(a)) return false;
@@ -133,7 +133,7 @@ namespace SmarterBeds
             if (s.verboseLogging)
                 Log.Message($"[Wil's Better Beds] {a.LabelShort} moved to a free bed at {best.Position} (gain {bestGain:0.0})");
             if (s.negotiationMessages)
-                BriefMessage.Show("SmarterBeds_MovedToFreeBed".Translate(a.LabelShort), new LookTargets(a), s.messageSeconds);
+                BriefMessage.Show("WilsBetterBeds_MovedToFreeBed".Translate(a.LabelShort), new LookTargets(a), s.messageSeconds);
             return true;
         }
 
@@ -224,7 +224,7 @@ namespace SmarterBeds
             pairCooldownUntil.TryGetValue(PairKey(a, b), out int until) && Now < until;
 
         private void StartPairCooldown(Pawn a, Pawn b) =>
-            pairCooldownUntil[PairKey(a, b)] = Now + (int)(SmarterBedsMod.Settings.negotiationCooldownDays * GenDate.TicksPerDay);
+            pairCooldownUntil[PairKey(a, b)] = Now + (int)(WilsBetterBedsMod.Settings.negotiationCooldownDays * GenDate.TicksPerDay);
 
         // Memory thoughts that mean "the place I slept was bad". SleepDisturbed is noise, not the room.
         // Built on first use rather than when the class loads, so it never reads the game's DefOf
@@ -326,7 +326,7 @@ namespace SmarterBeds
 
         public bool WantsToNegotiate(Pawn a)
         {
-            var s = SmarterBedsMod.Settings;
+            var s = WilsBetterBedsMod.Settings;
             if (!s.enabled || !s.negotiationEnabled) return false;
 
             int now = Now;
@@ -354,7 +354,7 @@ namespace SmarterBeds
         public const int ModeCouple = 3;        // a couple asking for someone's room, for both of them
         public const int ModeCoupleForced = 4;  // dev tool version of the above
 
-        private static JobDef NegotiateJobDef => DefDatabase<JobDef>.GetNamedSilentFail("SmarterBeds_NegotiateRoom");
+        private static JobDef NegotiateJobDef => DefDatabase<JobDef>.GetNamedSilentFail("WilsBetterBeds_NegotiateRoom");
 
         /// <summary>
         /// The partner of a colonist who is half of a couple that can act together: each is the other's only
@@ -362,7 +362,7 @@ namespace SmarterBeds
         /// </summary>
         private static Pawn CoupleOf(Pawn a)
         {
-            if (!SmarterBedsMod.Settings.coupleNegotiationEnabled) return null;
+            if (!WilsBetterBedsMod.Settings.coupleNegotiationEnabled) return null;
             var lover = Family.SoleLover(a);
             if (lover == null || Family.SoleLover(lover) != a) return null;
             if (!Family.IsAdultColonist(lover) || lover.Map != a.Map || !Eligible(lover)) return null;
@@ -393,7 +393,7 @@ namespace SmarterBeds
             try
             {
                 using (PerfWatch.Measure("negotiation search"))
-                    return PlanJob(a, SmarterBedsMod.Settings);
+                    return PlanJob(a, WilsBetterBedsMod.Settings);
             }
             catch (System.Exception e)
             {
@@ -402,7 +402,7 @@ namespace SmarterBeds
             }
         }
 
-        private Job PlanJob(Pawn a, SmarterBedsSettings s)
+        private Job PlanJob(Pawn a, WilsBetterBedsSettings s)
         {
             var jobDef = NegotiateJobDef;
             if (jobDef == null) return null;
@@ -446,12 +446,12 @@ namespace SmarterBeds
         /// </summary>
         public void ForceNegotiation(Pawn a)
         {
-            var s = SmarterBedsMod.Settings;
+            var s = WilsBetterBedsMod.Settings;
             string problem = null;
             Pawn target = null;
 
             int mode = ModeForced;
-            if (!Eligible(a)) problem = "SmarterBeds_Force_NotEligible";
+            if (!Eligible(a)) problem = "WilsBetterBeds_Force_NotEligible";
             else
             {
                 var partner = CoupleOf(a);
@@ -461,7 +461,7 @@ namespace SmarterBeds
                     target = FindCoupleTarget(a, partner, s, true, out _, out _, out _, out _);
                 }
                 else target = FindLoser(a, a.ownership.OwnedBed, s, out _, out _, force: true);
-                if (target == null) problem = "SmarterBeds_Force_NoTarget";
+                if (target == null) problem = "WilsBetterBeds_Force_NoTarget";
             }
 
             if (problem != null)
@@ -481,10 +481,10 @@ namespace SmarterBeds
             try
             {
                 bool convince = mode == ModeConvince;
-                var contest = NegotiationRoll.Build(a, b, SmarterBedsMod.Settings, convince);
+                var contest = NegotiationRoll.Build(a, b, WilsBetterBedsMod.Settings, convince);
                 bool bully = contest.approach == NegotiationApproach.Intimidate;
-                string line = convince ? (bully ? "SmarterBeds_PressureToMove" : "SmarterBeds_ConvinceToMove")
-                                       : (bully ? "SmarterBeds_IntimidateForRoom" : "SmarterBeds_AskForRoom");
+                string line = convince ? (bully ? "WilsBetterBeds_PressureToMove" : "WilsBetterBeds_ConvinceToMove")
+                                       : (bully ? "WilsBetterBeds_IntimidateForRoom" : "WilsBetterBeds_AskForRoom");
                 NegotiationLog.Say(line, a, b);
             }
             catch (System.Exception e) { SafeLog.Once("starting a conversation", e); }
@@ -500,7 +500,7 @@ namespace SmarterBeds
             if (mode == ModeCouple || mode == ModeCoupleForced) { ResolveCouple(a, b, mode == ModeCoupleForced); return; }
 
             bool forced = mode == ModeForced;
-            var s = SmarterBedsMod.Settings;
+            var s = WilsBetterBedsMod.Settings;
             try
             {
                 if ((forced ? Eligible(a) : ComputeWants(a)) && Eligible(b))
@@ -526,7 +526,7 @@ namespace SmarterBeds
             }
         }
 
-        private static void GiveSocialExperience(Pawn asker, bool won, SmarterBedsSettings s)
+        private static void GiveSocialExperience(Pawn asker, bool won, WilsBetterBedsSettings s)
         {
             // Practice either way; half as much when turned down.
             asker.skills?.Learn(SkillDefOf.Social, won ? s.socialXpOnWin : s.socialXpOnWin / 2f);
@@ -535,7 +535,7 @@ namespace SmarterBeds
         /// <summary>Someone who was leaned on remembers it, win or lose.</summary>
         private static void Resent(Pawn victim, Pawn bully)
         {
-            var def = DefDatabase<ThoughtDef>.GetNamedSilentFail("SmarterBeds_PushedAround");
+            var def = DefDatabase<ThoughtDef>.GetNamedSilentFail("WilsBetterBeds_PushedAround");
             if (def != null) victim.needs?.mood?.thoughts?.memories?.TryGainMemory(def, bully);
         }
 
@@ -562,7 +562,7 @@ namespace SmarterBeds
         /// - The winner is pleased with the new room. Only the winner moves to a new room, so only
         ///   the winner gets this; someone who keeps their room is not rewarded for it.
         /// </summary>
-        private static void ApplyMoodEffects(Pawn winner, Pawn loser, NegotiationContest c, float gain, SmarterBedsSettings s, Pawn partner = null)
+        private static void ApplyMoodEffects(Pawn winner, Pawn loser, NegotiationContest c, float gain, WilsBetterBedsSettings s, Pawn partner = null)
         {
             if (!s.negotiationMoodEffects) return;
 
@@ -572,35 +572,35 @@ namespace SmarterBeds
             if (c.approach == NegotiationApproach.Intimidate)
             {
                 float points = Mathf.Clamp(MoodWeight * Mathf.Abs(relationship) + MoodWeight * quality, MoodFloor, MoodCap);
-                GainMood(loser, "SmarterBeds_BulliedOutOfRoom", points);
+                GainMood(loser, "WilsBetterBeds_BulliedOutOfRoom", points);
             }
             else if (relationship > 0f)
             {
                 float points = Mathf.Clamp(MoodWeight * relationship + MoodWeight * quality, MoodFloor, MoodCap);
-                GainMood(loser, "SmarterBeds_GaveUpRoomHappily", points);
+                GainMood(loser, "WilsBetterBeds_GaveUpRoomHappily", points);
             }
 
             float winnerPoints = Mathf.Clamp(MoodWeight * Mathf.Max(0f, relationship) + MoodWeight * quality, MoodFloor, MoodCap);
-            GainMood(winner, "SmarterBeds_GotBetterRoom", winnerPoints);
-            if (partner != null) GainMood(partner, "SmarterBeds_GotBetterRoom", winnerPoints); // they moved too
+            GainMood(winner, "WilsBetterBeds_GotBetterRoom", winnerPoints);
+            if (partner != null) GainMood(partner, "WilsBetterBeds_GotBetterRoom", winnerPoints); // they moved too
 
             if (s.verboseLogging)
                 Log.Message($"[Wil's Better Beds] mood: {loser.LabelShort} relationship {relationship:0.0}, quality {quality:0.0}; winner +{winnerPoints:0.0}");
         }
 
-        private static void Refuse(Pawn asker, Pawn defender, NegotiationContest c, int askerTotal, int defenderTotal, SmarterBedsSettings s)
+        private static void Refuse(Pawn asker, Pawn defender, NegotiationContest c, int askerTotal, int defenderTotal, WilsBetterBedsSettings s)
         {
             if (s.verboseLogging)
                 Log.Message($"[Wil's Better Beds] negotiation failed: {asker.LabelShort} vs {defender.LabelShort} ({c.approach}) {askerTotal} vs {defenderTotal}");
 
-            NegotiationLog.Say("SmarterBeds_RefuseRoom", defender, asker);
+            NegotiationLog.Say("WilsBetterBeds_RefuseRoom", defender, asker);
 
             if (s.negotiationMessages)
-                BriefMessage.Show("SmarterBeds_RoomFailed".Translate(asker.LabelShort, defender.LabelShort, askerTotal, defenderTotal),
+                BriefMessage.Show("WilsBetterBeds_RoomFailed".Translate(asker.LabelShort, defender.LabelShort, askerTotal, defenderTotal),
                     new LookTargets(asker, defender), s.messageSeconds);
         }
 
-        private Pawn FindLoser(Pawn a, Building_Bed bedA, SmarterBedsSettings s, out float bestGain, out NegotiationContest bestContest, Pawn only = null, bool force = false)
+        private Pawn FindLoser(Pawn a, Building_Bed bedA, WilsBetterBedsSettings s, out float bestGain, out NegotiationContest bestContest, Pawn only = null, bool force = false)
         {
             bestGain = 0f;
             bestContest = default;
@@ -655,7 +655,7 @@ namespace SmarterBeds
             return best;
         }
 
-        private bool Swap(Pawn winner, Pawn loser, float gain, SmarterBedsSettings s, NegotiationContest contest, int winnerTotal, int loserTotal)
+        private bool Swap(Pawn winner, Pawn loser, float gain, WilsBetterBedsSettings s, NegotiationContest contest, int winnerTotal, int loserTotal)
         {
             var wonBed = loser.ownership.OwnedBed;
             var oldBed = winner.ownership.OwnedBed;
@@ -678,12 +678,12 @@ namespace SmarterBeds
             if (s.verboseLogging)
                 Log.Message($"[Wil's Better Beds] negotiation: {winner.LabelShort} took {loser.LabelShort}'s bed at {wonBed.Position} (gain {gain:0.0})");
 
-            NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_YieldRoom" : "SmarterBeds_AgreeToRoom", loser, winner);
+            NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "WilsBetterBeds_YieldRoom" : "WilsBetterBeds_AgreeToRoom", loser, winner);
             ApplyMoodEffects(winner, loser, contest, gain, s);
 
             if (s.negotiationMessages)
             {
-                string key = contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_RoomWonIntimidate" : "SmarterBeds_RoomWonPersuade";
+                string key = contest.approach == NegotiationApproach.Intimidate ? "WilsBetterBeds_RoomWonIntimidate" : "WilsBetterBeds_RoomWonPersuade";
                 BriefMessage.Show(key.Translate(winner.LabelShort, loser.LabelShort, winnerTotal, loserTotal),
                     new LookTargets(winner, loser), s.messageSeconds);
             }
@@ -699,7 +699,7 @@ namespace SmarterBeds
         /// </summary>
         private void ResolveConvince(Pawn wanter, Pawn partner)
         {
-            var s = SmarterBedsMod.Settings;
+            var s = WilsBetterBedsMod.Settings;
             try
             {
                 if (Eligible(wanter) && CoupleOf(wanter) == partner)
@@ -714,11 +714,11 @@ namespace SmarterBeds
 
                         if (s.negotiationMessages)
                         {
-                            string key = !won ? "SmarterBeds_ConvinceFailed" : bully ? "SmarterBeds_ConvinceWonIntimidate" : "SmarterBeds_ConvinceWon";
+                            string key = !won ? "WilsBetterBeds_ConvinceFailed" : bully ? "WilsBetterBeds_ConvinceWonIntimidate" : "WilsBetterBeds_ConvinceWon";
                             BriefMessage.Show(key.Translate(wanter.LabelShort, partner.LabelShort, askerTotal, partnerTotal),
                                 new LookTargets(wanter, partner), s.messageSeconds);
                         }
-                        NegotiationLog.Say(won ? "SmarterBeds_AgreeToMove" : "SmarterBeds_RefuseToMove", partner, wanter);
+                        NegotiationLog.Say(won ? "WilsBetterBeds_AgreeToMove" : "WilsBetterBeds_RefuseToMove", partner, wanter);
                         if (won) SendBetterTalker(wanter, partner, s);
                     }
                 }
@@ -728,7 +728,7 @@ namespace SmarterBeds
         }
 
         /// <summary>The partner is on board: whoever talks better of the two goes to ask for the room.</summary>
-        private void SendBetterTalker(Pawn wanter, Pawn partner, SmarterBedsSettings s)
+        private void SendBetterTalker(Pawn wanter, Pawn partner, WilsBetterBedsSettings s)
         {
             var negotiator = BetterTalker(wanter, partner);
             var other = negotiator == wanter ? partner : wanter;
@@ -751,7 +751,7 @@ namespace SmarterBeds
         /// <summary>The couple asks for someone's room. A win moves both of them in; the owner is left to find another bed.</summary>
         private void ResolveCouple(Pawn asker, Pawn owner, bool forced)
         {
-            var s = SmarterBedsMod.Settings;
+            var s = WilsBetterBedsMod.Settings;
             try
             {
                 var partner = CoupleOf(asker);
@@ -773,18 +773,18 @@ namespace SmarterBeds
             finally { StartPairCooldown(asker, owner); }
         }
 
-        private void RefuseCouple(Pawn asker, Pawn partner, Pawn owner, NegotiationContest c, int askerTotal, int ownerTotal, SmarterBedsSettings s)
+        private void RefuseCouple(Pawn asker, Pawn partner, Pawn owner, NegotiationContest c, int askerTotal, int ownerTotal, WilsBetterBedsSettings s)
         {
             if (s.verboseLogging)
                 Log.Message($"[Wil's Better Beds] couple negotiation failed: {asker.LabelShort} (for {partner.LabelShort}) vs {owner.LabelShort} ({c.approach}) {askerTotal} vs {ownerTotal}");
-            NegotiationLog.Say("SmarterBeds_RefuseRoom", owner, asker);
+            NegotiationLog.Say("WilsBetterBeds_RefuseRoom", owner, asker);
             if (s.negotiationMessages)
-                BriefMessage.Show("SmarterBeds_CoupleRoomFailed".Translate(asker.LabelShort, owner.LabelShort, askerTotal, ownerTotal, partner.LabelShort),
+                BriefMessage.Show("WilsBetterBeds_CoupleRoomFailed".Translate(asker.LabelShort, owner.LabelShort, askerTotal, ownerTotal, partner.LabelShort),
                     new LookTargets(asker, partner, owner), s.messageSeconds);
         }
 
         private bool MoveCouple(Pawn asker, Pawn partner, Pawn owner, Building_Bed bedAsker, Building_Bed bedPartner, float gain,
-            SmarterBedsSettings s, NegotiationContest contest, int askerTotal, int ownerTotal)
+            WilsBetterBedsSettings s, NegotiationContest contest, int askerTotal, int ownerTotal)
         {
             var ownerBed = owner.ownership.OwnedBed;
             var oldAsker = asker.ownership.OwnedBed;
@@ -815,12 +815,12 @@ namespace SmarterBeds
             if (s.verboseLogging)
                 Log.Message($"[Wil's Better Beds] couple negotiation: {asker.LabelShort} and {partner.LabelShort} took {owner.LabelShort}'s room (gain {gain:0.0})");
 
-            NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_YieldRoom" : "SmarterBeds_AgreeToRoom", owner, asker);
+            NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "WilsBetterBeds_YieldRoom" : "WilsBetterBeds_AgreeToRoom", owner, asker);
             ApplyMoodEffects(asker, owner, contest, gain, s, partner);
 
             if (s.negotiationMessages)
             {
-                string key = contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_CoupleRoomWonIntimidate" : "SmarterBeds_CoupleRoomWonPersuade";
+                string key = contest.approach == NegotiationApproach.Intimidate ? "WilsBetterBeds_CoupleRoomWonIntimidate" : "WilsBetterBeds_CoupleRoomWonPersuade";
                 BriefMessage.Show(key.Translate(asker.LabelShort, owner.LabelShort, askerTotal, ownerTotal, partner.LabelShort),
                     new LookTargets(asker, partner, owner), s.messageSeconds);
             }
@@ -832,7 +832,7 @@ namespace SmarterBeds
         /// it would be better for them (a penalty fixed, or a big enough upgrade), and the owner is free to be asked.
         /// Returns the owner and the two beds the couple would take, or null.
         /// </summary>
-        private Pawn FindCoupleTarget(Pawn n, Pawn m, SmarterBedsSettings s, bool force, out float bestGain, out NegotiationContest bestContest,
+        private Pawn FindCoupleTarget(Pawn n, Pawn m, WilsBetterBedsSettings s, bool force, out float bestGain, out NegotiationContest bestContest,
             out Building_Bed bestBedN, out Building_Bed bestBedM, Pawn only = null)
         {
             bestGain = 0f;
