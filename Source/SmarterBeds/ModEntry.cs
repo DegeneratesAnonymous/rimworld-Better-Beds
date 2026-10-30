@@ -14,7 +14,7 @@ namespace SmarterBeds
         public SmarterBedsMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<SmarterBedsSettings>();
-            new Harmony("yourname.smarterbeds").PatchAll();
+            new Harmony("spacemanwil.smarterbeds").PatchAll();
             Log.Message("[Smarter Beds] Loaded.");
         }
 
