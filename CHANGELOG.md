@@ -21,6 +21,7 @@ All notable changes are listed here. Versions follow semantic versioning.
 - Couple housing scores each bed once per person instead of once per pair of beds
 
 ### Added
+- Couples negotiate together: when both want a better room the one with the higher Social skill asks, and a win moves both of them in. When only one wants to move they first talk their partner round (intimidation only if the partner does not think well of them), then the better talker asks. The room must hold nobody but its owner and have space for two. New setting to turn it off, and the dev Force negotiation gizmo handles couples
 - Neighbours: a colonist dislikes sleeping within the family distance (35 tiles) of someone they dislike who is not family (-4, up to two people), and likes sleeping near someone of their own ideoligion (+2) or xenotype (+2, "people like me", baseliners excluded). All three count in bed choice, couple housing and negotiation, and show as thoughts
 - A disliked relative nearby now costs less than a disliked stranger (-2 against -4, setting renamed so old saved values do not carry over)
 - Initial scaffold

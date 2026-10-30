@@ -231,4 +231,14 @@ Off: the button is hidden (the rest of the mod is unaffected). Turn it off if an
   <SmarterBeds_Live_ChairWorse>{0} mood worse than (no reason to use a chair)</SmarterBeds_Live_ChairWorse>
   <SmarterBeds_Live_ChairSame>the same as</SmarterBeds_Live_ChairSame>
   <SmarterBeds_Live_Radius>Roughly the width of {0} standard 7x7 bedrooms side by side.</SmarterBeds_Live_Radius>
+
+  <!-- Couples negotiating together -->
+  <SmarterBeds_ConvinceWon>{0} talked {1} into moving to a better room. ({2} vs {3})</SmarterBeds_ConvinceWon>
+  <SmarterBeds_ConvinceWonIntimidate>{0} pushed {1} into agreeing to move. ({2} vs {3})</SmarterBeds_ConvinceWonIntimidate>
+  <SmarterBeds_ConvinceFailed>{1} would not hear of moving rooms with {0}. ({2} vs {3})</SmarterBeds_ConvinceFailed>
+  <SmarterBeds_CoupleRoomWonPersuade>{0} talked {1} out of their bedroom for {4} and themselves. ({2} vs {3})</SmarterBeds_CoupleRoomWonPersuade>
+  <SmarterBeds_CoupleRoomWonIntimidate>{0} pushed {1} out of their bedroom for {4} and themselves. ({2} vs {3})</SmarterBeds_CoupleRoomWonIntimidate>
+  <SmarterBeds_CoupleRoomFailed>{0} tried to take {1}'s bedroom for {4} and themselves, but {1} held firm. ({2} vs {3})</SmarterBeds_CoupleRoomFailed>
+  <SmarterBeds_S_CoupleNegotiate>Couples negotiate together</SmarterBeds_S_CoupleNegotiate>
+  <SmarterBeds_S_CoupleNegotiate_Tip>When both of a couple want a better room, the one who talks better (Social skill) asks for it, and if they win both move in. When only one wants to move, they first have to talk their partner round (leaning on them is possible only if the partner does not think well of them), and then the better talker asks. The room has to hold nobody but its owner and have space for two.\nOff: a colonist with a partner negotiates alone, as before, and only moves themselves.</SmarterBeds_S_CoupleNegotiate_Tip>
 </LanguageData>

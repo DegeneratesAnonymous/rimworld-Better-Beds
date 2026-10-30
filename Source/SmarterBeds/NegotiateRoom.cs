@@ -30,9 +30,7 @@ namespace SmarterBeds
         {
             try
             {
-                var target = GameComponent_BedNegotiation.Instance?.FindNegotiationTarget(pawn);
-                if (target == null) return null;
-                return JobMaker.MakeJob(def.jobDef, target);
+                return GameComponent_BedNegotiation.Instance?.MakeNegotiationJob(pawn);
             }
             catch (System.Exception e)
             {
@@ -131,7 +129,7 @@ namespace SmarterBeds
                 initAction = () =>
                 {
                     if (!listenerHeld) { listenerHeld = true; TalkHold.Start(Target, pawn, TalkTicks); }
-                    GameComponent_BedNegotiation.Instance?.BeginConversation(pawn, Target);
+                    GameComponent_BedNegotiation.Instance?.BeginConversation(pawn, Target, job.count);
                 }
             };
 
@@ -152,8 +150,9 @@ namespace SmarterBeds
                 defaultCompleteMode = ToilCompleteMode.Instant,
                 initAction = () =>
                 {
-                    GameComponent_BedNegotiation.Instance?.ResolveNegotiation(pawn, Target, job.count == 1);
+                    // Let them go first: settling it may send one of them off on a new errand.
                     TalkHold.Release(Target);
+                    GameComponent_BedNegotiation.Instance?.ResolveNegotiation(pawn, Target, job.count);
                 }
             };
         }

@@ -274,8 +274,43 @@ namespace SmarterBeds
             return HasSleepDebuff(a, includeMemories: !RecentlyMoved(a));
         }
 
-        /// <summary>Finds who this pawn would negotiate with, or null. Throttled to once an hour per pawn.</summary>
-        public Pawn FindNegotiationTarget(Pawn a)
+        // What a negotiation job is for. Stored in the job's count (the game leaves it at -1).
+        public const int ModeForced = 1;        // dev tool: one colonist, ignoring the usual reasons
+        public const int ModeConvince = 2;      // one of a couple talking their partner into moving
+        public const int ModeCouple = 3;        // a couple asking for someone's room, for both of them
+        public const int ModeCoupleForced = 4;  // dev tool version of the above
+
+        private static JobDef NegotiateJobDef => DefDatabase<JobDef>.GetNamedSilentFail("SmarterBeds_NegotiateRoom");
+
+        /// <summary>
+        /// The partner of a colonist who is half of a couple that can act together: each is the other's only
+        /// love partner and both are settled adults who own a bed the player has not locked.
+        /// </summary>
+        private static Pawn CoupleOf(Pawn a)
+        {
+            if (!SmarterBedsMod.Settings.coupleNegotiationEnabled) return null;
+            var lover = Family.SoleLover(a);
+            if (lover == null || Family.SoleLover(lover) != a) return null;
+            if (!Family.IsAdultColonist(lover) || lover.Map != a.Map || !Eligible(lover)) return null;
+            return lover;
+        }
+
+        /// <summary>Of a couple, whoever talks better. Equal skill: the lower id, so everyone agrees who it is.</summary>
+        private static Pawn BetterTalker(Pawn a, Pawn b)
+        {
+            float x = NegotiationRoll.SocialLevel(a), y = NegotiationRoll.SocialLevel(b);
+            if (x != y) return x > y ? a : b;
+            return a.thingIDNumber <= b.thingIDNumber ? a : b;
+        }
+
+        /// <summary>
+        /// What this pawn should do about their room, as a job, or null. Throttled to once an hour per pawn.
+        /// - On their own: ask the owner of a better room.
+        /// - In a couple where both want to move: the better talker asks, and the room is for both of them.
+        /// - In a couple where only this one wants to move: first talk the partner round, and then the
+        ///   better talker of the two asks for the room.
+        /// </summary>
+        public Job MakeNegotiationJob(Pawn a)
         {
             if (!WantsToNegotiate(a)) return null;
             if (lastChecked.TryGetValue(a.thingIDNumber, out int last) && Now >= last && Now - last < RecheckTicks) return null;
@@ -284,13 +319,51 @@ namespace SmarterBeds
             try
             {
                 using (PerfWatch.Measure("negotiation search"))
-                    return FindLoser(a, a.ownership.OwnedBed, SmarterBedsMod.Settings, out _, out _);
+                    return PlanJob(a, SmarterBedsMod.Settings);
             }
             catch (System.Exception e)
             {
                 SafeLog.Once("finding someone to negotiate with", e);
                 return null;
             }
+        }
+
+        private Job PlanJob(Pawn a, SmarterBedsSettings s)
+        {
+            var jobDef = NegotiateJobDef;
+            if (jobDef == null) return null;
+
+            var partner = CoupleOf(a);
+            if (partner == null)
+            {
+                var loser = FindLoser(a, a.ownership.OwnedBed, s, out _, out _);
+                return loser == null ? null : JobMaker.MakeJob(jobDef, loser);
+            }
+
+            var negotiator = BetterTalker(a, partner);
+            if (ComputeWants(partner))
+            {
+                // Both want out. The better talker goes; the other leaves it to them.
+                if (negotiator != a) return null;
+                var target = FindCoupleTarget(a, partner, s, false, out _, out _, out _, out _);
+                return target == null ? null : MakeNegotiationJob(jobDef, target, ModeCouple);
+            }
+
+            // Only this one wants out: the partner has to be talked round first.
+            if (PairOnCooldown(a, partner)) return null;
+            var convince = NegotiationRoll.Build(a, partner, s, convince: true);
+            if (!convince.possible || convince.winChance < s.minWinChance) return null;
+            var other = negotiator == a ? partner : a;
+            // No point persuading them if there is no room to ask for afterwards.
+            if (FindCoupleTarget(negotiator, other, s, false, out _, out _, out _, out _) == null) return null;
+            return MakeNegotiationJob(jobDef, partner, ModeConvince);
+        }
+
+        private static Job MakeNegotiationJob(JobDef def, Pawn target, int mode)
+        {
+            var job = JobMaker.MakeJob(def, target);
+            job.count = mode;
+            return job;
         }
 
         /// <summary>
@@ -303,10 +376,17 @@ namespace SmarterBeds
             string problem = null;
             Pawn target = null;
 
+            int mode = ModeForced;
             if (!Eligible(a)) problem = "SmarterBeds_Force_NotEligible";
             else
             {
-                target = FindLoser(a, a.ownership.OwnedBed, s, out _, out _, force: true);
+                var partner = CoupleOf(a);
+                if (partner != null)
+                {
+                    mode = ModeCoupleForced;
+                    target = FindCoupleTarget(a, partner, s, true, out _, out _, out _, out _);
+                }
+                else target = FindLoser(a, a.ownership.OwnedBed, s, out _, out _, force: true);
                 if (target == null) problem = "SmarterBeds_Force_NoTarget";
             }
 
@@ -316,20 +396,22 @@ namespace SmarterBeds
                 return;
             }
 
-            var jobDef = DefDatabase<JobDef>.GetNamedSilentFail("SmarterBeds_NegotiateRoom");
+            var jobDef = NegotiateJobDef;
             if (jobDef == null) return;
-            var job = JobMaker.MakeJob(jobDef, target);
-            job.count = 1; // marks it as forced for the job driver
-            a.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+            a.jobs.TryTakeOrderedJob(MakeNegotiationJob(jobDef, target, mode), JobTag.Misc);
         }
 
         /// <summary>The asker has walked over: they make their pitch (a bubble over their head).</summary>
-        public void BeginConversation(Pawn a, Pawn b)
+        public void BeginConversation(Pawn a, Pawn b, int mode = 0)
         {
             try
             {
-                var contest = NegotiationRoll.Build(a, b, SmarterBedsMod.Settings);
-                NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_IntimidateForRoom" : "SmarterBeds_AskForRoom", a, b);
+                bool convince = mode == ModeConvince;
+                var contest = NegotiationRoll.Build(a, b, SmarterBedsMod.Settings, convince);
+                bool bully = contest.approach == NegotiationApproach.Intimidate;
+                string line = convince ? (bully ? "SmarterBeds_PressureToMove" : "SmarterBeds_ConvinceToMove")
+                                       : (bully ? "SmarterBeds_IntimidateForRoom" : "SmarterBeds_AskForRoom");
+                NegotiationLog.Say(line, a, b);
             }
             catch (System.Exception e) { SafeLog.Once("starting a conversation", e); }
         }
@@ -338,8 +420,12 @@ namespace SmarterBeds
         /// End of the conversation: re-checks everything (the world moved while they walked over),
         /// rolls, and swaps on a win. The two are on cooldown with each other afterwards either way.
         /// </summary>
-        public void ResolveNegotiation(Pawn a, Pawn b, bool forced = false)
+        public void ResolveNegotiation(Pawn a, Pawn b, int mode = 0)
         {
+            if (mode == ModeConvince) { ResolveConvince(a, b); return; }
+            if (mode == ModeCouple || mode == ModeCoupleForced) { ResolveCouple(a, b, mode == ModeCoupleForced); return; }
+
+            bool forced = mode == ModeForced;
             var s = SmarterBedsMod.Settings;
             try
             {
@@ -402,7 +488,7 @@ namespace SmarterBeds
         /// - The winner is pleased with the new room. Only the winner moves to a new room, so only
         ///   the winner gets this; someone who keeps their room is not rewarded for it.
         /// </summary>
-        private static void ApplyMoodEffects(Pawn winner, Pawn loser, NegotiationContest c, float gain, SmarterBedsSettings s)
+        private static void ApplyMoodEffects(Pawn winner, Pawn loser, NegotiationContest c, float gain, SmarterBedsSettings s, Pawn partner = null)
         {
             if (!s.negotiationMoodEffects) return;
 
@@ -422,6 +508,7 @@ namespace SmarterBeds
 
             float winnerPoints = Mathf.Clamp(MoodWeight * Mathf.Max(0f, relationship) + MoodWeight * quality, MoodFloor, MoodCap);
             GainMood(winner, "SmarterBeds_GotBetterRoom", winnerPoints);
+            if (partner != null) GainMood(partner, "SmarterBeds_GotBetterRoom", winnerPoints); // they moved too
 
             if (s.verboseLogging)
                 Log.Message($"[Smarter Beds] mood: {loser.LabelShort} relationship {relationship:0.0}, quality {quality:0.0}; winner +{winnerPoints:0.0}");
@@ -527,6 +614,231 @@ namespace SmarterBeds
                     new LookTargets(winner, loser), s.messageSeconds);
             }
             return true;
+        }
+
+
+        // ---- couples
+
+        /// <summary>
+        /// The first half of a couple talking their partner into moving. If it works, whichever of the two
+        /// talks better goes and asks for the room.
+        /// </summary>
+        private void ResolveConvince(Pawn wanter, Pawn partner)
+        {
+            var s = SmarterBedsMod.Settings;
+            try
+            {
+                if (Eligible(wanter) && CoupleOf(wanter) == partner)
+                {
+                    var contest = NegotiationRoll.Build(wanter, partner, s, convince: true);
+                    if (contest.possible)
+                    {
+                        bool won = NegotiationRoll.Roll(contest, out int askerTotal, out int partnerTotal);
+                        GiveSocialExperience(wanter, won, s);
+                        bool bully = contest.approach == NegotiationApproach.Intimidate;
+                        if (bully) Resent(partner, wanter);
+
+                        if (s.negotiationMessages)
+                        {
+                            string key = !won ? "SmarterBeds_ConvinceFailed" : bully ? "SmarterBeds_ConvinceWonIntimidate" : "SmarterBeds_ConvinceWon";
+                            BriefMessage.Show(key.Translate(wanter.LabelShort, partner.LabelShort, askerTotal, partnerTotal),
+                                new LookTargets(wanter, partner), s.messageSeconds);
+                        }
+                        NegotiationLog.Say(won ? "SmarterBeds_AgreeToMove" : "SmarterBeds_RefuseToMove", partner, wanter);
+                        if (won) SendBetterTalker(wanter, partner, s);
+                    }
+                }
+            }
+            catch (System.Exception e) { SafeLog.Once("talking a partner into moving", e); }
+            finally { StartPairCooldown(wanter, partner); }
+        }
+
+        /// <summary>The partner is on board: whoever talks better of the two goes to ask for the room.</summary>
+        private void SendBetterTalker(Pawn wanter, Pawn partner, SmarterBedsSettings s)
+        {
+            var negotiator = BetterTalker(wanter, partner);
+            var other = negotiator == wanter ? partner : wanter;
+            var target = FindCoupleTarget(negotiator, other, s, false, out _, out _, out _, out _);
+            var jobDef = NegotiateJobDef;
+            if (target == null || jobDef == null) return;
+
+            var job = MakeNegotiationJob(jobDef, target, ModeCouple);
+            if (negotiator == wanter)
+            {
+                // Still finishing the conversation; this follows straight after it.
+                negotiator.jobs.jobQueue.EnqueueFirst(job, JobTag.Misc);
+            }
+            else if (!negotiator.Downed && negotiator.Awake())
+            {
+                negotiator.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+            }
+        }
+
+        /// <summary>The couple asks for someone's room. A win moves both of them in; the owner is left to find another bed.</summary>
+        private void ResolveCouple(Pawn asker, Pawn owner, bool forced)
+        {
+            var s = SmarterBedsMod.Settings;
+            try
+            {
+                var partner = CoupleOf(asker);
+                if (partner != null && Eligible(asker) && Eligible(owner) && (forced || ComputeWants(asker) || ComputeWants(partner)))
+                {
+                    var target = FindCoupleTarget(asker, partner, s, forced, out float gain, out var contest,
+                        out var bedAsker, out var bedPartner, only: owner);
+                    if (target == owner)
+                    {
+                        bool won = NegotiationRoll.Roll(contest, out int askerTotal, out int ownerTotal);
+                        GiveSocialExperience(asker, won, s);
+                        if (contest.approach == NegotiationApproach.Intimidate) Resent(owner, asker);
+                        if (won) MoveCouple(asker, partner, owner, bedAsker, bedPartner, gain, s, contest, askerTotal, ownerTotal);
+                        else RefuseCouple(asker, partner, owner, contest, askerTotal, ownerTotal, s);
+                    }
+                }
+            }
+            catch (System.Exception e) { SafeLog.Once("settling a couple's negotiation", e); }
+            finally { StartPairCooldown(asker, owner); }
+        }
+
+        private void RefuseCouple(Pawn asker, Pawn partner, Pawn owner, NegotiationContest c, int askerTotal, int ownerTotal, SmarterBedsSettings s)
+        {
+            if (s.verboseLogging)
+                Log.Message($"[Smarter Beds] couple negotiation failed: {asker.LabelShort} (for {partner.LabelShort}) vs {owner.LabelShort} ({c.approach}) {askerTotal} vs {ownerTotal}");
+            NegotiationLog.Say("SmarterBeds_RefuseRoom", owner, asker);
+            if (s.negotiationMessages)
+                BriefMessage.Show("SmarterBeds_CoupleRoomFailed".Translate(asker.LabelShort, owner.LabelShort, askerTotal, ownerTotal, partner.LabelShort),
+                    new LookTargets(asker, partner, owner), s.messageSeconds);
+        }
+
+        private bool MoveCouple(Pawn asker, Pawn partner, Pawn owner, Building_Bed bedAsker, Building_Bed bedPartner, float gain,
+            SmarterBedsSettings s, NegotiationContest contest, int askerTotal, int ownerTotal)
+        {
+            var ownerBed = owner.ownership.OwnedBed;
+            var oldAsker = asker.ownership.OwnedBed;
+            var oldPartner = partner.ownership.OwnedBed;
+
+            owner.ownership.UnclaimBed();
+            asker.ownership.UnclaimBed();
+            partner.ownership.UnclaimBed();
+            if (!(asker.ownership.ClaimBedIfNonMedical(bedAsker) && partner.ownership.ClaimBedIfNonMedical(bedPartner)))
+            {
+                // Put everyone back exactly as they were.
+                asker.ownership.UnclaimBed();
+                partner.ownership.UnclaimBed();
+                if (oldAsker != null) asker.ownership.ClaimBedIfNonMedical(oldAsker);
+                if (oldPartner != null) partner.ownership.ClaimBedIfNonMedical(oldPartner);
+                if (ownerBed != null) owner.ownership.ClaimBedIfNonMedical(ownerBed);
+                return false;
+            }
+
+            NoteMoved(asker);
+            NoteMoved(partner);
+            int until = Now + (int)(s.rematchDays * GenDate.TicksPerDay);
+            rematchUntil[RematchKey(owner, asker)] = until;
+            rematchUntil[RematchKey(owner, partner)] = until;
+            StartCoupleCooldown(asker, partner, s.negotiationCooldownDays);
+            PruneCooldowns();
+
+            if (s.verboseLogging)
+                Log.Message($"[Smarter Beds] couple negotiation: {asker.LabelShort} and {partner.LabelShort} took {owner.LabelShort}'s room (gain {gain:0.0})");
+
+            NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_YieldRoom" : "SmarterBeds_AgreeToRoom", owner, asker);
+            ApplyMoodEffects(asker, owner, contest, gain, s, partner);
+
+            if (s.negotiationMessages)
+            {
+                string key = contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_CoupleRoomWonIntimidate" : "SmarterBeds_CoupleRoomWonPersuade";
+                BriefMessage.Show(key.Translate(asker.LabelShort, owner.LabelShort, askerTotal, ownerTotal, partner.LabelShort),
+                    new LookTargets(asker, partner, owner), s.messageSeconds);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Someone whose room the couple could take over: nobody else owns a bed in it, it has room for two,
+        /// it would be better for them (a penalty fixed, or a big enough upgrade), and the owner is free to be asked.
+        /// Returns the owner and the two beds the couple would take, or null.
+        /// </summary>
+        private Pawn FindCoupleTarget(Pawn n, Pawn m, SmarterBedsSettings s, bool force, out float bestGain, out NegotiationContest bestContest,
+            out Building_Bed bestBedN, out Building_Bed bestBedM, Pawn only = null)
+        {
+            bestGain = 0f;
+            bestContest = default;
+            bestBedN = null;
+            bestBedM = null;
+            Pawn best = null;
+            float bestValue = 0f;
+
+            var oldN = n.ownership?.OwnedBed;
+            var oldM = m.ownership?.OwnedBed;
+            if (oldN == null || oldM == null) return null;
+
+            float current = RoomComfort.Points(oldN, n, s, company: false) + RoomComfort.Points(oldM, m, s, company: false);
+            float debuffNow = RoomComfort.DebuffPenalty(oldN, n, s) + RoomComfort.DebuffPenalty(oldM, m, s);
+            Room roomN = oldN.GetRoom(), roomM = oldM.GetRoom();
+
+            foreach (var c in new List<Pawn>(n.Map.mapPawns.FreeColonistsSpawned))
+            {
+                if (c == n || c == m || (only != null && c != only) || !Eligible(c)) continue;
+                if (!c.Awake() || c.Downed || c.Drafted || c.InMentalState) continue;
+                if (AreLovePartners(n, c) || AreLovePartners(m, c)) continue;
+                if (Family.IsInCoupleRoom(c)) continue;
+                if (!force && (PairOnCooldown(n, c) || PairOnCooldown(m, c))) continue;
+                if (!force && ((rematchUntil.TryGetValue(RematchKey(n, c), out int r1) && Now < r1)
+                            || (rematchUntil.TryGetValue(RematchKey(m, c), out int r2) && Now < r2))) continue;
+
+                var bedC = c.ownership.OwnedBed;
+                Room room = bedC.GetRoom();
+                if (room == null || room.PsychologicallyOutdoors || room == roomN || room == roomM) continue;
+
+                // Nobody else may live there, and there has to be space for two.
+                if (room.ContainedBeds.Any(bed => bed.OwnersForReading.Any(o => o != c))) continue;
+                var usable = room.ContainedBeds.Where(bed => bed.Spawned && !bed.Medical && bed.ForColonists
+                    && RestUtility.CanUseBedEver(n, bed.def) && RestUtility.CanUseBedEver(m, bed.def)
+                    && (bed.OwnersForReading.Count > 0 || (BedScorer.IsCandidate(bed, n, n) && BedScorer.IsCandidate(bed, m, m)))).ToList();
+                if (usable.Sum(bed => bed.SleepingSlotsCount) < 2) continue;
+
+                // Each bed scored once per person, as the owner is about to leave.
+                var forN = usable.Select(bed => RoomComfort.Points(bed, n, s, company: false, leaving: c)).ToList();
+                var forM = usable.Select(bed => RoomComfort.Points(bed, m, s, company: false, leaving: c)).ToList();
+                float value = float.MinValue;
+                int bi = -1, bj = -1;
+                for (int i = 0; i < usable.Count; i++)
+                {
+                    for (int j = 0; j < usable.Count; j++)
+                    {
+                        if (i == j && usable[i].SleepingSlotsCount < 2) continue;
+                        float v = forN[i] + forM[j] + 2f * s.coupleRoomBonus;
+                        if (v > value) { value = v; bi = i; bj = j; }
+                    }
+                }
+                if (bi < 0) continue;
+
+                float gain = value - current;
+                if (gain <= 0f) continue;
+
+                float debuffNew = RoomComfort.DebuffPenalty(usable[bi], n, s, leaving: c) + RoomComfort.DebuffPenalty(usable[bj], m, s, leaving: c);
+                bool fixesAPenalty = debuffNew < debuffNow;
+                bool bigUpgrade = s.qualityNegotiationEnabled && gain >= s.qualityNegotiationThreshold;
+                if (!force && !fixesAPenalty && !bigUpgrade) continue;
+
+                // The owner must not be using it right now. Checked last: it asks the pathfinder.
+                if (!n.CanReserveAndReach(bedC, PathEndMode.OnCell, Danger.Some, bedC.SleepingSlotsCount)) continue;
+
+                var contest = NegotiationRoll.Build(n, c, s);
+                if (!contest.possible || contest.winChance < (force ? 0.01f : s.minWinChance)) continue;
+
+                float weighted = gain * contest.winChance;
+                if (weighted > bestValue)
+                {
+                    bestValue = weighted;
+                    bestGain = gain;
+                    bestContest = contest;
+                    bestBedN = usable[bi];
+                    bestBedM = usable[bj];
+                    best = c;
+                }
+            }
+            return best;
         }
 
         private void PruneCooldowns()
