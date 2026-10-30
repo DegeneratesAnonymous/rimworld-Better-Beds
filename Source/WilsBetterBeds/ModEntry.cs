@@ -47,6 +47,7 @@ namespace WilsBetterBeds
             if (s.titleRulesEnabled)
                 Slide(list, "WilsBetterBeds_S_Unmet", ref s.unmetRequirementPenalty, 0f, 20f, "0.0");
             Check(list, "WilsBetterBeds_S_Jealousy", ref s.jealousyEnabled);
+            Check(list, "WilsBetterBeds_S_Traits", ref s.traitsEnabled);
             Check(list, "WilsBetterBeds_S_Temperature", ref s.temperatureEnabled);
             if (s.temperatureEnabled)
                 Slide(list, "WilsBetterBeds_S_TemperaturePenalty", ref s.temperaturePenalty, 0f, 10f, "0.0");
@@ -88,6 +89,8 @@ namespace WilsBetterBeds
                 Check(list, "WilsBetterBeds_S_Quality", ref s.qualityNegotiationEnabled);
                 if (s.qualityNegotiationEnabled)
                     Slide(list, "WilsBetterBeds_S_QualityGap", ref s.qualityNegotiationThreshold, 1f, 12f, "0.0");
+                Slide(list, "WilsBetterBeds_S_Expectations", ref s.expectationWeight, 0f, 1f, "0%",
+                    () => "WilsBetterBeds_Live_Expectations".Translate((s.qualityNegotiationThreshold * (1f - s.expectationWeight * 7f / 9f)).ToString("0.0"), s.qualityNegotiationThreshold.ToString("0.0")));
                 Slide(list, "WilsBetterBeds_S_Cooldown", ref s.negotiationCooldownDays, 0.5f, 30f, "0.0");
                 Slide(list, "WilsBetterBeds_S_Rematch", ref s.rematchDays, 0f, 60f, "0");
                 Slide(list, "WilsBetterBeds_S_MinWin", ref s.minWinChance, 0f, 0.5f, "0%",

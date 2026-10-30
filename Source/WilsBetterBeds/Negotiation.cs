@@ -163,7 +163,7 @@ namespace WilsBetterBeds
                 float gain = BedScorer.Quality(bed, a, s) - currentQuality;
                 if (gain <= bestGain) continue;
                 bool fixesAPenalty = RoomComfort.DebuffPenalty(bed, a, s) < debuffNow;
-                bool bigUpgrade = s.qualityNegotiationEnabled && gain >= s.qualityNegotiationThreshold;
+                bool bigUpgrade = s.qualityNegotiationEnabled && gain >= RoomComfort.UpgradeThreshold(a, s);
                 if (!fixesAPenalty && !bigUpgrade) continue;
                 if (!a.CanReserveAndReach(bed, PathEndMode.OnCell, Danger.Some, bed.SleepingSlotsCount)) continue;
 
@@ -299,7 +299,9 @@ namespace WilsBetterBeds
             typeof(ThoughtWorker_RoomFarFromFamily),
             typeof(ThoughtWorker_RoomNearDislikedFamily),
             typeof(ThoughtWorker_RoomNearDislikedNeighbor),
-            typeof(ThoughtWorker_RoomNearPrisoners)
+            typeof(ThoughtWorker_RoomNearPrisoners),
+            typeof(ThoughtWorker_Greedy),
+            typeof(ThoughtWorker_Ascetic)
         };
 
         private static readonly List<Thought> tmpThoughts = new List<Thought>();
@@ -683,7 +685,7 @@ namespace WilsBetterBeds
                 // A reason to ask: their room is what causes a title or jealousy penalty and this one would not,
                 // or (optional) the move is a big enough upgrade on its own.
                 bool fixesAPenalty = RoomComfort.DebuffPenalty(bedB, a, s, leaving: b) < debuffNow;
-                bool bigUpgrade = s.qualityNegotiationEnabled && gain >= s.qualityNegotiationThreshold;
+                bool bigUpgrade = s.qualityNegotiationEnabled && gain >= RoomComfort.UpgradeThreshold(a, s);
                 if (!force && !fixesAPenalty && !bigUpgrade) continue;
 
                 // The owner must not be using it right now. Checked last: it asks the pathfinder.
@@ -943,7 +945,7 @@ namespace WilsBetterBeds
 
                 float debuffNew = RoomComfort.DebuffPenalty(usable[bi], n, s, leaving: c) + RoomComfort.DebuffPenalty(usable[bj], m, s, leaving: c);
                 bool fixesAPenalty = debuffNew < debuffNow;
-                bool bigUpgrade = s.qualityNegotiationEnabled && gain >= s.qualityNegotiationThreshold;
+                bool bigUpgrade = s.qualityNegotiationEnabled && gain >= Mathf.Min(RoomComfort.UpgradeThreshold(n, s), RoomComfort.UpgradeThreshold(m, s));
                 if (!force && !fixesAPenalty && !bigUpgrade) continue;
 
                 // The owner must not be using it right now. Checked last: it asks the pathfinder.

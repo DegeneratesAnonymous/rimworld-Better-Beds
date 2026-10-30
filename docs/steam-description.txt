@@ -21,7 +21,7 @@ Everything is measured in [b]mood points[/b], the same unit the game uses for "s
 [b]Things that make a bed better or worse[/b] (all within 35 tiles of the bed, adjustable)
 [list]
 [*][b]Royalty:[/b] title-holders need a personal bedroom that meets their title. Scored exactly as the game scores it.
-[*][b]Jealous trait:[/b] envies a much nicer room.
+[*][b]Jealous, Greedy and Ascetic traits:[/b] Jealous envies a much nicer room. Greedy wants an impressive bedroom (the game's -4 to -8). Ascetic likes a humble one (+3 to +5) and dislikes an impressive one (-5).
 [*][b]Temperature:[/b] a room that is too cold or too hot for the sleeper right now (the game's own test for "slept in the cold / heat") is -4, so a heated or cooled room becomes the better room.
 [*][b]Family:[/b] sharing with family you get on with is a small plus. Sleeping close to a relative you dislike is -2 (family is put up with). A couple far from all their family gets "room far from family", -4.
 [*][b]Disliked colonists:[/b] up to two disliked non-relatives nearby is -4 each.
@@ -98,6 +98,7 @@ Load after Harmony and any bed, room or guest mods. Anywhere below Hospitality i
 
 [list]
 [*]Ideology roles have no bedroom requirements in the game, so only Royalty titles are scored.
+[*]Optional: colonists with high expectations (a rich colony, an ideoligion role, a royal title) can be set to ask for smaller upgrades. Off by default.
 [*]Temperature is judged at the moment of the decision, so a room that is cold with the winter weather counts as cold until it warms.
 [*]Replace Stuff rebuilds beds as new objects, which can drop the lock on a replaced bed.
 [*]The game has no sitting pose, so a colonist dozing in a chair is shown upright.
