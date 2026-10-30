@@ -51,13 +51,19 @@ dotnet build Source/SmarterBeds/SmarterBeds.csproj -c Release -p:GameVersion=1.6
 
 ## Testing in game
 
-Link the repo into your Mods folder so every build is live on the next game launch. To play 1.7, switch RimWorld to the `unstable` branch in Steam (Properties, Betas tab). On Windows, from an admin Command Prompt:
+Run the deploy script. It builds both versions and copies the mod into RimWorld's `Mods` folder:
 
 ```
-mklink /J "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\SmarterBeds" "C:\path\to\rimworld-smarter-beds"
+scripts\deploy-to-game.ps1
 ```
 
-Enable dev mode, turn on **Log bed decisions** in mod settings, and watch the debug log as colonists pick beds.
+Use `-Game "D:\path\to\RimWorld"` if your game is not at the default location, or `-NoBuild` to copy without rebuilding. In your mod manager, refresh, activate **Smarter Beds**, sort, and launch. To play 1.7, switch RimWorld to the `unstable` branch in Steam (Properties, Betas tab).
+
+**Do not use a junction or symlink to the repo.** RimWorld 1.7 runs on .NET 10, which refuses to read a folder reached through one ("The path cannot be traversed because it contains an untrusted mount point") and the game starts to a black screen. The deploy script refuses to run if the destination is a link.
+
+Also note that DLLs are not committed, so installing the mod by cloning the repo into `Mods` gives you a mod with no code. Use the deploy script, or a release zip.
+
+Enable dev mode, turn on **Log decisions** in mod settings, and watch the debug log as colonists pick beds.
 
 ## Repo layout
 
@@ -69,6 +75,7 @@ Enable dev mode, turn on **Log bed decisions** in mod settings, and watch the de
 | `Textures/UI/` | Gizmo icon |
 | `Source/SmarterBeds/` | C# source |
 | `Source/SmarterBeds/Patches/` | Harmony patches |
+| `scripts/` | `deploy-to-game.ps1`, builds and installs the mod into your game |
 
 ## Releasing
 
