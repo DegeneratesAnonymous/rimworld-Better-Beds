@@ -1,8 +1,15 @@
 # Smarter Beds
 
-A RimWorld mod for 1.7 (unstable branch) and 1.6. Colonists without a bed claim the best free **private bedroom** instead of whatever bed is nearest. Beds marked **overflow** (a toggle on any bed) are only used when nothing better is free, so your unrenovated dorm stays empty until refugees show up.
+A RimWorld mod for 1.7 (unstable branch) and 1.6 about who sleeps where.
 
-Vanilla picks a bed by bed type, then distance. This mod scores each free bed by room impressiveness, whether the room is a private bedroom, bed rest effectiveness, distance, and the overflow flag. Weights are adjustable in mod settings.
+- **Better bed choice.** A colonist without a bed takes the nicest bed they can reach, scored in mood points using the game's own numbers for bedrooms, barracks and sleeping outside. Distance does not count against a bed.
+- **Royal and trait awareness.** Title-holders need a personal bedroom that meets their title, and the Jealous trait envies better rooms. Both are scored exactly as the game scores them.
+- **Room negotiation.** A colonist who sleeps badly can pick "negotiate for a better room" as recreation, walk to another colonist, and ask. A contested d20 roll decides it, using Social (or Melee, to intimidate), opinion, royal title and time in the colony. The winner takes the room, the loser finds another at bedtime, and both feel it in their mood. The conversation shows in the play log and, with Interaction Bubbles, as speech bubbles.
+- **You have the last word.** When you set a bed's owner with the Set Owner button, the assignment is locked: nobody negotiates for that room and its owner does not negotiate either. Unassign the owner to release it.
+- **Last resort sleeping.** A colonist with no bed dozes in a chair instead of on the floor, for a smaller mood penalty.
+- **Assign rooms.** The Assign tab gets an **Assign rooms** button. It lists every room with beds (beds taken, room score, size, owners). Hover a room to point at its beds in the world, double-click to jump the camera there, and use **Assign** to set owners room by room.
+- **Family and couples.** Colonists prefer to share a room with family they get on with. A colonist with negative relations with a parent, child or sibling wants a room outside 35 tiles of them. A couple wants a room of just the two of them, close to family, and a couple far from family gets a "room far from family" thought. New couples are moved into a free room of their own.
+- **God mode.** A selected colonist gets a **Force negotiation** button that sends them to ask for a better room right now.
 
 Prisoner, guest, slave, medical, and child bed choice is left entirely to vanilla.
 
@@ -12,6 +19,25 @@ Prisoner, guest, slave, medical, and child bed choice is left entirely to vanill
 
 - RimWorld 1.7 (unstable branch) or 1.6
 - [Harmony](https://steamcommunity.com/workshop/filedetails/?id=2009463077)
+
+## Compatibility
+
+Smarter Beds is built to coexist with other bed mods rather than overrule them. The approach:
+
+- Bed choice is a *postfix*, running last on `RestUtility.FindBedFor`. Vanilla and every other mod decide first; we only replace the answer when it is a free bed (or none) for a bedless colonist, and never a bed someone already owns, such as a partner's.
+- Which beds a colonist may use is decided by the game's own `IsValidBedFor`, which other mods patch. Anything they forbid, we forbid.
+- Rooms and titles are read through the game's methods, so mods that change title requirements are honoured.
+
+| Mod | Behaviour |
+| --- | --- |
+| Hospitality (Continued) | Guest beds are separate bed defs and `IsValidBedFor` keeps colonists out of them, so we never take one. Guests are never part of negotiation. |
+| Interaction Bubbles | Negotiation lines are written as ordinary interactions, so each speaker gets a bubble. |
+| Dubs Mint Menus | Its assign window ends up in the same assignment method as vanilla's, so setting an owner through it locks the bed. |
+| Vanilla Factions Expanded - Empire | Changes royal bedroom requirements through the game's title methods, which we read. |
+| Replace Stuff, EBSG Framework, Worksites Expanded, Vanilla Races Expanded - Android | Patch bed choice or ownership. We run after them and call the game's own claim and validity methods. |
+| Realistic Rooms Rewritten | Only relabels room size stages; room impressiveness is untouched. |
+
+Known limits: Replace Stuff rebuilds a bed as a new object, which can drop the lock on a replaced bed. Ideology roles carry no bedroom requirements in the game's data, so only Royalty titles are scored. Temperature debuffs count as a reason to ask for a room but are not part of the room score.
 
 ## Building
 
@@ -28,13 +54,19 @@ dotnet build Source/SmarterBeds/SmarterBeds.csproj -c Release -p:GameVersion=1.6
 
 ## Testing in game
 
-Link the repo into your Mods folder so every build is live on the next game launch. To play 1.7, switch RimWorld to the `unstable` branch in Steam (Properties, Betas tab). On Windows, from an admin Command Prompt:
+Run the deploy script. It builds both versions and copies the mod into RimWorld's `Mods` folder:
 
 ```
-mklink /J "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\SmarterBeds" "C:\path\to\rimworld-smarter-beds"
+scripts\deploy-to-game.ps1
 ```
 
-Enable dev mode, turn on **Log bed decisions** in mod settings, and watch the debug log as colonists pick beds.
+Use `-Game "D:\path\to\RimWorld"` if your game is not at the default location, or `-NoBuild` to copy without rebuilding. In your mod manager, refresh, activate **Smarter Beds**, sort, and launch. To play 1.7, switch RimWorld to the `unstable` branch in Steam (Properties, Betas tab).
+
+**Do not use a junction or symlink to the repo.** RimWorld 1.7 runs on .NET 10, which refuses to read a folder reached through one ("The path cannot be traversed because it contains an untrusted mount point") and the game starts to a black screen. The deploy script refuses to run if the destination is a link.
+
+Also note that DLLs are not committed, so installing the mod by cloning the repo into `Mods` gives you a mod with no code. Use the deploy script, or a release zip.
+
+Enable dev mode, turn on **Log decisions** in mod settings, and watch the debug log as colonists pick beds.
 
 ## Repo layout
 
@@ -43,9 +75,9 @@ Enable dev mode, turn on **Log bed decisions** in mod settings, and watch the de
 | `About/` | Mod metadata and preview image |
 | `1.7/Assemblies/`, `1.6/Assemblies/` | Built DLLs per game version (ignored by git, built by CI) |
 | `Languages/English/Keyed/` | All player-facing text |
-| `Textures/UI/` | Gizmo icon |
 | `Source/SmarterBeds/` | C# source |
 | `Source/SmarterBeds/Patches/` | Harmony patches |
+| `scripts/` | `deploy-to-game.ps1`, builds and installs the mod into your game |
 
 ## Releasing
 

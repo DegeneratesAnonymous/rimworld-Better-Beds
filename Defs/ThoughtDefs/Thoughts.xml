@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <!-- Mood points are the stage's baseMoodEffect (+/-1) times a factor set in code. -->
+  <ThoughtDef>
+    <defName>SmarterBeds_BulliedOutOfRoom</defName>
+    <thoughtClass>Thought_Memory</thoughtClass>
+    <durationDays>5</durationDays>
+    <stackLimit>1</stackLimit>
+    <stages>
+      <li>
+        <label>pushed out of my room</label>
+        <description>Someone leaned on me until I gave up my bedroom.</description>
+        <baseMoodEffect>-1</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+  <ThoughtDef>
+    <defName>SmarterBeds_GaveUpRoomHappily</defName>
+    <thoughtClass>Thought_Memory</thoughtClass>
+    <durationDays>5</durationDays>
+    <stackLimit>1</stackLimit>
+    <stages>
+      <li>
+        <label>gave up my room for a friend</label>
+        <description>I let someone I like have my bedroom. It felt good to help.</description>
+        <baseMoodEffect>1</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+  <ThoughtDef>
+    <defName>SmarterBeds_PushedAround</defName>
+    <thoughtClass>Thought_MemorySocial</thoughtClass>
+    <durationDays>15</durationDays>
+    <stackLimit>3</stackLimit>
+    <stackLimitForSameOtherPawn>1</stackLimitForSameOtherPawn>
+    <stages>
+      <li>
+        <label>leaned on over my room</label>
+        <baseOpinionOffset>-15</baseOpinionOffset>
+      </li>
+    </stages>
+  </ThoughtDef>
+  <!-- Winner of a negotiation. Mood points = baseMoodEffect (+1) x a factor set in code. -->
+  <ThoughtDef>
+    <defName>SmarterBeds_GotBetterRoom</defName>
+    <thoughtClass>Thought_Memory</thoughtClass>
+    <durationDays>5</durationDays>
+    <stackLimit>1</stackLimit>
+    <stages>
+      <li>
+        <label>got a better room</label>
+        <description>I talked my way into a better bedroom.</description>
+        <baseMoodEffect>1</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <!-- Dozing in a chair is bad, but less bad than the floor (slept on ground is -4). -->
+  <ThoughtDef>
+    <defName>SmarterBeds_SleptInChair</defName>
+    <durationDays>1</durationDays>
+    <stackLimit>1</stackLimit>
+    <nullifyingPrecepts>
+      <li MayRequire="Ludeon.RimWorld.Ideology">RoughLiving_Welcomed</li>
+    </nullifyingPrecepts>
+    <stages>
+      <li>
+        <label>slept in a chair</label>
+        <description>I had to sleep sitting up in a chair. My neck hurts, but at least it was not the floor.</description>
+        <baseMoodEffect>-3</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+  <!-- Situational: worked out in code (see FamilyThoughts.cs). Mood is fixed here; the settings
+       for how much a bed is marked down for these default to the same -4. -->
+  <ThoughtDef>
+    <defName>SmarterBeds_RoomFarFromFamily</defName>
+    <workerClass>SmarterBeds.ThoughtWorker_RoomFarFromFamily</workerClass>
+    <developmentalStageFilter>Adult</developmentalStageFilter>
+    <stages>
+      <li>
+        <label>room far from family</label>
+        <description>My partner and I have a place of our own, but it is a long way from my family.</description>
+        <baseMoodEffect>-4</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+  <ThoughtDef>
+    <defName>SmarterBeds_RoomNearDislikedFamily</defName>
+    <workerClass>SmarterBeds.ThoughtWorker_RoomNearDislikedFamily</workerClass>
+    <developmentalStageFilter>Adult</developmentalStageFilter>
+    <stages>
+      <li>
+        <label>sleeping too close to {0}</label>
+        <description>I do not get on with {0}, and my bed is too close to theirs.</description>
+        <baseMoodEffect>-4</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+
+</Defs>

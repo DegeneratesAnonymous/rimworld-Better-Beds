@@ -6,6 +6,8 @@ namespace SmarterBeds
 {
     /// <summary>
     /// Pure bed-choice logic. No Harmony here, so it can be reasoned about on its own.
+    /// Scores are in mood points (see RoomComfort), so every weight below is a number of mood.
+    /// A bedless colonist gets the nicest free bed they can reach.
     /// </summary>
     public static class BedScorer
     {
@@ -32,7 +34,7 @@ namespace SmarterBeds
             {
                 if (!IsCandidate(bed, sleeper, traveler)) continue;
 
-                float score = Score(bed, traveler, s);
+                float score = Score(bed, sleeper, traveler, s);
                 if (s.verboseLogging)
                     Log.Message($"[Smarter Beds] {sleeper.LabelShort}: {bed.LabelShort} at {bed.Position} scored {score:0.0}");
 
@@ -44,40 +46,54 @@ namespace SmarterBeds
             }
 
             if (s.verboseLogging)
-                Log.Message($"[Smarter Beds] {sleeper.LabelShort} -> {(best == null ? "vanilla fallback" : best.LabelShort + " at " + best.Position)}");
+                Log.Message($"[Smarter Beds] {sleeper.LabelShort} -> {(best == null ? "vanilla choice" : best.LabelShort + " at " + best.Position)}");
 
             return best;
         }
 
-        private static bool IsCandidate(Building_Bed bed, Pawn sleeper, Pawn traveler)
+        /// <summary>Best quality among free beds this pawn could claim now; MinValue when there are none.</summary>
+        public static float BestFreeQuality(Pawn pawn, SmarterBedsSettings s)
         {
-            if (!bed.Spawned || bed.Destroyed) return false;
-            if (bed.Faction != Faction.OfPlayer) return false;
-            if (bed.Medical || !bed.ForColonists) return false;
-            if (!RestUtility.CanUseBedEver(sleeper, bed.def)) return false;
-            // v1 only claims fully unowned beds, which sidesteps shared-bed social rules.
-            if (bed.OwnersForReading.Count > 0) return false;
-            if (bed.IsForbidden(traveler) || bed.IsBurning()) return false;
-            if (!traveler.CanReserveAndReach(bed, PathEndMode.OnCell, Danger.Some, bed.SleepingSlotsCount)) return false;
-            return true;
+            float best = float.MinValue;
+            foreach (var bed in pawn.Map.listerBuildings.AllBuildingsColonistOfClass<Building_Bed>())
+            {
+                if (!IsCandidate(bed, pawn, pawn)) continue;
+                float q = Quality(bed, pawn, s);
+                if (q > best) best = q;
+            }
+            return best;
         }
 
-        private static float Score(Building_Bed bed, Pawn traveler, SmarterBedsSettings s)
+        /// <summary>
+        /// A free bed this pawn may use. The final word goes to the game's own IsValidBedFor, which
+        /// every other mod that cares about beds patches (Hospitality keeps guest beds away from
+        /// colonists, gene mods change who can sleep where, and so on). Anything they forbid, so do we.
+        /// </summary>
+        public static bool IsCandidate(Building_Bed bed, Pawn sleeper, Pawn traveler)
         {
-            float score = 0f;
-            Room room = bed.GetRoom();
+            if (!bed.Spawned || bed.Destroyed || bed.IsBurning()) return false;
+            if (bed.Medical || !bed.ForColonists) return false;
+            // Only fully unowned beds: joining a half-claimed bed is vanilla's business (couples).
+            if (bed.OwnersForReading.Count > 0) return false;
+            if (!RestUtility.CanUseBedEver(sleeper, bed.def)) return false;
+            return RestUtility.IsValidBedFor(bed, sleeper, traveler, true, false, false, sleeper.GuestStatus);
+        }
 
-            if (room != null && !room.PsychologicallyOutdoors)
-            {
-                score += room.GetStat(RoomStatDefOf.Impressiveness) * s.impressivenessWeight;
-                if (room.Role == RoomRoleDefOf.Bedroom) score += s.privateRoomBonus;
-            }
+        /// <summary>
+        /// How good this bed is for this pawn, in mood points, ignoring distance.
+        /// Used by the bedtime search and by room negotiation.
+        /// </summary>
+        public static float Quality(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, Pawn leaving = null) =>
+            RoomComfort.Points(bed, pawn, s, company: true, leaving: leaving);
 
-            score += bed.GetStatValue(StatDefOf.BedRestEffectiveness) * s.restEffectivenessWeight;
-            score -= (bed.Position - traveler.Position).LengthHorizontal * s.distanceWeight;
+        // Distance does not count against a bed: a colonist takes the nicest bed they can reach, however
+        // far it is. It only breaks ties, so that of two equally good beds the nearer one wins.
+        private const float TieBreakPerCell = 0.0001f;
 
-            if (bed.GetComp<CompOverflowBed>()?.isOverflow == true) score -= s.overflowPenalty;
-
+        private static float Score(Building_Bed bed, Pawn sleeper, Pawn traveler, SmarterBedsSettings s)
+        {
+            float score = Quality(bed, sleeper, s);
+            score -= (bed.Position - traveler.Position).LengthHorizontal * TieBreakPerCell;
             return score;
         }
     }

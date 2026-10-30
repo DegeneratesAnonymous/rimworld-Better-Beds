@@ -1,0 +1,140 @@
+using System.Collections.Generic;
+using System.Linq;
+using RimWorld;
+using Verse;
+
+namespace SmarterBeds
+{
+    /// <summary>
+    /// When a colonist has a partner and the two do not live in a room of their own, find them one.
+    ///
+    /// Looks for a room where nobody else owns a bed and there is space for both (a double bed, or
+    /// two beds), scores it the way a bed is scored for each of them (including how close it is to
+    /// their family, since a couple far from family is unhappy), and moves them in if it is clearly
+    /// better than what they have. Nobody is evicted: only free beds, or the couple's own, are used.
+    /// A bed whose owner the player set is left alone, since that is the player's decision.
+    /// </summary>
+    public static class CoupleHousing
+    {
+        private const float MinImprovement = 1f;
+        private const float NoBedMood = -4f; // "slept on the ground"
+        private const float RetryDaysWhenNothingFits = 1f;
+
+        public static void Run(Map map, GameComponent_BedNegotiation comp)
+        {
+            var s = SmarterBedsMod.Settings;
+            foreach (var a in map.mapPawns.FreeColonistsSpawned)
+            {
+                if (!Family.IsAdultColonist(a)) continue;
+                var b = Family.SoleLover(a);
+                if (b == null || Family.SoleLover(b) != a) continue;
+                if (a.thingIDNumber > b.thingIDNumber) continue; // once per pair
+                if (!Family.IsAdultColonist(b) || b.Map != a.Map) continue;
+                if (!a.Awake() || !b.Awake()) continue;
+                // Already in a room of their own: only look again if family distance is still a problem.
+                if (Family.IsInCoupleRoom(a) && !FamilyProblem(a, b, s)) continue;
+                if (comp.CoupleOnCooldown(a, b)) continue;
+
+                bool moved = TryHouse(a, b, s);
+                comp.StartCoupleCooldown(a, b, moved ? s.negotiationCooldownDays : RetryDaysWhenNothingFits);
+                if (moved) return; // one couple per map per hour is plenty
+            }
+        }
+
+        private static bool FamilyProblem(Pawn a, Pawn b, SmarterBedsSettings s)
+        {
+            var bedA = Family.BedOf(a);
+            var bedB = Family.BedOf(b);
+            return (bedA != null && RoomComfort.FamilyPenalty(bedA, a, s) > 0f)
+                || (bedB != null && RoomComfort.FamilyPenalty(bedB, b, s) > 0f);
+        }
+
+        private struct Plan
+        {
+            public Building_Bed bedA;
+            public Building_Bed bedB;
+            public float value;
+        }
+
+        private static bool TryHouse(Pawn a, Pawn b, SmarterBedsSettings s)
+        {
+            var oldA = Family.BedOf(a);
+            var oldB = Family.BedOf(b);
+            if (CompBedLock.IsLocked(oldA, a) || CompBedLock.IsLocked(oldB, b)) return false; // the player decided
+
+            float current = ValueNow(a, oldA, s) + ValueNow(b, oldB, s);
+
+            Plan? best = null;
+            foreach (var room in RoomsWithBeds(a.Map))
+            {
+                // Someone else lives here.
+                if (room.ContainedBeds.Any(bed => bed.OwnersForReading.Any(o => o != a && o != b))) continue;
+
+                var usable = room.ContainedBeds.Where(bed => UsableByBoth(bed, a, b)).ToList();
+                if (usable.Sum(bed => bed.SleepingSlotsCount) < 2) continue;
+
+                foreach (var bedA in usable)
+                {
+                    foreach (var bedB in usable)
+                    {
+                        if (bedA == bedB && bedA.SleepingSlotsCount < 2) continue;
+                        float value = RoomComfort.Points(bedA, a, s, company: false)
+                                    + RoomComfort.Points(bedB, b, s, company: false)
+                                    + 2f * s.coupleRoomBonus;
+                        if (best == null || value > best.Value.value)
+                            best = new Plan { bedA = bedA, bedB = bedB, value = value };
+                    }
+                }
+            }
+
+            if (best == null || best.Value.value < current + MinImprovement) return false;
+            return Move(a, b, oldA, oldB, best.Value, s);
+        }
+
+        /// <summary>What the pawn has now, in the same units (their company is not counted: they are not yet a couple room).</summary>
+        private static float ValueNow(Pawn p, Building_Bed bed, SmarterBedsSettings s) =>
+            bed == null ? NoBedMood : RoomComfort.Points(bed, p, s, company: false);
+
+        private static IEnumerable<Room> RoomsWithBeds(Map map)
+        {
+            return map.listerBuildings.AllBuildingsColonistOfClass<Building_Bed>()
+                .Where(bed => bed.Spawned && !bed.Medical && bed.ForColonists)
+                .Select(bed => bed.GetRoom())
+                .Where(room => room != null && !room.PsychologicallyOutdoors)
+                .Distinct();
+        }
+
+        /// <summary>A bed that is free (and valid for both), or is already one of the couple's.</summary>
+        private static bool UsableByBoth(Building_Bed bed, Pawn a, Pawn b)
+        {
+            if (!bed.Spawned || bed.Medical || !bed.ForColonists) return false;
+            if (bed.OwnersForReading.Count > 0)
+                return bed.OwnersForReading.All(o => o == a || o == b);
+            return BedScorer.IsCandidate(bed, a, a) && BedScorer.IsCandidate(bed, b, b);
+        }
+
+        private static bool Move(Pawn a, Pawn b, Building_Bed oldA, Building_Bed oldB, Plan plan, SmarterBedsSettings s)
+        {
+            a.ownership.UnclaimBed();
+            b.ownership.UnclaimBed();
+
+            bool ok = a.ownership.ClaimBedIfNonMedical(plan.bedA) && b.ownership.ClaimBedIfNonMedical(plan.bedB);
+            if (!ok)
+            {
+                // Put everyone back exactly as they were.
+                a.ownership.UnclaimBed();
+                b.ownership.UnclaimBed();
+                if (oldA != null) a.ownership.ClaimBedIfNonMedical(oldA);
+                if (oldB != null) b.ownership.ClaimBedIfNonMedical(oldB);
+                return false;
+            }
+
+            if (s.verboseLogging)
+                Log.Message($"[Smarter Beds] couple: {a.LabelShort} and {b.LabelShort} moved into a room of their own at {plan.bedA.Position}");
+
+            if (s.negotiationMessages)
+                BriefMessage.Show("SmarterBeds_CoupleMoved".Translate(a.LabelShort, b.LabelShort), new LookTargets(a, b), s.messageSeconds);
+            return true;
+        }
+    }
+}
