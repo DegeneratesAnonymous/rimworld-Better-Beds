@@ -10,4 +10,13 @@
     <joyXpPerTick>0.01</joyXpPerTick>
     <joyKind>Social</joyKind>
   </JobDef>
+  <!-- Last resort for a colonist with no bed: doze off in a chair. See ChairSleep.cs. -->
+  <JobDef>
+    <defName>SmarterBeds_SleepInChair</defName>
+    <driverClass>SmarterBeds.JobDriver_SleepInChair</driverClass>
+    <reportString>dozing in a chair.</reportString>
+    <casualInterruptible>false</casualInterruptible>
+    <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+    <neverShowWeapon>true</neverShowWeapon>
+  </JobDef>
 </Defs>

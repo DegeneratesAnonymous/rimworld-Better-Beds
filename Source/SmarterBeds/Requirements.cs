@@ -6,11 +6,15 @@ using Verse;
 namespace SmarterBeds
 {
     /// <summary>
-    /// A pawn's bedroom requirements, read from the game. Royalty titles only for now.
+    /// A pawn's bedroom requirements, read from the game. Royalty titles only: Ideology roles carry
+    /// skill and age requirements in the game's data, but no bedroom requirements.
+    /// Goes through the game's own methods, so mods that change title requirements
+    /// (Vanilla Factions Expanded - Empire, for one) are respected automatically.
     /// </summary>
     public static class Requirements
     {
-        private static RoyalTitle Title(Pawn pawn)
+        /// <summary>The title that sets this pawn's bedroom requirements, or null.</summary>
+        public static RoyalTitle TitleOf(Pawn pawn)
         {
             if (!ModsConfig.RoyaltyActive || pawn?.royalty == null) return null;
             // CanRequireBedroom respects the player's per-pawn "allow room requirements" toggle.
@@ -19,11 +23,11 @@ namespace SmarterBeds
         }
 
         /// <summary>Higher outranks lower. 0 for a pawn with no bedroom requirements.</summary>
-        public static int Rank(Pawn pawn) => Title(pawn)?.def.seniority ?? 0;
+        public static int Rank(Pawn pawn) => TitleOf(pawn)?.def.seniority ?? 0;
 
         public static IEnumerable<RoomRequirement> For(Pawn pawn)
         {
-            var title = Title(pawn);
+            var title = TitleOf(pawn);
             if (title == null) return Enumerable.Empty<RoomRequirement>();
             return title.def.GetBedroomRequirements(pawn) ?? Enumerable.Empty<RoomRequirement>();
         }

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <!-- The asker speaks. Written to the play log, so Interaction Bubbles shows them. -->
+  <InteractionDef>
+    <defName>SmarterBeds_AskForRoom</defName>
+    <label>ask for a room</label>
+    <workerClass>InteractionWorker</workerClass>
+    <symbol>Things/Mote/SpeechSymbols/BuildRapport</symbol>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] asked [RECIPIENT_nameDef] to trade bedrooms.</li>
+        <li>r_logentry->[INITIATOR_nameDef] made a case to [RECIPIENT_nameDef] for taking over their bedroom.</li>
+        <li>r_logentry->[INITIATOR_nameDef] suggested to [RECIPIENT_nameDef] that they might be happier in a different room.</li>
+        <li>r_logentry->[INITIATOR_nameDef] asked [RECIPIENT_nameDef] for their room.</li>
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+
+  <InteractionDef>
+    <defName>SmarterBeds_IntimidateForRoom</defName>
+    <label>demand a room</label>
+    <workerClass>InteractionWorker</workerClass>
+    <symbol>Things/Mote/SpeechSymbols/Insult</symbol>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] loomed over [RECIPIENT_nameDef] and demanded their bedroom.</li>
+        <li>r_logentry->[INITIATOR_nameDef] told [RECIPIENT_nameDef] to hand over their room, or else.</li>
+        <li>r_logentry->[INITIATOR_nameDef] squared up to [RECIPIENT_nameDef] over their bedroom.</li>
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+
+  <!-- The defender answers, so they get their own bubble. INITIATOR is the defender here. -->
+  <InteractionDef>
+    <defName>SmarterBeds_AgreeToRoom</defName>
+    <label>agree to a room swap</label>
+    <workerClass>InteractionWorker</workerClass>
+    <symbol>Things/Mote/SpeechSymbols/KindWords</symbol>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] was persuaded and agreed to give up their bedroom to [RECIPIENT_nameDef].</li>
+        <li>r_logentry->[INITIATOR_nameDef] gave in and offered [RECIPIENT_nameDef] their room.</li>
+        <li>r_logentry->[INITIATOR_nameDef] said [RECIPIENT_nameDef] could have their bedroom.</li>
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+
+  <InteractionDef>
+    <defName>SmarterBeds_YieldRoom</defName>
+    <label>yield a room</label>
+    <workerClass>InteractionWorker</workerClass>
+    <symbol>Things/Mote/SpeechSymbols/Slight</symbol>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] backed down and gave up their room to [RECIPIENT_nameDef].</li>
+        <li>r_logentry->[INITIATOR_nameDef] reluctantly handed their bedroom over to [RECIPIENT_nameDef].</li>
+        <li>r_logentry->[INITIATOR_nameDef] was cowed into surrendering their room to [RECIPIENT_nameDef].</li>
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+
+  <InteractionDef>
+    <defName>SmarterBeds_RefuseRoom</defName>
+    <label>refuse to give up a room</label>
+    <workerClass>InteractionWorker</workerClass>
+    <symbol>Things/Mote/SpeechSymbols/Slight</symbol>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] flatly refused to give up their room to [RECIPIENT_nameDef].</li>
+        <li>r_logentry->[INITIATOR_nameDef] held firm and kept their bedroom.</li>
+        <li>r_logentry->[INITIATOR_nameDef] told [RECIPIENT_nameDef] the bedroom was not up for discussion.</li>
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+</Defs>

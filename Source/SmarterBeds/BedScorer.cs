@@ -6,6 +6,7 @@ namespace SmarterBeds
 {
     /// <summary>
     /// Pure bed-choice logic. No Harmony here, so it can be reasoned about on its own.
+    /// Scores are in mood points (see RoomComfort), so every weight below is a number of mood.
     /// </summary>
     public static class BedScorer
     {
@@ -19,21 +20,7 @@ namespace SmarterBeds
             if ((sleeper.DevelopmentalStage & DevelopmentalStage.Adult) == 0) return false;  // babies/children
             if (sleeper.ownership?.OwnedBed != null) return false;                           // already has a bed
             if (HealthAIUtility.ShouldSeekMedicalRest(sleeper)) return false;                // medical beds
-            if (PartnerHasRoomInTheirBed(sleeper)) return false;                             // vanilla sleeps couples together
             return true;
-        }
-
-        /// <summary>True when a love partner owns a bed with a free sleeping slot the pawn could share.</summary>
-        private static bool PartnerHasRoomInTheirBed(Pawn sleeper)
-        {
-            foreach (var rel in LovePartnerRelationUtility.ExistingLovePartners(sleeper, false))
-            {
-                var bed = rel.otherPawn?.ownership?.OwnedBed;
-                if (bed == null || bed.Medical || !bed.Spawned) continue;
-                if (bed.OwnersForReading.Count < bed.SleepingSlotsCount
-                    && RestUtility.CanUseBedEver(sleeper, bed.def)) return true;
-            }
-            return false;
         }
 
         public static Building_Bed FindBest(Pawn sleeper, Pawn traveler)
@@ -58,7 +45,7 @@ namespace SmarterBeds
             }
 
             if (s.verboseLogging)
-                Log.Message($"[Smarter Beds] {sleeper.LabelShort} -> {(best == null ? "vanilla fallback" : best.LabelShort + " at " + best.Position)}");
+                Log.Message($"[Smarter Beds] {sleeper.LabelShort} -> {(best == null ? "vanilla choice" : best.LabelShort + " at " + best.Position)}");
 
             return best;
         }
@@ -76,46 +63,33 @@ namespace SmarterBeds
             return best;
         }
 
+        /// <summary>
+        /// A free bed this pawn may use. The final word goes to the game's own IsValidBedFor, which
+        /// every other mod that cares about beds patches (Hospitality keeps guest beds away from
+        /// colonists, gene mods change who can sleep where, and so on). Anything they forbid, so do we.
+        /// </summary>
         private static bool IsCandidate(Building_Bed bed, Pawn sleeper, Pawn traveler)
         {
-            if (!bed.Spawned || bed.Destroyed) return false;
-            if (bed.Faction != Faction.OfPlayer) return false;
+            if (!bed.Spawned || bed.Destroyed || bed.IsBurning()) return false;
             if (bed.Medical || !bed.ForColonists) return false;
-            if (!RestUtility.CanUseBedEver(sleeper, bed.def)) return false;
-            // v1 only claims fully unowned beds, which sidesteps shared-bed social rules.
+            // Only fully unowned beds: joining a half-claimed bed is vanilla's business (couples).
             if (bed.OwnersForReading.Count > 0) return false;
-            if (bed.IsForbidden(traveler) || bed.IsBurning()) return false;
-            if (!traveler.CanReserveAndReach(bed, PathEndMode.OnCell, Danger.Some, bed.SleepingSlotsCount)) return false;
-            return true;
+            if (!RestUtility.CanUseBedEver(sleeper, bed.def)) return false;
+            return RestUtility.IsValidBedFor(bed, sleeper, traveler, true, false, false, sleeper.GuestStatus);
         }
 
         /// <summary>
-        /// How good this bed is for this pawn, ignoring distance and the overflow flag.
+        /// How good this bed is for this pawn, in mood points, ignoring distance and the overflow flag.
         /// Used by the bedtime search and by room negotiation.
         /// </summary>
-        public static float Quality(Building_Bed bed, Pawn pawn, SmarterBedsSettings s)
-        {
-            float score = 0f;
-            Room room = bed.GetRoom();
-
-            if (room != null && !room.PsychologicallyOutdoors)
-            {
-                score += room.GetStat(RoomStatDefOf.Impressiveness) * s.impressivenessWeight;
-                if (room.Role == RoomRoleDefOf.Bedroom) score += s.privateRoomBonus;
-            }
-
-            score += bed.GetStatValue(StatDefOf.BedRestEffectiveness) * s.restEffectivenessWeight;
-            score -= Requirements.Unmet(pawn, room) * s.unmetRequirementPenalty;
-            return score;
-        }
+        public static float Quality(Building_Bed bed, Pawn pawn, SmarterBedsSettings s) =>
+            RoomComfort.Points(bed, pawn, s);
 
         private static float Score(Building_Bed bed, Pawn sleeper, Pawn traveler, SmarterBedsSettings s)
         {
             float score = Quality(bed, sleeper, s);
             score -= (bed.Position - traveler.Position).LengthHorizontal * s.distanceWeight;
-
             if (bed.GetComp<CompOverflowBed>()?.isOverflow == true) score -= s.overflowPenalty;
-
             return score;
         }
     }

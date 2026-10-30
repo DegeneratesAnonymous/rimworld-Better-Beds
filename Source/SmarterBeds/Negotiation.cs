@@ -13,6 +13,9 @@ namespace SmarterBeds
     /// JoyGiver_NegotiateRoom). They walk over, talk, and a contested roll (see NegotiationRoll)
     /// decides it. A winner takes the loser's bed; the loser is left bedless to find a room at
     /// their own bedtime.
+    ///
+    /// The player always has the last word: a bed the player assigned (or locked) is never
+    /// negotiated for, and its owner does not negotiate either.
     /// </summary>
     public class GameComponent_BedNegotiation : GameComponent
     {
@@ -23,17 +26,14 @@ namespace SmarterBeds
 
         // Saved: "loserId>winnerId" -> tick until which the loser may not challenge that winner again.
         private Dictionary<string, int> rematchUntil = new Dictionary<string, int>();
-        private const int RematchDays = 15;
-        private const float MinWinChance = 0.1f;
 
-        // Mood effect of a negotiation = MaxMoodEffect x (0.25 x relationship + 0.25 x room quality),
-        // both measured 0..1. Relationship is the loser's opinion of the asker / 100; room quality is
-        // the quality gain of the room that changed hands / QualityForFullEffect.
-        private const float MaxMoodEffect = 20f;
-        private const float QualityForFullEffect = 500f;
-
-        // Experience for the asker. A failed attempt is worth half.
-        private const float SocialXpOnWin = 60f;
+        // Mood effect of a negotiation = 0.25 x relationship + 0.25 x room quality, in mood points.
+        // Relationship is the loser's opinion of the winner / 10 (-10..+10). Room quality is the
+        // mood gained by the move, capped. Never less than 1 and never more than the cap.
+        private const float MoodWeight = 0.25f;
+        private const float RoomQualityCap = 12f;
+        private const float MoodFloor = 1f;
+        private const float MoodCap = 8f;
 
         // Not saved: stops a pawn from re-running the search every time the joy system asks.
         private readonly Dictionary<int, int> lastChecked = new Dictionary<int, int>();
@@ -65,25 +65,52 @@ namespace SmarterBeds
         private void StartPairCooldown(Pawn a, Pawn b) =>
             pairCooldownUntil[PairKey(a, b)] = Now + (int)(SmarterBedsMod.Settings.negotiationCooldownDays * GenDate.TicksPerDay);
 
-        // Thoughts that mean "the place I slept was bad". SleepDisturbed is noise, not the room.
-        private static readonly List<ThoughtDef> SleepDebuffs = new List<ThoughtDef>
+        // Memory thoughts that mean "the place I slept was bad". SleepDisturbed is noise, not the room.
+        private static readonly List<ThoughtDef> SleepDebuffMemories = new List<ThoughtDef>
         {
             ThoughtDefOf.SleptInBarracks, ThoughtDefOf.SleptOutside, ThoughtDefOf.SleptOnGround,
             ThoughtDefOf.SleptInCold, ThoughtDefOf.SleptInHeat, ThoughtDefOf.SleptInRoomWithSlave
         };
 
+        // Situational thoughts the game raises about a bedroom: a title without a personal bedroom
+        // or with unmet requirements, and the Jealous trait envying someone's room.
+        private static readonly System.Type[] BedroomThoughtWorkers =
+        {
+            typeof(ThoughtWorker_BedroomRequirementsNotMet),
+            typeof(ThoughtWorker_NoPersonalBedroom),
+            typeof(ThoughtWorker_BedroomJealous)
+        };
+
+        private static readonly List<Thought> tmpThoughts = new List<Thought>();
+
+        /// <summary>True when the pawn is currently suffering a mood penalty about where they sleep.</summary>
         public static bool HasSleepDebuff(Pawn p)
         {
-            var memories = p.needs?.mood?.thoughts?.memories;
-            if (memories == null) return false;
-            foreach (var def in SleepDebuffs)
+            var handler = p.needs?.mood?.thoughts;
+            if (handler == null) return false;
+
+            var memories = handler.memories;
+            foreach (var def in SleepDebuffMemories)
             {
                 if (def != null && memories.GetFirstMemoryOfDef(def) != null) return true;
             }
+
+            tmpThoughts.Clear();
+            handler.GetAllMoodThoughts(tmpThoughts);
+            try
+            {
+                foreach (var t in tmpThoughts)
+                {
+                    var worker = t.def.workerClass;
+                    if (worker == null || !BedroomThoughtWorkers.Any(w => w.IsAssignableFrom(worker))) continue;
+                    if (t.MoodOffset() < 0f) return true;
+                }
+            }
+            finally { tmpThoughts.Clear(); }
             return false;
         }
 
-        /// <summary>Common checks for both sides: a settled adult colonist who is the only owner of their bed.</summary>
+        /// <summary>Common checks for both sides: a settled adult colonist who is the only owner of a bed the player has not locked.</summary>
         private static bool Eligible(Pawn p)
         {
             if (p == null || !p.Spawned || p.Dead || !p.IsColonist || p.IsPrisoner || p.IsSlave) return false;
@@ -95,6 +122,8 @@ namespace SmarterBeds
             // Shared beds belong to two people (usually a couple); leave those to vanilla.
             // A double bed with a single owner is fine.
             if (bed.OwnersForReading.Count != 1) return false;
+            // The player decided; that is final.
+            if (CompOverflowBed.IsLocked(bed, p)) return false;
             return true;
         }
 
@@ -114,7 +143,7 @@ namespace SmarterBeds
             if (!s.enabled || !s.negotiationEnabled) return false;
             if (!Eligible(a)) return false;
             // Only negotiate when something is actually wrong with how they sleep.
-            return Requirements.Unmet(a, a.ownership.OwnedBed.GetRoom()) > 0 || HasSleepDebuff(a);
+            return HasSleepDebuff(a);
         }
 
         /// <summary>Finds who this pawn would negotiate with, or null. Throttled to once an hour per pawn.</summary>
@@ -132,6 +161,13 @@ namespace SmarterBeds
             }
         }
 
+        /// <summary>The asker has walked over: they make their pitch (a bubble over their head).</summary>
+        public void BeginConversation(Pawn a, Pawn b)
+        {
+            var contest = NegotiationRoll.Build(a, b, SmarterBedsMod.Settings);
+            NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_IntimidateForRoom" : "SmarterBeds_AskForRoom", a, b);
+        }
+
         /// <summary>
         /// End of the conversation: re-checks everything (the world moved while they walked over),
         /// rolls, and swaps on a win. The two are on cooldown with each other afterwards either way.
@@ -147,10 +183,10 @@ namespace SmarterBeds
                     if (target == b)
                     {
                         bool won = NegotiationRoll.Roll(contest, out int askerTotal, out int defenderTotal);
-                        GiveSocialExperience(a, won);
+                        GiveSocialExperience(a, won, s);
                         if (contest.approach == NegotiationApproach.Intimidate) Resent(b, a);
                         if (won) Swap(a, b, gain, s, contest, askerTotal, defenderTotal);
-                        else ReportFailure(a, b, contest, askerTotal, defenderTotal, s);
+                        else Refuse(a, b, contest, askerTotal, defenderTotal, s);
                     }
                 }
             }
@@ -164,10 +200,10 @@ namespace SmarterBeds
             }
         }
 
-        private static void GiveSocialExperience(Pawn asker, bool won)
+        private static void GiveSocialExperience(Pawn asker, bool won, SmarterBedsSettings s)
         {
             // Practice either way; half as much when turned down.
-            asker.skills?.Learn(SkillDefOf.Social, won ? SocialXpOnWin : SocialXpOnWin / 2f);
+            asker.skills?.Learn(SkillDefOf.Social, won ? s.socialXpOnWin : s.socialXpOnWin / 2f);
         }
 
         /// <summary>Someone who was leaned on remembers it, win or lose.</summary>
@@ -177,44 +213,60 @@ namespace SmarterBeds
                 DefDatabase<ThoughtDef>.GetNamed("SmarterBeds_PushedAround"), bully);
         }
 
-        /// <summary>
-        /// The loser's mood after a successful negotiation, scaled 0.25 x relationship + 0.25 x room quality.
-        /// Intimidation is always a debuff. Persuasion is a buff when the loser likes the asker;
-        /// someone who doesn't gives the room up with no particular feeling either way.
-        /// </summary>
-        private static void ApplyMoodEffect(Pawn loser, Pawn winner, NegotiationContest c, float gain, SmarterBedsSettings s)
+        private static float Relationship(Pawn loser, Pawn winner) =>
+            loser.relations != null ? Mathf.Clamp(loser.relations.OpinionOf(winner) / 10f, -10f, 10f) : 0f;
+
+        private static void GainMood(Pawn pawn, string thoughtDefName, float points, Pawn other = null)
         {
-            if (!s.negotiationMoodEffects || loser.needs?.mood?.thoughts?.memories == null) return;
-
-            float relationship = loser.relations != null ? Mathf.Clamp(loser.relations.OpinionOf(winner) / 100f, -1f, 1f) : 0f;
-            float quality = Mathf.Clamp01(gain / QualityForFullEffect);
-
-            ThoughtDef def;
-            float magnitude;
-            if (c.approach == NegotiationApproach.Intimidate)
-            {
-                def = DefDatabase<ThoughtDef>.GetNamed("SmarterBeds_BulliedOutOfRoom");
-                magnitude = MaxMoodEffect * (0.25f * Mathf.Abs(relationship) + 0.25f * quality);
-            }
-            else
-            {
-                if (relationship <= 0f) return;
-                def = DefDatabase<ThoughtDef>.GetNamed("SmarterBeds_GaveUpRoomHappily");
-                magnitude = MaxMoodEffect * (0.25f * relationship + 0.25f * quality);
-            }
-
-            var thought = (Thought_Memory)ThoughtMaker.MakeThought(def);
-            thought.moodPowerFactor = Mathf.Max(1f, magnitude); // the stage is +/-1, so this is the mood points
-            loser.needs.mood.thoughts.memories.TryGainMemory(thought, winner);
-
-            if (s.verboseLogging)
-                Log.Message($"[Smarter Beds] {loser.LabelShort} mood effect {(c.approach == NegotiationApproach.Intimidate ? "-" : "+")}{thought.moodPowerFactor:0.0} (relationship {relationship:0.00}, quality {quality:0.00})");
+            var memories = pawn.needs?.mood?.thoughts?.memories;
+            if (memories == null) return;
+            var thought = (Thought_Memory)ThoughtMaker.MakeThought(DefDatabase<ThoughtDef>.GetNamed(thoughtDefName));
+            // The stage is worth exactly +/-1 mood; the factor sets how many points this one is.
+            thought.moodPowerFactor = points;
+            if (other != null) memories.TryGainMemory(thought, other);
+            else memories.TryGainMemory(thought);
         }
 
-        private static void ReportFailure(Pawn asker, Pawn defender, NegotiationContest c, int askerTotal, int defenderTotal, SmarterBedsSettings s)
+        /// <summary>
+        /// How people feel after a successful negotiation, in mood points: 0.25 x relationship + 0.25 x room quality.
+        /// - The loser is bullied out of the room (debuff), or, if they like the winner and were
+        ///   talked round, gave it up for a friend (buff). A persuaded loser who does not like the
+        ///   winner has no particular feeling either way.
+        /// - The winner is pleased with the new room. Only the winner moves to a new room, so only
+        ///   the winner gets this; someone who keeps their room is not rewarded for it.
+        /// </summary>
+        private static void ApplyMoodEffects(Pawn winner, Pawn loser, NegotiationContest c, float gain, SmarterBedsSettings s)
+        {
+            if (!s.negotiationMoodEffects) return;
+
+            float relationship = Relationship(loser, winner);
+            float quality = Mathf.Clamp(gain, 0f, RoomQualityCap);
+
+            if (c.approach == NegotiationApproach.Intimidate)
+            {
+                float points = Mathf.Clamp(MoodWeight * Mathf.Abs(relationship) + MoodWeight * quality, MoodFloor, MoodCap);
+                GainMood(loser, "SmarterBeds_BulliedOutOfRoom", points);
+            }
+            else if (relationship > 0f)
+            {
+                float points = Mathf.Clamp(MoodWeight * relationship + MoodWeight * quality, MoodFloor, MoodCap);
+                GainMood(loser, "SmarterBeds_GaveUpRoomHappily", points);
+            }
+
+            float winnerPoints = Mathf.Clamp(MoodWeight * Mathf.Max(0f, relationship) + MoodWeight * quality, MoodFloor, MoodCap);
+            GainMood(winner, "SmarterBeds_GotBetterRoom", winnerPoints);
+
+            if (s.verboseLogging)
+                Log.Message($"[Smarter Beds] mood: {loser.LabelShort} relationship {relationship:0.0}, quality {quality:0.0}; winner +{winnerPoints:0.0}");
+        }
+
+        private static void Refuse(Pawn asker, Pawn defender, NegotiationContest c, int askerTotal, int defenderTotal, SmarterBedsSettings s)
         {
             if (s.verboseLogging)
                 Log.Message($"[Smarter Beds] negotiation failed: {asker.LabelShort} vs {defender.LabelShort} ({c.approach}) {askerTotal} vs {defenderTotal}");
+
+            NegotiationLog.Say("SmarterBeds_RefuseRoom", defender, asker);
+
             if (s.negotiationMessages)
                 Messages.Message("SmarterBeds_RoomFailed".Translate(asker.LabelShort, defender.LabelShort, askerTotal, defenderTotal),
                     new LookTargets(asker, defender), MessageTypeDefOf.NeutralEvent, false);
@@ -225,10 +277,10 @@ namespace SmarterBeds
             bestGain = 0f;
             bestContest = default;
             float bestValue = 0f;
-            int unmetNow = Requirements.Unmet(a, bedA.GetRoom());
             Pawn best = null;
 
             float currentA = BedScorer.Quality(bedA, a, s);
+            float debuffNow = RoomComfort.DebuffPenalty(bedA, a, s);
             // A free room that is at least as good for A makes taking someone's room pointless.
             float bestFree = BedScorer.BestFreeQuality(a, s);
 
@@ -248,17 +300,16 @@ namespace SmarterBeds
                 if (gain <= 0f) continue;
                 if (bestFree >= currentA + gain) continue;
 
-                // Anyone may try; rank only matters as a number in the roll.
-                int unmetAfter = Requirements.Unmet(a, bedB.GetRoom());
-                bool requirementCase = unmetNow > unmetAfter;
-                bool qualityCase = s.qualityNegotiationEnabled
-                    && gain >= s.qualityNegotiationThreshold
-                    && unmetNow == 0 && unmetAfter == 0;
-                if (!requirementCase && !qualityCase) continue;
+                // A reason to ask: their room is what causes a title or jealousy penalty and this one would not,
+                // or (optional) the move is a big enough upgrade on its own.
+                bool fixesAPenalty = RoomComfort.DebuffPenalty(bedB, a, s) < debuffNow;
+                bool bigUpgrade = s.qualityNegotiationEnabled && gain >= s.qualityNegotiationThreshold;
+                if (!fixesAPenalty && !bigUpgrade) continue;
 
+                // Anyone may try; rank only matters as a number in the roll.
                 var contest = NegotiationRoll.Build(a, b, s);
                 // Don't spend a conversation on something with almost no chance.
-                if (!contest.possible || contest.winChance < MinWinChance) continue;
+                if (!contest.possible || contest.winChance < s.minWinChance) continue;
 
                 float value = gain * contest.winChance;
                 if (value > bestValue)
@@ -288,13 +339,14 @@ namespace SmarterBeds
             }
 
             // The loser can't just turn around and take it back.
-            rematchUntil[RematchKey(loser, winner)] = Now + RematchDays * GenDate.TicksPerDay;
+            rematchUntil[RematchKey(loser, winner)] = Now + (int)(s.rematchDays * GenDate.TicksPerDay);
             PruneCooldowns();
 
             if (s.verboseLogging)
                 Log.Message($"[Smarter Beds] negotiation: {winner.LabelShort} took {loser.LabelShort}'s bed at {wonBed.Position} (gain {gain:0.0})");
 
-            ApplyMoodEffect(loser, winner, contest, gain, s);
+            NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_YieldRoom" : "SmarterBeds_AgreeToRoom", loser, winner);
+            ApplyMoodEffects(winner, loser, contest, gain, s);
 
             if (s.negotiationMessages)
             {

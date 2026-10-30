@@ -17,6 +17,12 @@
   </modDependencies>
   <loadAfter>
     <li>brrainz.harmony</li>
+    <!-- Load after the mods that also touch beds, so our checks see their rules. -->
+    <li>Ludeon.RimWorld.Royalty</li>
+    <li>Ludeon.RimWorld.Ideology</li>
+    <li>OskarPotocki.VanillaFactionsExpanded.Core</li>
+    <li>Orion.Hospitality</li>
+    <li>Jaxe.Bubbles</li>
   </loadAfter>
   <description>Colonists without a bed claim the best free private bedroom instead of the nearest bed. Mark any bed as "overflow" and it is only used when nothing better is free.
 

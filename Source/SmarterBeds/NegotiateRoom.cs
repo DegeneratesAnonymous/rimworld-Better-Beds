@@ -7,7 +7,7 @@ namespace SmarterBeds
 {
     /// <summary>
     /// Offers "negotiate for a better room" as a recreation choice, but only to a pawn who has a
-    /// reason to (a sleep-related mood debuff or an unmet title requirement) and someone to talk to.
+    /// reason to (a sleep-related mood debuff) and someone to talk to.
     /// </summary>
     public class JoyGiver_NegotiateRoom : JoyGiver
     {
@@ -15,7 +15,7 @@ namespace SmarterBeds
         {
             var comp = GameComponent_BedNegotiation.Instance;
             if (comp == null || !comp.WantsToNegotiate(pawn)) return 0f;
-            return base.GetChance(pawn);
+            return base.GetChance(pawn) * SmarterBedsMod.Settings.negotiationJoyWeight;
         }
 
         public override Job TryGiveJob(Pawn pawn)
@@ -26,7 +26,7 @@ namespace SmarterBeds
         }
     }
 
-    /// <summary>Walk over, talk for a while, then settle the room question.</summary>
+    /// <summary>Walk over, make the pitch, talk for a while, then settle the room question.</summary>
     public class JobDriver_NegotiateRoom : JobDriver
     {
         private Pawn Target => (Pawn)job.GetTarget(TargetIndex.A).Thing;
@@ -40,10 +40,18 @@ namespace SmarterBeds
 
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
 
+            // Arrived: this is the moment the asker speaks, so it is when the bubble appears.
+            yield return new Toil
+            {
+                defaultCompleteMode = ToilCompleteMode.Instant,
+                initAction = () => GameComponent_BedNegotiation.Instance?.BeginConversation(pawn, Target)
+            };
+
             var talk = Toils_General.Wait(job.def.joyDuration, TargetIndex.A);
             talk.tickAction = () =>
             {
                 pawn.rotationTracker.FaceTarget(Target);
+                // Joy and Social experience come from the job definition (joyKind, joySkill, joyXpPerTick).
                 JoyUtility.JoyTickCheckEnd(pawn, 1, JoyTickFullJoyAction.EndJob, 1f, null);
             };
             talk.socialMode = RandomSocialMode.Off;
