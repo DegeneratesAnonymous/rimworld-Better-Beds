@@ -4,6 +4,13 @@ All notable changes are listed here. Versions follow semantic versioning.
 
 ## [Unreleased]
 
+### Added
+- Temperature is part of choosing a room: a bed in a room that is too cold or too hot for the sleeper right now (the game's own test for slept in the cold or heat) is marked down by 4, in bed choice, free-bed moves and negotiation, with a switch and a slider
+
+## [1.0.0] - 2026-10-30
+
+First release, as Wil's Better Beds.
+
 ### Settings
 - Every tooltip now says what lowering and raising the setting does, and the default. Sliders with a calculable effect also show a worked example for the current value (win odds, bed value, intimidation vs persuasion, days of tenure, chair vs floor)
 - New switches: royal title bedroom rules, the Jealous trait, the Assign rooms button; a slider for the chair-sleep penalty
