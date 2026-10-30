@@ -70,7 +70,7 @@
 
   <!-- Settings window: sleeping rough -->
   <SmarterBeds_S_Chair>Sleep in a chair when there is no bed</SmarterBeds_S_Chair>
-  <SmarterBeds_S_Chair_Tip>A colonist with no bed to use dozes off in a free indoor chair instead of on the floor. They still get a mood penalty (-3), just a smaller one than the floor (-4).</SmarterBeds_S_Chair_Tip>
+  <SmarterBeds_S_Chair_Tip>A colonist with no bed to use dozes off in a free indoor chair instead of on the floor. They still get a mood penalty (3 by default), just a smaller one than the floor (-4).</SmarterBeds_S_Chair_Tip>
 
   <!-- Messages -->
 
@@ -119,9 +119,9 @@
   <SmarterBeds_S_FamilyShare>Sharing a room with family: +{0}</SmarterBeds_S_FamilyShare>
   <SmarterBeds_S_FamilyShare_Tip>Mood points a colonist counts for each relative (up to two) they share a room with, if they get on.</SmarterBeds_S_FamilyShare_Tip>
   <SmarterBeds_S_FamilyNear>Too close to a disliked relative: -{0}</SmarterBeds_S_FamilyNear>
-  <SmarterBeds_S_FamilyNear_Tip>Counted against a bed inside the family distance of a relative they have negative relations with. The matching thought is -2: family is put up with more than a stranger is.</SmarterBeds_S_FamilyNear_Tip>
+  <SmarterBeds_S_FamilyNear_Tip>Counted against a bed inside the family distance of a relative they have negative relations with. The matching thought shows the same number. The default is lower than for a stranger: family is put up with more.</SmarterBeds_S_FamilyNear_Tip>
   <SmarterBeds_S_FamilyFar>Couple far from family: -{0}</SmarterBeds_S_FamilyFar>
-  <SmarterBeds_S_FamilyFar_Tip>Counted against a couple's bed that is outside the family distance of all their family. The matching "room far from family" thought is -4.</SmarterBeds_S_FamilyFar_Tip>
+  <SmarterBeds_S_FamilyFar_Tip>Counted against a couple's bed that is outside the family distance of all their family. The matching "room far from family" thought shows the same number.</SmarterBeds_S_FamilyFar_Tip>
   <SmarterBeds_S_CoupleHousing>Move new couples into a room of their own</SmarterBeds_S_CoupleHousing>
   <SmarterBeds_S_CoupleHousing_Tip>Once an hour, a couple who do not have a room to themselves are moved into a free one if there is a clearly better room. Nobody is evicted, and beds whose owner you set are left alone.</SmarterBeds_S_CoupleHousing_Tip>
   <SmarterBeds_S_CoupleRoom>Room for just the two of them: +{0}</SmarterBeds_S_CoupleRoom>
@@ -141,4 +141,15 @@
   <!-- Diagnostics -->
   <SmarterBeds_Sec_Diag>Compatibility</SmarterBeds_Sec_Diag>
   <SmarterBeds_Diag_Summary>Hooks active: {0} of {1}. Hover for details.</SmarterBeds_Diag_Summary>
+  <!-- Settings window: extra switches -->
+  <SmarterBeds_Sec_Near>Near, far and disliked</SmarterBeds_Sec_Near>
+  <SmarterBeds_S_Titles>Royal title bedroom rules count</SmarterBeds_S_Titles>
+  <SmarterBeds_S_Titles_Tip>Needs Royalty. When on, a title-holder wants a personal bedroom that meets their title's requirements, and negotiation can be used to get one. Turn off to ignore titles when choosing beds.</SmarterBeds_S_Titles_Tip>
+  <SmarterBeds_S_Jealousy>Jealous trait counts</SmarterBeds_S_Jealousy>
+  <SmarterBeds_S_Jealousy_Tip>When on, a Jealous colonist counts another colonist's much nicer room against their own, as the game does, and may ask for a better one.</SmarterBeds_S_Jealousy_Tip>
+  <SmarterBeds_S_ChairPenalty>Night in a chair: -{0}</SmarterBeds_S_ChairPenalty>
+  <SmarterBeds_S_ChairPenalty_Tip>The mood penalty for dozing in a chair. The floor is -4 in the game. Applies to new nights only.</SmarterBeds_S_ChairPenalty_Tip>
+  <SmarterBeds_Sec_Interface>Interface</SmarterBeds_Sec_Interface>
+  <SmarterBeds_S_RoomsButton>Show the Assign rooms button</SmarterBeds_S_RoomsButton>
+  <SmarterBeds_S_RoomsButton_Tip>The button on the Assign tab that opens the room list. Turn off if another mod uses that space.</SmarterBeds_S_RoomsButton_Tip>
 </LanguageData>

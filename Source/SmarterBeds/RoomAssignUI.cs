@@ -26,7 +26,7 @@ namespace SmarterBeds
         {
             try
             {
-                if (!(__instance is MainTabWindow_Assign) || !SmarterBedsMod.Settings.enabled) return;
+                if (!(__instance is MainTabWindow_Assign) || !SmarterBedsMod.Settings.enabled || !SmarterBedsMod.Settings.showRoomsButton) return;
 
                 var button = new Rect(rect.x + 4f, rect.y + 5f, ButtonWidth, ButtonHeight);
                 TooltipHandler.TipRegion(button, "SmarterBeds_AssignRooms_Tip".Translate());

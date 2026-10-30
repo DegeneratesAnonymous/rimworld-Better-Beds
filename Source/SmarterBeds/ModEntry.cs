@@ -40,14 +40,20 @@ namespace SmarterBeds
             Section(list, "SmarterBeds_Sec_Scoring");
             Slide(list, "SmarterBeds_S_RoomMood", ref s.roomMoodWeight, 0f, 3f, "0.00");
             Slide(list, "SmarterBeds_S_Rest", ref s.restEffectivenessWeight, 0f, 30f, "0.0");
-            Slide(list, "SmarterBeds_S_Unmet", ref s.unmetRequirementPenalty, 0f, 20f, "0.0");
+            Check(list, "SmarterBeds_S_Titles", ref s.titleRulesEnabled);
+            if (s.titleRulesEnabled)
+                Slide(list, "SmarterBeds_S_Unmet", ref s.unmetRequirementPenalty, 0f, 20f, "0.0");
+            Check(list, "SmarterBeds_S_Jealousy", ref s.jealousyEnabled);
+
+            // Used by both family and neighbours, so it is not hidden behind either switch.
+            Section(list, "SmarterBeds_Sec_Near");
+            Slide(list, "SmarterBeds_S_FamilyRadius", ref s.familyRadius, 5f, 100f, "0");
+            Slide(list, "SmarterBeds_S_FamilyHostile", ref s.familyHostileOpinion, -100f, 0f, "0");
 
             Section(list, "SmarterBeds_Sec_Family");
             Check(list, "SmarterBeds_S_Family", ref s.familyEnabled);
             if (s.familyEnabled)
             {
-                Slide(list, "SmarterBeds_S_FamilyRadius", ref s.familyRadius, 5f, 100f, "0");
-                Slide(list, "SmarterBeds_S_FamilyHostile", ref s.familyHostileOpinion, -100f, 0f, "0");
                 Slide(list, "SmarterBeds_S_FamilyShare", ref s.familyShareBonus, 0f, 6f, "0.0");
                 Slide(list, "SmarterBeds_S_FamilyNear", ref s.familyHostilePenalty, 0f, 10f, "0.0");
                 Slide(list, "SmarterBeds_S_FamilyFar", ref s.familyFarPenalty, 0f, 10f, "0.0");
@@ -83,17 +89,23 @@ namespace SmarterBeds
                 Slide(list, "SmarterBeds_S_Intimidate", ref s.intimidationFactor, 0f, 1.5f, "0.00");
                 Slide(list, "SmarterBeds_S_Tenure", ref s.tenureCap, 0f, 10f, "0.0");
                 Slide(list, "SmarterBeds_S_Xp", ref s.socialXpOnWin, 0f, 300f, "0");
-
-                Section(list, "SmarterBeds_Sec_Feedback");
-                Check(list, "SmarterBeds_S_Moods", ref s.negotiationMoodEffects);
-                Check(list, "SmarterBeds_S_Messages", ref s.negotiationMessages);
-                if (s.negotiationMessages)
-                    Slide(list, "SmarterBeds_S_MessageSeconds", ref s.messageSeconds, 0.5f, 13f, "0.0");
-                Check(list, "SmarterBeds_S_Log", ref s.showInPlayLog);
             }
+
+            // Messages also announce couples moving in, so these stay available without negotiation.
+            Section(list, "SmarterBeds_Sec_Feedback");
+            if (s.negotiationEnabled) Check(list, "SmarterBeds_S_Moods", ref s.negotiationMoodEffects);
+            Check(list, "SmarterBeds_S_Messages", ref s.negotiationMessages);
+            if (s.negotiationMessages)
+                Slide(list, "SmarterBeds_S_MessageSeconds", ref s.messageSeconds, 0.5f, 13f, "0.0");
+            if (s.negotiationEnabled) Check(list, "SmarterBeds_S_Log", ref s.showInPlayLog);
 
             Section(list, "SmarterBeds_Sec_Rough");
             Check(list, "SmarterBeds_S_Chair", ref s.chairSleepEnabled);
+            if (s.chairSleepEnabled)
+                Slide(list, "SmarterBeds_S_ChairPenalty", ref s.chairSleepPenalty, 0f, 8f, "0.0");
+
+            Section(list, "SmarterBeds_Sec_Interface");
+            Check(list, "SmarterBeds_S_RoomsButton", ref s.showRoomsButton);
 
             Section(list, "SmarterBeds_Sec_Diag");
             list.Label(new TaggedString(SafePatcher.Summary()), -1f, SafePatcher.Details());

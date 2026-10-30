@@ -135,7 +135,11 @@ namespace SmarterBeds
 
                 memories.RemoveMemoriesOfDef(ThoughtDefOf.SleptOnGround);
                 var def = DefDatabase<ThoughtDef>.GetNamedSilentFail(ChairSleep.ThoughtDefName);
-                if (def != null) memories.TryGainMemory(def);
+                var penalty = SmarterBedsMod.Settings.chairSleepPenalty;
+                if (def == null || penalty <= 0f) return;
+                var thought = (Thought_Memory)ThoughtMaker.MakeThought(def);
+                thought.moodPowerFactor = penalty; // the stage is worth exactly -1
+                memories.TryGainMemory(thought);
             }
             catch (System.Exception e) { SafeLog.Once("chair sleep thought", e); }
         }

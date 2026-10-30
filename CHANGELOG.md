@@ -4,6 +4,12 @@ All notable changes are listed here. Versions follow semantic versioning.
 
 ## [Unreleased]
 
+### Settings
+- New switches: royal title bedroom rules, the Jealous trait, the Assign rooms button; a slider for the chair-sleep penalty
+- The family, neighbour and chair sliders now set the real mood of their thoughts, not only the bed score
+- Family distance and the dislike threshold have their own section, since neighbours use them even with family rules off
+- Messages and the chair options no longer disappear when negotiation is off
+
 ### Fixed
 - A negotiation could end without being settled if the asker's recreation filled up mid-conversation; it now always reaches the roll
 - Nobody asks someone who is asleep, drafted, downed or in a mental break
