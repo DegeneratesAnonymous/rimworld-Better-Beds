@@ -25,7 +25,9 @@ namespace SmarterBeds
             var view = new Rect(0f, 0f, inRect.width - 20f, viewHeight);
             Widgets.BeginScrollView(inRect, ref scrollPosition, view);
 
-            var list = new Listing_Standard { ColumnWidth = view.width };
+            // One column only: once the list is taller than the view, Listing_Standard would start a second
+            // column off to the right, and the measured height (below) would collapse with it.
+            var list = new Listing_Standard { ColumnWidth = view.width, maxOneColumn = true };
             list.Begin(view);
             var s = Settings;
 
@@ -60,6 +62,7 @@ namespace SmarterBeds
                 Slide(list, "SmarterBeds_S_FamilyNear", ref s.familyHostilePenalty, 0f, 10f, "0.0");
                 Slide(list, "SmarterBeds_S_FamilyFar", ref s.familyFarPenalty, 0f, 10f, "0.0");
                 Check(list, "SmarterBeds_S_CoupleHousing", ref s.coupleHousingEnabled);
+                if (s.negotiationEnabled) Check(list, "SmarterBeds_S_CoupleNegotiate", ref s.coupleNegotiationEnabled);
                 Slide(list, "SmarterBeds_S_CoupleRoom", ref s.coupleRoomBonus, 0f, 8f, "0.0");
                 Slide(list, "SmarterBeds_S_CoupleShare", ref s.coupleSharePenalty, 0f, 8f, "0.0");
             }
@@ -114,6 +117,9 @@ namespace SmarterBeds
             Check(list, "SmarterBeds_S_Chair", ref s.chairSleepEnabled);
             if (s.chairSleepEnabled)
                 Slide(list, "SmarterBeds_S_ChairPenalty", ref s.chairSleepPenalty, 0f, 8f, "0.0", ChairExample);
+
+            Section(list, "SmarterBeds_Sec_Guests");
+            Check(list, "SmarterBeds_S_VisitorBeds", ref s.visitorsUseGuestBeds);
 
             Section(list, "SmarterBeds_Sec_Interface");
             Check(list, "SmarterBeds_S_RoomsButton", ref s.showRoomsButton);

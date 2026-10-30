@@ -9,6 +9,20 @@ namespace SmarterBeds
     /// </summary>
     public class Thought_SettingMood : Thought_Situational
     {
+        /// <summary>
+        /// The game fills {0} in a description with the colonist's own name, not the reason, so the
+        /// reason (the neighbour or relative) is put in here.
+        /// </summary>
+        public override string Description
+        {
+            get
+            {
+                string text = CurStage?.description ?? def.description;
+                if (string.IsNullOrEmpty(text) || !text.Contains("{0}")) return text;
+                return text.Replace("{0}", string.IsNullOrEmpty(reason) ? "someone" : reason);
+            }
+        }
+
         public override float MoodOffset()
         {
             var s = SmarterBedsMod.Settings;

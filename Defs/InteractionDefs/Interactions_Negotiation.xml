@@ -72,4 +72,58 @@
       </rulesStrings>
     </logRulesInitiator>
   </InteractionDef>
+
+  <!-- A couple: one of them talks their partner round to moving. -->
+  <InteractionDef>
+    <defName>SmarterBeds_ConvinceToMove</defName>
+    <label>talk a partner into moving</label>
+    <workerClass>InteractionWorker</workerClass>
+    <symbol>Things/Mote/SpeechSymbols/BuildRapport</symbol>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] suggested to [RECIPIENT_nameDef] that they find a better room together.</li>
+        <li>r_logentry->[INITIATOR_nameDef] talked to [RECIPIENT_nameDef] about moving to a nicer bedroom.</li>
+        <li>r_logentry->[INITIATOR_nameDef] asked [RECIPIENT_nameDef] to help them find somewhere better to sleep.</li>
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+
+  <InteractionDef>
+    <defName>SmarterBeds_PressureToMove</defName>
+    <label>push a partner into moving</label>
+    <workerClass>InteractionWorker</workerClass>
+    <symbol>Things/Mote/SpeechSymbols/Insult</symbol>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] told [RECIPIENT_nameDef] they were moving rooms, and that was that.</li>
+        <li>r_logentry->[INITIATOR_nameDef] leaned on [RECIPIENT_nameDef] to go along with a move.</li>
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+
+  <InteractionDef>
+    <defName>SmarterBeds_AgreeToMove</defName>
+    <label>agree to move</label>
+    <workerClass>InteractionWorker</workerClass>
+    <symbol>Things/Mote/SpeechSymbols/KindWords</symbol>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] agreed to move rooms with [RECIPIENT_nameDef].</li>
+        <li>r_logentry->[INITIATOR_nameDef] gave in and said [RECIPIENT_nameDef] was right about the room.</li>
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
+
+  <InteractionDef>
+    <defName>SmarterBeds_RefuseToMove</defName>
+    <label>refuse to move</label>
+    <workerClass>InteractionWorker</workerClass>
+    <symbol>Things/Mote/SpeechSymbols/Slight</symbol>
+    <logRulesInitiator>
+      <rulesStrings>
+        <li>r_logentry->[INITIATOR_nameDef] was happy where they were and said no to [RECIPIENT_nameDef].</li>
+        <li>r_logentry->[INITIATOR_nameDef] would not hear of changing rooms.</li>
+      </rulesStrings>
+    </logRulesInitiator>
+  </InteractionDef>
 </Defs>

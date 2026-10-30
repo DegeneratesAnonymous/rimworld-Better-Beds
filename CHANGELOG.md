@@ -12,12 +12,18 @@ All notable changes are listed here. Versions follow semantic versioning.
 - Messages and the chair options no longer disappear when negotiation is off
 
 ### Fixed
+- Nobody is pulled into a negotiation while using the toilet, washing, bathing, showering (Dubs Bad Hygiene) or eating, and a conversation is called off if the other colonist goes to the toilet on the way
+- The settings window went blank after the General heading once it grew past its starting height (the list wrapped into a hidden second column)
+- "Collection was modified" errors when searching for someone to negotiate with, or housing couples
+- The tooltip of the "sleeping too close to ..." thoughts named the colonist themselves instead of the person they dislike
 - A negotiation could end without being settled if the asker's recreation filled up mid-conversation; it now always reaches the roll
 - Nobody asks someone who is asleep, drafted, downed or in a mental break
 - Old cooldown entries are cleared every hour, not only after a successful swap
 - Couple housing scores each bed once per person instead of once per pair of beds
 
 ### Added
+- Visitors who are not Hospitality guests (spaceport visitors, trade caravans) rent a free guest bed when they can pay, instead of sleeping on the floor; bedless guests and visitors who cannot pay sleep in a chair. Hospitality's own bed choice for its guests is unchanged
+- Couples negotiate together: when both want a better room the one with the higher Social skill asks, and a win moves both of them in. When only one wants to move they first talk their partner round (intimidation only if the partner does not think well of them), then the better talker asks. The room must hold nobody but its owner and have space for two. New setting to turn it off, and the dev Force negotiation gizmo handles couples
 - Neighbours: a colonist dislikes sleeping within the family distance (35 tiles) of someone they dislike who is not family (-4, up to two people), and likes sleeping near someone of their own ideoligion (+2) or xenotype (+2, "people like me", baseliners excluded). All three count in bed choice, couple housing and negotiation, and show as thoughts
 - A disliked relative nearby now costs less than a disliked stranger (-2 against -4, setting renamed so old saved values do not carry over)
 - Initial scaffold

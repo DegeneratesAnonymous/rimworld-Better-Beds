@@ -48,6 +48,13 @@ namespace SmarterBeds
             return Mathf.Min(s.tenureCap, days / TenureDaysPerPoint);
         }
 
+        /// <summary>Social skill, or -1 for someone who cannot talk. Used to decide which of a couple negotiates.</summary>
+        public static float SocialLevel(Pawn p)
+        {
+            var rec = p.skills?.GetSkill(SkillDefOf.Social);
+            return rec == null || rec.TotallyDisabled ? -1f : rec.Level;
+        }
+
         private static float Level(Pawn p, SkillDef skill)
         {
             var rec = p.skills?.GetSkill(skill);
@@ -63,10 +70,15 @@ namespace SmarterBeds
             return true;
         }
 
-        public static NegotiationContest Build(Pawn asker, Pawn defender, SmarterBedsSettings s)
+        /// <param name="convince">
+        /// One of a couple persuading the other to move. The partner is not holding a room against them, so
+        /// there is no defender bonus, and leaning on them is only an option when they do not think well of the asker.
+        /// </param>
+        public static NegotiationContest Build(Pawn asker, Pawn defender, SmarterBedsSettings s, bool convince = false)
         {
             bool canTalk = asker.skills != null && !asker.skills.GetSkill(SkillDefOf.Social).TotallyDisabled;
             bool canBully = WillIntimidate(asker, defender);
+            if (convince && canBully && defender.relations != null && defender.relations.OpinionOf(asker) > 0) canBully = false;
 
             float opinion = defender.relations != null ? defender.relations.OpinionOf(asker) / 10f : 0f;
             float persuade = canTalk ? Level(asker, SkillDefOf.Social) + opinion : float.MinValue;
@@ -81,7 +93,7 @@ namespace SmarterBeds
             float defence = Level(defender, bully ? SkillDefOf.Melee : SkillDefOf.Social);
 
             c.askerMod = Mathf.Round(askerSkill + TitlePoints(asker, s) + TenurePoints(asker, s));
-            c.defenderMod = Mathf.Round(defence + TitlePoints(defender, s) + TenurePoints(defender, s) + s.defenderBonus);
+            c.defenderMod = Mathf.Round(defence + TitlePoints(defender, s) + TenurePoints(defender, s) + (convince ? 0f : s.defenderBonus));
             c.winChance = WinChance(c.askerMod, c.defenderMod);
             return c;
         }
