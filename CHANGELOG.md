@@ -17,3 +17,4 @@ All notable changes are listed here. Versions follow semantic versioning.
 - Sleep in a chair as a last resort, with a milder penalty than the floor
 - Scrollable settings window with a tooltip on every option and a reset button
 - Compatibility: bed choice is a last-running postfix that defers to `IsValidBedFor`, so Hospitality and other bed mods keep working
+- Negotiation notification is brief (1 second, adjustable) and fades out

@@ -66,6 +66,8 @@ namespace SmarterBeds
                 Section(list, "SmarterBeds_Sec_Feedback");
                 Check(list, "SmarterBeds_S_Moods", ref s.negotiationMoodEffects);
                 Check(list, "SmarterBeds_S_Messages", ref s.negotiationMessages);
+                if (s.negotiationMessages)
+                    Slide(list, "SmarterBeds_S_MessageSeconds", ref s.messageSeconds, 0.5f, 13f, "0.0");
                 Check(list, "SmarterBeds_S_Log", ref s.showInPlayLog);
             }
 

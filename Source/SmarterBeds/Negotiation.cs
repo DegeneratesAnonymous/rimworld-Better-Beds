@@ -268,8 +268,8 @@ namespace SmarterBeds
             NegotiationLog.Say("SmarterBeds_RefuseRoom", defender, asker);
 
             if (s.negotiationMessages)
-                Messages.Message("SmarterBeds_RoomFailed".Translate(asker.LabelShort, defender.LabelShort, askerTotal, defenderTotal),
-                    new LookTargets(asker, defender), MessageTypeDefOf.NeutralEvent, false);
+                BriefMessage.Show("SmarterBeds_RoomFailed".Translate(asker.LabelShort, defender.LabelShort, askerTotal, defenderTotal),
+                    new LookTargets(asker, defender), s.messageSeconds);
         }
 
         private Pawn FindLoser(Pawn a, Building_Bed bedA, SmarterBedsSettings s, out float bestGain, out NegotiationContest bestContest, Pawn only = null)
@@ -351,8 +351,8 @@ namespace SmarterBeds
             if (s.negotiationMessages)
             {
                 string key = contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_RoomWonIntimidate" : "SmarterBeds_RoomWonPersuade";
-                Messages.Message(key.Translate(winner.LabelShort, loser.LabelShort, winnerTotal, loserTotal),
-                    new LookTargets(winner, loser), MessageTypeDefOf.NeutralEvent, false);
+                BriefMessage.Show(key.Translate(winner.LabelShort, loser.LabelShort, winnerTotal, loserTotal),
+                    new LookTargets(winner, loser), s.messageSeconds);
             }
             return true;
         }

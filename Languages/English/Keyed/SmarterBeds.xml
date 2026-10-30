@@ -68,7 +68,9 @@
   <SmarterBeds_S_Moods>Negotiations change moods</SmarterBeds_S_Moods>
   <SmarterBeds_S_Moods_Tip>Mood points = 0.25 x relationship + 0.25 x the mood gained from the room. The loser is bullied out (a debuff) or, if they like the winner and were persuaded, gave up the room for a friend (a buff). The winner is pleased with the new room.</SmarterBeds_S_Moods_Tip>
   <SmarterBeds_S_Messages>Show a message when a room changes hands</SmarterBeds_S_Messages>
-  <SmarterBeds_S_Messages_Tip>A notification with the roll totals, such as "Alice talked Bob out of their bedroom. (21 vs 17)".</SmarterBeds_S_Messages_Tip>
+  <SmarterBeds_S_Messages_Tip>A short notification in the top left with the roll totals, such as "Alice talked Bob out of their bedroom. (21 vs 17)". It is also kept in the message history.</SmarterBeds_S_Messages_Tip>
+  <SmarterBeds_S_MessageSeconds>Notification stays for: {0} s</SmarterBeds_S_MessageSeconds>
+  <SmarterBeds_S_MessageSeconds_Tip>How long the notification stays fully visible before it fades out (the fade itself takes about half a second more). The game's normal messages stay for 13 seconds.</SmarterBeds_S_MessageSeconds_Tip>
   <SmarterBeds_S_Log>Show negotiations in the log and speech bubbles</SmarterBeds_S_Log>
   <SmarterBeds_S_Log_Tip>Adds the conversation to the colonists' social log. Interaction Bubbles, if installed, shows it as speech bubbles.</SmarterBeds_S_Log_Tip>
 

@@ -39,6 +39,7 @@ namespace SmarterBeds
         // Feedback
         public bool negotiationMoodEffects = true;
         public bool negotiationMessages = true;
+        public float messageSeconds = 1f;              // how long the top-left notification stays before it fades
         public bool showInPlayLog = true;              // also what Interaction Bubbles displays
 
         // Player control
@@ -75,6 +76,7 @@ namespace SmarterBeds
 
             Scribe_Values.Look(ref negotiationMoodEffects, "negotiationMoodEffects", true);
             Scribe_Values.Look(ref negotiationMessages, "negotiationMessages", true);
+            Scribe_Values.Look(ref messageSeconds, "messageSeconds", 1f);
             Scribe_Values.Look(ref showInPlayLog, "showInPlayLog", true);
 
             Scribe_Values.Look(ref autoLockManualAssignments, "autoLockManualAssignments", true);
