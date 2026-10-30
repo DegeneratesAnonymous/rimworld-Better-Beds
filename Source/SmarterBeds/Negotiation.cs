@@ -52,6 +52,7 @@ namespace SmarterBeds
         {
             if (Find.TickManager.TicksGame % GenDate.TicksPerHour != 0) return;
             PruneLocks();
+            PruneCooldowns();
             var s = SmarterBedsMod.Settings;
             if (!s.enabled || !s.familyEnabled || !s.coupleHousingEnabled) return;
 
@@ -453,6 +454,8 @@ namespace SmarterBeds
             foreach (var b in a.Map.mapPawns.FreeColonistsSpawned)
             {
                 if (b == a || (only != null && b != only) || !Eligible(b)) continue;
+                // Someone asleep, drafted, downed or in a mental break cannot be talked to.
+                if (!b.Awake() || b.Downed || b.Drafted || b.InMentalState) continue;
                 var bedB = b.ownership.OwnedBed;
                 if (bedA.GetRoom() == bedB.GetRoom()) continue;
                 if (!force && PairOnCooldown(a, b)) continue;

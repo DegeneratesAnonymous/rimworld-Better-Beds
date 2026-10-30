@@ -79,14 +79,17 @@ namespace SmarterBeds
                 var usable = room.ContainedBeds.Where(bed => UsableByBoth(bed, a, b)).ToList();
                 if (usable.Sum(bed => bed.SleepingSlotsCount) < 2) continue;
 
-                foreach (var bedA in usable)
+                // Score each bed once per person, not once per pair of beds.
+                var forA = usable.Select(bed => RoomComfort.Points(bed, a, s, company: false)).ToList();
+                var forB = usable.Select(bed => RoomComfort.Points(bed, b, s, company: false)).ToList();
+                for (int i = 0; i < usable.Count; i++)
                 {
-                    foreach (var bedB in usable)
+                    for (int j = 0; j < usable.Count; j++)
                     {
+                        var bedA = usable[i];
+                        var bedB = usable[j];
                         if (bedA == bedB && bedA.SleepingSlotsCount < 2) continue;
-                        float value = RoomComfort.Points(bedA, a, s, company: false)
-                                    + RoomComfort.Points(bedB, b, s, company: false)
-                                    + 2f * s.coupleRoomBonus;
+                        float value = forA[i] + forB[j] + 2f * s.coupleRoomBonus;
                         if (best == null || value > best.Value.value)
                             best = new Plan { bedA = bedA, bedB = bedB, value = value };
                     }

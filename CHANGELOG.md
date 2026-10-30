@@ -4,6 +4,12 @@ All notable changes are listed here. Versions follow semantic versioning.
 
 ## [Unreleased]
 
+### Fixed
+- A negotiation could end without being settled if the asker's recreation filled up mid-conversation; it now always reaches the roll
+- Nobody asks someone who is asleep, drafted, downed or in a mental break
+- Old cooldown entries are cleared every hour, not only after a successful swap
+- Couple housing scores each bed once per person instead of once per pair of beds
+
 ### Added
 - Neighbours: a colonist dislikes sleeping within the family distance (35 tiles) of someone they dislike who is not family (-4, up to two people), and likes sleeping near someone of their own ideoligion (+2) or xenotype (+2, "people like me", baseliners excluded). All three count in bed choice, couple housing and negotiation, and show as thoughts
 - A disliked relative nearby now costs less than a disliked stranger (-2 against -4, setting renamed so old saved values do not carry over)
