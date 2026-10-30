@@ -163,12 +163,12 @@ Load after Harmony and any bed, room, or guest mods.
 
 Found something behaving strangely?
 
-[list=1]
+[olist]
 [*] Enable [b]Log decisions[/b] in the mod settings.
 [*] Reproduce the issue.
 [*] Press [b]Ctrl+F12[/b] to generate a log.
 [*] Include the log and your mod list when reporting the issue.
-[/list]
+[/olist]
 
 [h2]Credits[/h2]
 
