@@ -17,6 +17,8 @@ namespace SmarterBeds
         public float roomMoodWeight = 1f;            // 1 = trust the game's room mood numbers as they are
         public float restEffectivenessWeight = 10f;  // mood points per 1.0 of bed rest effectiveness
         public float unmetRequirementPenalty = 6f;   // the game's own title bedroom penalty
+        public bool titleRulesEnabled = true;        // Royalty: a title-holder's bedroom rules count in the score
+        public bool jealousyEnabled = true;          // the Jealous trait counts in the score
 
         // Family and couples
         public bool familyEnabled = true;
@@ -59,6 +61,10 @@ namespace SmarterBeds
 
         // Sleeping rough
         public bool chairSleepEnabled = true;
+        public float chairSleepPenalty = 3f;           // mood for a night in a chair (the floor is 4)
+
+        // Interface
+        public bool showRoomsButton = true;            // the Assign rooms button on the Assign tab
 
         public override void ExposeData()
         {
@@ -69,6 +75,8 @@ namespace SmarterBeds
             Scribe_Values.Look(ref roomMoodWeight, "roomMoodWeight", 1f);
             Scribe_Values.Look(ref restEffectivenessWeight, "restEffectivenessWeight", 10f);
             Scribe_Values.Look(ref unmetRequirementPenalty, "unmetRequirementPenalty", 6f);
+            Scribe_Values.Look(ref titleRulesEnabled, "titleRulesEnabled", true);
+            Scribe_Values.Look(ref jealousyEnabled, "jealousyEnabled", true);
 
             Scribe_Values.Look(ref familyEnabled, "familyEnabled", true);
             Scribe_Values.Look(ref familyRadius, "familyRadius", 35f);
@@ -104,6 +112,8 @@ namespace SmarterBeds
             Scribe_Values.Look(ref showInPlayLog, "showInPlayLog", true);
 
             Scribe_Values.Look(ref chairSleepEnabled, "chairSleepEnabled", true);
+            Scribe_Values.Look(ref chairSleepPenalty, "chairSleepPenalty", 3f);
+            Scribe_Values.Look(ref showRoomsButton, "showRoomsButton", true);
         }
 
         /// <summary>Puts every setting back to the value in its field initializer.</summary>

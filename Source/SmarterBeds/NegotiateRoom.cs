@@ -140,7 +140,9 @@ namespace SmarterBeds
             {
                 pawn.rotationTracker.FaceTarget(Target);
                 // Joy and Social experience come from the job definition (joyKind, joySkill, joyXpPerTick).
-                JoyUtility.JoyTickCheckEnd(pawn, 1, JoyTickFullJoyAction.EndJob, 1f, null);
+                // Never EndJob here: a pawn whose recreation fills up mid-talk would leave before the
+                // resolve step below, and the negotiation would silently never be settled.
+                JoyUtility.JoyTickCheckEnd(pawn, 1, JoyTickFullJoyAction.None, 1f, null);
             };
             talk.socialMode = RandomSocialMode.Off;
             yield return talk;

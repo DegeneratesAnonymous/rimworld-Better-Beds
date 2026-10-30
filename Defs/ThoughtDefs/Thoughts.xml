@@ -55,7 +55,7 @@
     </stages>
   </ThoughtDef>
 
-  <!-- Dozing in a chair is bad, but less bad than the floor (slept on ground is -4). -->
+  <!-- Dozing in a chair is bad, but less bad than the floor (slept on ground is -4). The stage is worth -1; the setting scales it (default 3). -->
   <ThoughtDef>
     <defName>SmarterBeds_SleptInChair</defName>
     <durationDays>1</durationDays>
@@ -67,14 +67,15 @@
       <li>
         <label>slept in a chair</label>
         <description>I had to sleep sitting up in a chair. My neck hurts, but at least it was not the floor.</description>
-        <baseMoodEffect>-3</baseMoodEffect>
+        <baseMoodEffect>-1</baseMoodEffect>
       </li>
     </stages>
   </ThoughtDef>
-  <!-- Situational: worked out in code (see FamilyThoughts.cs). Mood is fixed here; the settings
-       for how much a bed is marked down for these default to the same -4. -->
+  <!-- Situational: worked out in code (see FamilyThoughts.cs). The mood shown is the matching setting (Thought_SettingMood);
+       the value here is only a fallback. -->
   <ThoughtDef>
     <defName>SmarterBeds_RoomFarFromFamily</defName>
+    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
     <workerClass>SmarterBeds.ThoughtWorker_RoomFarFromFamily</workerClass>
     <developmentalStageFilter>Adult</developmentalStageFilter>
     <stages>
@@ -88,6 +89,7 @@
 
   <ThoughtDef>
     <defName>SmarterBeds_RoomNearDislikedFamily</defName>
+    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
     <workerClass>SmarterBeds.ThoughtWorker_RoomNearDislikedFamily</workerClass>
     <developmentalStageFilter>Adult</developmentalStageFilter>
     <stages>
@@ -101,6 +103,7 @@
 
   <ThoughtDef>
     <defName>SmarterBeds_RoomNearDislikedNeighbor</defName>
+    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
     <workerClass>SmarterBeds.ThoughtWorker_RoomNearDislikedNeighbor</workerClass>
     <developmentalStageFilter>Adult</developmentalStageFilter>
     <stages>
@@ -114,6 +117,7 @@
 
   <ThoughtDef MayRequire="Ludeon.RimWorld.Ideology">
     <defName>SmarterBeds_RoomAmongOwnIdeo</defName>
+    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
     <workerClass>SmarterBeds.ThoughtWorker_RoomAmongOwnIdeo</workerClass>
     <developmentalStageFilter>Adult</developmentalStageFilter>
     <stages>
@@ -127,6 +131,7 @@
 
   <ThoughtDef MayRequire="Ludeon.RimWorld.Biotech">
     <defName>SmarterBeds_RoomAmongSimilarGenes</defName>
+    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
     <workerClass>SmarterBeds.ThoughtWorker_RoomAmongSimilarGenes</workerClass>
     <developmentalStageFilter>Adult</developmentalStageFilter>
     <stages>

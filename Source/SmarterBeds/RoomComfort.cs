@@ -173,6 +173,7 @@ namespace SmarterBeds
         /// </summary>
         public static float TitlePenalty(Building_Bed bed, Room room, bool outdoors, Pawn pawn, SmarterBedsSettings s)
         {
+            if (!s.titleRulesEnabled) return 0f;
             var title = Requirements.TitleOf(pawn);
             if (title == null) return 0f;
             if (pawn.story?.traits != null && pawn.story.traits.HasTrait(TraitDefOf.Ascetic)) return 0f;
@@ -206,6 +207,7 @@ namespace SmarterBeds
         /// </summary>
         public static float JealousyPenalty(Room room, bool outdoors, Pawn pawn)
         {
+            if (!SmarterBedsMod.Settings.jealousyEnabled) return 0f;
             if (pawn.story?.traits == null || !pawn.story.traits.HasTrait(TraitDefOf.Jealous)) return 0f;
             if (pawn.Map == null) return 0f;
             float own = outdoors ? 0f : room.GetStat(RoomStatDefOf.Impressiveness);

@@ -4,6 +4,27 @@ using Verse;
 namespace SmarterBeds
 {
     /// <summary>
+    /// A situational thought whose mood is the matching setting, so the slider changes what the
+    /// colonist actually feels and not only how beds are ranked.
+    /// </summary>
+    public class Thought_SettingMood : Thought_Situational
+    {
+        public override float MoodOffset()
+        {
+            var s = SmarterBedsMod.Settings;
+            switch (def.defName)
+            {
+                case "SmarterBeds_RoomFarFromFamily": return -s.familyFarPenalty;
+                case "SmarterBeds_RoomNearDislikedFamily": return -s.familyHostilePenalty;
+                case "SmarterBeds_RoomNearDislikedNeighbor": return -s.neighborHostilePenalty;
+                case "SmarterBeds_RoomAmongOwnIdeo": return s.ideoNeighborBonus;
+                case "SmarterBeds_RoomAmongSimilarGenes": return s.geneNeighborBonus;
+                default: return base.MoodOffset();
+            }
+        }
+    }
+
+    /// <summary>
     /// "Room far from family": a couple, with family in the colony, whose bed is outside the family
     /// radius (35 tiles by default) of every one of those relatives. Counts as a bedroom problem, so
     /// the colonist may ask for a room closer to them.
