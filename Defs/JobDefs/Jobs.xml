@@ -10,6 +10,16 @@
     <joyXpPerTick>0.01</joyXpPerTick>
     <joyKind>Social</joyKind>
   </JobDef>
+  <!-- The colonist being asked stops and listens (see TalkHold in NegotiateRoom.cs). Their old job
+       resumes afterwards. -->
+  <JobDef>
+    <defName>SmarterBeds_ListenToRoomPitch</defName>
+    <driverClass>SmarterBeds.JobDriver_ListenToPitch</driverClass>
+    <reportString>listening to TargetA.</reportString>
+    <casualInterruptible>true</casualInterruptible>
+    <neverShowWeapon>true</neverShowWeapon>
+  </JobDef>
+
   <!-- Last resort for a colonist with no bed: doze off in a chair. See ChairSleep.cs. -->
   <JobDef>
     <defName>SmarterBeds_SleepInChair</defName>

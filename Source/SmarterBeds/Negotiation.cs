@@ -21,11 +21,18 @@ namespace SmarterBeds
     {
         public static GameComponent_BedNegotiation Instance => Current.Game?.GetComponent<GameComponent_BedNegotiation>();
 
-        // Saved: "lowId:highId" -> tick when these two may negotiate with each other again.
-        private Dictionary<string, int> pairCooldownUntil = new Dictionary<string, int>();
+        // Saved: pair of pawn ids -> tick when these two may negotiate with each other again.
+        // (Keys are two ids packed into one number: no strings are built while searching.)
+        private Dictionary<long, int> pairCooldownUntil = new Dictionary<long, int>();
 
-        // Saved: "loserId>winnerId" -> tick until which the loser may not challenge that winner again.
-        private Dictionary<string, int> rematchUntil = new Dictionary<string, int>();
+        // Saved: same, for the housing check on a couple.
+        private Dictionary<long, int> coupleCooldownUntil = new Dictionary<long, int>();
+
+        // Saved: loser/winner ids -> tick until which the loser may not challenge that winner again.
+        private Dictionary<long, int> rematchUntil = new Dictionary<long, int>();
+
+        // Saved: bed id -> id of the owner the player set with the Set owner button (see BedLocks).
+        private Dictionary<int, int> lockedBeds = new Dictionary<int, int>();
 
         // Mood effect of a negotiation = 0.25 x relationship + 0.25 x room quality, in mood points.
         // Relationship is the loser's opinion of the winner / 10 (-10..+10). Room quality is the
@@ -44,6 +51,7 @@ namespace SmarterBeds
         public override void GameComponentTick()
         {
             if (Find.TickManager.TicksGame % GenDate.TicksPerHour != 0) return;
+            PruneLocks();
             var s = SmarterBedsMod.Settings;
             if (!s.enabled || !s.familyEnabled || !s.coupleHousingEnabled) return;
 
@@ -51,33 +59,92 @@ namespace SmarterBeds
             {
                 if (!map.IsPlayerHome) continue;
                 try { CoupleHousing.Run(map, this); }
-                catch (System.Exception e) { Log.Error($"[Smarter Beds] couple housing failed: {e}"); }
+                catch (System.Exception e) { SafeLog.Once("couple housing", e); }
             }
         }
 
+        // ---- the player's locks
+
+        public bool IsLocked(Building_Bed bed, Pawn owner) =>
+            bed != null && owner != null
+            && lockedBeds.TryGetValue(bed.thingIDNumber, out int id) && id == owner.thingIDNumber
+            && bed.OwnersForReading.Contains(owner);
+
+        public bool IsLockedForOwner(Building_Bed bed)
+        {
+            if (bed == null || !lockedBeds.TryGetValue(bed.thingIDNumber, out int id)) return false;
+            foreach (var owner in bed.OwnersForReading)
+            {
+                if (owner.thingIDNumber == id) return true;
+            }
+            return false;
+        }
+
+        public void Lock(Building_Bed bed, Pawn owner) => lockedBeds[bed.thingIDNumber] = owner.thingIDNumber;
+
+        public void Release(Building_Bed bed, Pawn owner)
+        {
+            if (lockedBeds.TryGetValue(bed.thingIDNumber, out int id) && id == owner.thingIDNumber)
+                lockedBeds.Remove(bed.thingIDNumber);
+        }
+
+        /// <summary>Forget locks on beds that no longer exist anywhere.</summary>
+        private void PruneLocks()
+        {
+            if (lockedBeds.Count == 0) return;
+            var live = new HashSet<int>();
+            foreach (var map in Find.Maps)
+            {
+                foreach (var bed in map.listerBuildings.AllBuildingsColonistOfClass<Building_Bed>()) live.Add(bed.thingIDNumber);
+            }
+            foreach (var id in lockedBeds.Keys.Where(k => !live.Contains(k)).ToList()) lockedBeds.Remove(id);
+        }
+
         public bool CoupleOnCooldown(Pawn a, Pawn b) =>
-            pairCooldownUntil.TryGetValue("c" + PairKey(a, b), out int until) && Now < until;
+            coupleCooldownUntil.TryGetValue(PairKey(a, b), out int until) && Now < until;
 
         public void StartCoupleCooldown(Pawn a, Pawn b, float days) =>
-            pairCooldownUntil["c" + PairKey(a, b)] = Now + (int)(days * GenDate.TicksPerDay);
+            coupleCooldownUntil[PairKey(a, b)] = Now + (int)(days * GenDate.TicksPerDay);
+
+        // Caches in this file are per game; the shared ones are cleared whenever a game loads, because
+        // pawn ids are reused between saves.
+        public override void LoadedGame() { ResetCaches(); }
+        public override void StartedNewGame() { ResetCaches(); }
+
+        private void ResetCaches()
+        {
+            Family.ClearCache();
+            BedScorer.ClearCache();
+            movedAt.Clear();
+            lastChecked.Clear();
+            wantsCache.Clear();
+        }
 
         public override void ExposeData()
         {
-            Scribe_Collections.Look(ref pairCooldownUntil, "pairCooldownUntil", LookMode.Value, LookMode.Value);
-            Scribe_Collections.Look(ref rematchUntil, "rematchUntil", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref pairCooldownUntil, "pairCooldowns", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref coupleCooldownUntil, "coupleCooldowns", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref rematchUntil, "rematches", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref lockedBeds, "lockedBeds", LookMode.Value, LookMode.Value);
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
-                if (pairCooldownUntil == null) pairCooldownUntil = new Dictionary<string, int>();
-                if (rematchUntil == null) rematchUntil = new Dictionary<string, int>();
+                if (lockedBeds == null) lockedBeds = new Dictionary<int, int>();
+                if (pairCooldownUntil == null) pairCooldownUntil = new Dictionary<long, int>();
+                if (coupleCooldownUntil == null) coupleCooldownUntil = new Dictionary<long, int>();
+                if (rematchUntil == null) rematchUntil = new Dictionary<long, int>();
             }
         }
 
         private static int Now => Find.TickManager.TicksGame;
 
-        private static string PairKey(Pawn a, Pawn b) =>
-            a.thingIDNumber < b.thingIDNumber ? a.thingIDNumber + ":" + b.thingIDNumber : b.thingIDNumber + ":" + a.thingIDNumber;
+        private static long Pack(int first, int second) => ((long)first << 32) | (uint)second;
 
-        private static string RematchKey(Pawn loser, Pawn winner) => loser.thingIDNumber + ">" + winner.thingIDNumber;
+        /// <summary>The same number whichever of the two is given first.</summary>
+        private static long PairKey(Pawn a, Pawn b) =>
+            a.thingIDNumber < b.thingIDNumber ? Pack(a.thingIDNumber, b.thingIDNumber) : Pack(b.thingIDNumber, a.thingIDNumber);
+
+        /// <summary>Order matters: this is "loser may not challenge winner".</summary>
+        private static long RematchKey(Pawn loser, Pawn winner) => Pack(loser.thingIDNumber, winner.thingIDNumber);
 
         private bool PairOnCooldown(Pawn a, Pawn b) =>
             pairCooldownUntil.TryGetValue(PairKey(a, b), out int until) && Now < until;
@@ -86,11 +153,16 @@ namespace SmarterBeds
             pairCooldownUntil[PairKey(a, b)] = Now + (int)(SmarterBedsMod.Settings.negotiationCooldownDays * GenDate.TicksPerDay);
 
         // Memory thoughts that mean "the place I slept was bad". SleepDisturbed is noise, not the room.
-        private static readonly List<ThoughtDef> SleepDebuffMemories = new List<ThoughtDef>
-        {
-            ThoughtDefOf.SleptInBarracks, ThoughtDefOf.SleptOutside, ThoughtDefOf.SleptOnGround,
-            ThoughtDefOf.SleptInCold, ThoughtDefOf.SleptInHeat, ThoughtDefOf.SleptInRoomWithSlave
-        };
+        // Built on first use rather than when the class loads, so it never reads the game's DefOf
+        // fields before they have been filled in. A def missing from this game version is just skipped.
+        private static List<ThoughtDef> sleepDebuffMemories;
+
+        private static List<ThoughtDef> SleepDebuffMemories =>
+            sleepDebuffMemories ?? (sleepDebuffMemories = new List<ThoughtDef>
+            {
+                ThoughtDefOf.SleptInBarracks, ThoughtDefOf.SleptOutside, ThoughtDefOf.SleptOnGround,
+                ThoughtDefOf.SleptInCold, ThoughtDefOf.SleptInHeat, ThoughtDefOf.SleptInRoomWithSlave
+            }.Where(d => d != null).ToList());
 
         // Situational thoughts about a bedroom: the game's (a title without a personal bedroom or with
         // unmet requirements, the Jealous trait envying someone's room) and this mod's two family ones.
@@ -105,16 +177,23 @@ namespace SmarterBeds
 
         private static readonly List<Thought> tmpThoughts = new List<Thought>();
 
-        /// <summary>True when the pawn is currently suffering a mood penalty about where they sleep.</summary>
-        public static bool HasSleepDebuff(Pawn p)
+        /// <summary>
+        /// True when the pawn is currently suffering a mood penalty about where they sleep.
+        /// <paramref name="includeMemories"/> is off for someone who has just moved: last night's
+        /// "slept in barracks" memory is about the room they left, and says nothing about the new one.
+        /// </summary>
+        public static bool HasSleepDebuff(Pawn p, bool includeMemories = true)
         {
             var handler = p.needs?.mood?.thoughts;
             if (handler == null) return false;
 
-            var memories = handler.memories;
-            foreach (var def in SleepDebuffMemories)
+            if (includeMemories)
             {
-                if (def != null && memories.GetFirstMemoryOfDef(def) != null) return true;
+                var memories = handler.memories;
+                foreach (var def in SleepDebuffMemories)
+                {
+                    if (memories.GetFirstMemoryOfDef(def) != null) return true;
+                }
             }
 
             tmpThoughts.Clear();
@@ -124,8 +203,11 @@ namespace SmarterBeds
                 foreach (var t in tmpThoughts)
                 {
                     var worker = t.def.workerClass;
-                    if (worker == null || !BedroomThoughtWorkers.Any(w => w.IsAssignableFrom(worker))) continue;
-                    if (t.MoodOffset() < 0f) return true;
+                    if (worker == null) continue;
+                    for (int i = 0; i < BedroomThoughtWorkers.Length; i++)
+                    {
+                        if (BedroomThoughtWorkers[i].IsAssignableFrom(worker) && t.MoodOffset() < 0f) return true;
+                    }
                 }
             }
             finally { tmpThoughts.Clear(); }
@@ -145,42 +227,66 @@ namespace SmarterBeds
             // A double bed with a single owner is fine.
             if (bed.OwnersForReading.Count != 1) return false;
             // The player decided; that is final.
-            if (CompBedLock.IsLocked(bed, p)) return false;
+            if (BedLocks.IsLocked(bed, p)) return false;
             return true;
         }
 
-        private static bool AreLovePartners(Pawn a, Pawn b)
-        {
-            foreach (var rel in LovePartnerRelationUtility.ExistingLovePartners(a, false))
-            {
-                if (rel.otherPawn == b) return true;
-            }
-            return false;
-        }
+        private static bool AreLovePartners(Pawn a, Pawn b) => Family.Lovers(a).Contains(b);
 
         /// <summary>Cheap check: is this pawn in a position where negotiating makes sense at all?</summary>
+        // Not saved: when each pawn last moved to a new room, so old sleep memories do not count against the new one.
+        private readonly Dictionary<int, int> movedAt = new Dictionary<int, int>();
+        private const int MemoryIgnoreTicks = GenDate.TicksPerDay;
+
+        public void NoteMoved(Pawn p) => movedAt[p.thingIDNumber] = Now;
+
+        private bool RecentlyMoved(Pawn p) =>
+            movedAt.TryGetValue(p.thingIDNumber, out int at) && Now - at < MemoryIgnoreTicks;
+
+        // Not saved. The joy system asks every colonist, many times a minute, whether this is on offer;
+        // the honest answer only changes over hours, so it is worked out at most every 250 ticks.
+        private readonly Dictionary<int, KeyValuePair<int, bool>> wantsCache = new Dictionary<int, KeyValuePair<int, bool>>();
+        private const int WantsCacheTicks = 250;
+
         public bool WantsToNegotiate(Pawn a)
         {
             var s = SmarterBedsMod.Settings;
             if (!s.enabled || !s.negotiationEnabled) return false;
+
+            int now = Now;
+            if (wantsCache.TryGetValue(a.thingIDNumber, out var cached) && now >= cached.Key && now - cached.Key < WantsCacheTicks)
+                return cached.Value;
+
+            bool wants = ComputeWants(a);
+            wantsCache[a.thingIDNumber] = new KeyValuePair<int, bool>(now, wants);
+            return wants;
+        }
+
+        /// <summary>The real answer, never cached: used when it must be right (settling a negotiation).</summary>
+        private bool ComputeWants(Pawn a)
+        {
             if (!Eligible(a)) return false;
             // A couple who have a room of their own are not going to break it up.
             if (Family.IsInCoupleRoom(a)) return false;
             // Only negotiate when something is actually wrong with how they sleep.
-            return HasSleepDebuff(a);
+            return HasSleepDebuff(a, includeMemories: !RecentlyMoved(a));
         }
 
         /// <summary>Finds who this pawn would negotiate with, or null. Throttled to once an hour per pawn.</summary>
         public Pawn FindNegotiationTarget(Pawn a)
         {
             if (!WantsToNegotiate(a)) return null;
-            if (lastChecked.TryGetValue(a.thingIDNumber, out int last) && Now - last < RecheckTicks) return null;
+            if (lastChecked.TryGetValue(a.thingIDNumber, out int last) && Now >= last && Now - last < RecheckTicks) return null;
             lastChecked[a.thingIDNumber] = Now;
 
-            try { return FindLoser(a, a.ownership.OwnedBed, SmarterBedsMod.Settings, out _, out _); }
+            try
+            {
+                using (PerfWatch.Measure("negotiation search"))
+                    return FindLoser(a, a.ownership.OwnedBed, SmarterBedsMod.Settings, out _, out _);
+            }
             catch (System.Exception e)
             {
-                Log.Error($"[Smarter Beds] finding a negotiation target failed: {e}");
+                SafeLog.Once("finding someone to negotiate with", e);
                 return null;
             }
         }
@@ -208,7 +314,9 @@ namespace SmarterBeds
                 return;
             }
 
-            var job = JobMaker.MakeJob(DefDatabase<JobDef>.GetNamed("SmarterBeds_NegotiateRoom"), target);
+            var jobDef = DefDatabase<JobDef>.GetNamedSilentFail("SmarterBeds_NegotiateRoom");
+            if (jobDef == null) return;
+            var job = JobMaker.MakeJob(jobDef, target);
             job.count = 1; // marks it as forced for the job driver
             a.jobs.TryTakeOrderedJob(job, JobTag.Misc);
         }
@@ -216,8 +324,12 @@ namespace SmarterBeds
         /// <summary>The asker has walked over: they make their pitch (a bubble over their head).</summary>
         public void BeginConversation(Pawn a, Pawn b)
         {
-            var contest = NegotiationRoll.Build(a, b, SmarterBedsMod.Settings);
-            NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_IntimidateForRoom" : "SmarterBeds_AskForRoom", a, b);
+            try
+            {
+                var contest = NegotiationRoll.Build(a, b, SmarterBedsMod.Settings);
+                NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "SmarterBeds_IntimidateForRoom" : "SmarterBeds_AskForRoom", a, b);
+            }
+            catch (System.Exception e) { SafeLog.Once("starting a conversation", e); }
         }
 
         /// <summary>
@@ -229,7 +341,7 @@ namespace SmarterBeds
             var s = SmarterBedsMod.Settings;
             try
             {
-                if ((forced || WantsToNegotiate(a)) && Eligible(b))
+                if ((forced ? Eligible(a) : ComputeWants(a)) && Eligible(b))
                 {
                     var target = FindLoser(a, a.ownership.OwnedBed, s, out float gain, out var contest, only: b, force: forced);
                     if (target == b)
@@ -244,7 +356,7 @@ namespace SmarterBeds
             }
             catch (System.Exception e)
             {
-                Log.Error($"[Smarter Beds] negotiation failed: {e}");
+                SafeLog.Once("settling a negotiation", e);
             }
             finally
             {
@@ -261,8 +373,8 @@ namespace SmarterBeds
         /// <summary>Someone who was leaned on remembers it, win or lose.</summary>
         private static void Resent(Pawn victim, Pawn bully)
         {
-            victim.needs?.mood?.thoughts?.memories?.TryGainMemory(
-                DefDatabase<ThoughtDef>.GetNamed("SmarterBeds_PushedAround"), bully);
+            var def = DefDatabase<ThoughtDef>.GetNamedSilentFail("SmarterBeds_PushedAround");
+            if (def != null) victim.needs?.mood?.thoughts?.memories?.TryGainMemory(def, bully);
         }
 
         private static float Relationship(Pawn loser, Pawn winner) =>
@@ -271,8 +383,9 @@ namespace SmarterBeds
         private static void GainMood(Pawn pawn, string thoughtDefName, float points, Pawn other = null)
         {
             var memories = pawn.needs?.mood?.thoughts?.memories;
-            if (memories == null) return;
-            var thought = (Thought_Memory)ThoughtMaker.MakeThought(DefDatabase<ThoughtDef>.GetNamed(thoughtDefName));
+            var def = DefDatabase<ThoughtDef>.GetNamedSilentFail(thoughtDefName);
+            if (memories == null || def == null) return;
+            var thought = (Thought_Memory)ThoughtMaker.MakeThought(def);
             // The stage is worth exactly +/-1 mood; the factor sets how many points this one is.
             thought.moodPowerFactor = points;
             if (other != null) memories.TryGainMemory(thought, other);
@@ -339,15 +452,12 @@ namespace SmarterBeds
             foreach (var b in a.Map.mapPawns.FreeColonistsSpawned)
             {
                 if (b == a || (only != null && b != only) || !Eligible(b)) continue;
-                if (!force && PairOnCooldown(a, b)) continue;
-                if (AreLovePartners(a, b)) continue; // never split a couple's rooms
-                if (Family.IsInCoupleRoom(b)) continue; // nor take a bed out of one
-                if (!force && rematchUntil.TryGetValue(RematchKey(a, b), out int rematch) && Now < rematch) continue;
-
                 var bedB = b.ownership.OwnedBed;
                 if (bedA.GetRoom() == bedB.GetRoom()) continue;
-                // The owner must not be using it right now.
-                if (!a.CanReserveAndReach(bedB, PathEndMode.OnCell, Danger.Some, bedB.SleepingSlotsCount)) continue;
+                if (!force && PairOnCooldown(a, b)) continue;
+                if (!force && rematchUntil.TryGetValue(RematchKey(a, b), out int rematch) && Now < rematch) continue;
+                if (AreLovePartners(a, b)) continue; // never split a couple's rooms
+                if (Family.IsInCoupleRoom(b)) continue; // nor take a bed out of one
 
                 float gain = BedScorer.Quality(bedB, a, s, leaving: b) - currentA;
                 if (gain <= 0f) continue;
@@ -358,6 +468,9 @@ namespace SmarterBeds
                 bool fixesAPenalty = RoomComfort.DebuffPenalty(bedB, a, s, leaving: b) < debuffNow;
                 bool bigUpgrade = s.qualityNegotiationEnabled && gain >= s.qualityNegotiationThreshold;
                 if (!force && !fixesAPenalty && !bigUpgrade) continue;
+
+                // The owner must not be using it right now. Checked last: it asks the pathfinder.
+                if (!a.CanReserveAndReach(bedB, PathEndMode.OnCell, Danger.Some, bedB.SleepingSlotsCount)) continue;
 
                 // Anyone may try; rank only matters as a number in the roll.
                 var contest = NegotiationRoll.Build(a, b, s);
@@ -391,6 +504,7 @@ namespace SmarterBeds
                 return false;
             }
 
+            NoteMoved(winner);
             // The loser can't just turn around and take it back.
             rematchUntil[RematchKey(loser, winner)] = Now + (int)(s.rematchDays * GenDate.TicksPerDay);
             PruneCooldowns();
@@ -415,6 +529,8 @@ namespace SmarterBeds
             int now = Now;
             foreach (var key in pairCooldownUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
                 pairCooldownUntil.Remove(key);
+            foreach (var key in coupleCooldownUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
+                coupleCooldownUntil.Remove(key);
             foreach (var key in rematchUntil.Where(kv => kv.Value <= now).Select(kv => kv.Key).ToList())
                 rematchUntil.Remove(key);
         }

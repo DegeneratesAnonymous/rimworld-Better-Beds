@@ -62,20 +62,26 @@ namespace SmarterBeds
             if (!s.familyEnabled || !Family.IsAdultColonist(pawn)) return 0f;
 
             float penalty = 0f;
-            var friendly = new System.Collections.Generic.List<Building_Bed>();
+            bool anyFriendly = false, anyFriendlyNear = false;
             foreach (var relative in Family.CloseRelatives(pawn))
             {
                 if (relative == leaving) continue;
                 var theirs = Family.BedOf(relative);
                 if (theirs == null) continue;
+                bool near = theirs == bed || Family.Distance(bed, theirs) <= s.familyRadius;
                 if (Family.IsHostile(pawn, relative, s))
                 {
-                    if (theirs == bed || Family.Distance(bed, theirs) <= s.familyRadius) penalty += s.familyHostilePenalty;
+                    if (near) penalty += s.familyHostilePenalty;
                 }
-                else friendly.Add(theirs);
+                else
+                {
+                    anyFriendly = true;
+                    if (near) anyFriendlyNear = true;
+                }
             }
 
-            if (Family.SoleLover(pawn) != null && Family.IsFarFromAll(bed, friendly, s)) penalty += s.familyFarPenalty;
+            // A couple with family around, none of it within range: "room far from family".
+            if (anyFriendly && !anyFriendlyNear && Family.SoleLover(pawn) != null) penalty += s.familyFarPenalty;
             return penalty;
         }
 
@@ -178,6 +184,7 @@ namespace SmarterBeds
         public static float JealousyPenalty(Room room, bool outdoors, Pawn pawn)
         {
             if (pawn.story?.traits == null || !pawn.story.traits.HasTrait(TraitDefOf.Jealous)) return 0f;
+            if (pawn.Map == null) return 0f;
             float own = outdoors ? 0f : room.GetStat(RoomStatDefOf.Impressiveness);
 
             foreach (var other in pawn.Map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer))

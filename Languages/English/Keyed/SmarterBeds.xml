@@ -62,7 +62,7 @@
   <SmarterBeds_S_Messages>Show a message when a room changes hands</SmarterBeds_S_Messages>
   <SmarterBeds_S_Messages_Tip>A short notification in the top left with the roll totals, such as "Alice talked Bob out of their bedroom. (21 vs 17)". It is also kept in the message history.</SmarterBeds_S_Messages_Tip>
   <SmarterBeds_S_MessageSeconds>Notification stays for: {0} s</SmarterBeds_S_MessageSeconds>
-  <SmarterBeds_S_MessageSeconds_Tip>How long the notification stays fully visible before it fades out (the fade itself takes about half a second more). The game's normal messages stay for 13 seconds.</SmarterBeds_S_MessageSeconds_Tip>
+  <SmarterBeds_S_MessageSeconds_Tip>How long the notification stays fully visible before it fades out (the fade itself takes about half a second more). The game's normal messages stay for 13 seconds. The default is 4.</SmarterBeds_S_MessageSeconds_Tip>
   <SmarterBeds_S_Log>Show negotiations in the log and speech bubbles</SmarterBeds_S_Log>
   <SmarterBeds_S_Log_Tip>Adds the conversation to the colonists' social log. Interaction Bubbles, if installed, shows it as speech bubbles.</SmarterBeds_S_Log_Tip>
 
@@ -83,7 +83,7 @@
   <SmarterBeds_AssignRooms_Tip>List every room that has beds, with who lives there, and assign owners room by room.</SmarterBeds_AssignRooms_Tip>
   <SmarterBeds_RoomsTitle>Rooms with beds</SmarterBeds_RoomsTitle>
   <SmarterBeds_RoomsBeds>Beds</SmarterBeds_RoomsBeds>
-  <SmarterBeds_RoomsBeds_Tip>Owners / sleeping spaces. A double bed counts as two spaces. Sorts by free spaces.</SmarterBeds_RoomsBeds_Tip>
+  <SmarterBeds_RoomsBeds_Tip>Owners / sleeping spaces in the room's beds (not cribs). A double bed counts as two spaces. Sorts by free spaces.</SmarterBeds_RoomsBeds_Tip>
   <SmarterBeds_RoomsScore>Room score</SmarterBeds_RoomsScore>
   <SmarterBeds_RoomsScore_Tip>The room's impressiveness, the number the game uses for how nice a room is.</SmarterBeds_RoomsScore_Tip>
   <SmarterBeds_RoomsSize>Size</SmarterBeds_RoomsSize>
@@ -122,4 +122,11 @@
   <SmarterBeds_ForceNegotiation_Desc>Dev: send this colonist to negotiate for a better room right now. Skips the usual reasons, cooldowns and odds checks; they still walk over and roll.</SmarterBeds_ForceNegotiation_Desc>
   <SmarterBeds_Force_NotEligible>{0} has no bed of their own that can be negotiated (shared, locked because you set the owner, or they cannot take part).</SmarterBeds_Force_NotEligible>
   <SmarterBeds_Force_NoTarget>{0} has nobody to ask: no one else has a better bed that can be taken.</SmarterBeds_Force_NoTarget>
+
+  <SmarterBeds_RoomsCribs>Cribs</SmarterBeds_RoomsCribs>
+  <SmarterBeds_RoomsCribs_Tip>Babies / cribs in the room. Sorts by free cribs. Use Assign to put a baby in a crib.</SmarterBeds_RoomsCribs_Tip>
+
+  <!-- Diagnostics -->
+  <SmarterBeds_Sec_Diag>Compatibility</SmarterBeds_Sec_Diag>
+  <SmarterBeds_Diag_Summary>Hooks active: {0} of {1}. Hover for details.</SmarterBeds_Diag_Summary>
 </LanguageData>

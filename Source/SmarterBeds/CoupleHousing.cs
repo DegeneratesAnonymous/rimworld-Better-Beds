@@ -26,8 +26,11 @@ namespace SmarterBeds
             foreach (var a in map.mapPawns.FreeColonistsSpawned)
             {
                 if (!Family.IsAdultColonist(a)) continue;
+                Family.Refresh(a); // this runs once an hour, so read the relations afresh
                 var b = Family.SoleLover(a);
-                if (b == null || Family.SoleLover(b) != a) continue;
+                if (b == null) continue;
+                Family.Refresh(b);
+                if (Family.SoleLover(b) != a) continue;
                 if (a.thingIDNumber > b.thingIDNumber) continue; // once per pair
                 if (!Family.IsAdultColonist(b) || b.Map != a.Map) continue;
                 if (!a.Awake() || !b.Awake()) continue;
@@ -35,7 +38,8 @@ namespace SmarterBeds
                 if (Family.IsInCoupleRoom(a) && !FamilyProblem(a, b, s)) continue;
                 if (comp.CoupleOnCooldown(a, b)) continue;
 
-                bool moved = TryHouse(a, b, s);
+                bool moved;
+                using (PerfWatch.Measure("couple housing")) moved = TryHouse(a, b, s);
                 comp.StartCoupleCooldown(a, b, moved ? s.negotiationCooldownDays : RetryDaysWhenNothingFits);
                 if (moved) return; // one couple per map per hour is plenty
             }
@@ -60,9 +64,11 @@ namespace SmarterBeds
         {
             var oldA = Family.BedOf(a);
             var oldB = Family.BedOf(b);
-            if (CompBedLock.IsLocked(oldA, a) || CompBedLock.IsLocked(oldB, b)) return false; // the player decided
+            if (BedLocks.IsLocked(oldA, a) || BedLocks.IsLocked(oldB, b)) return false; // the player decided
 
-            float current = ValueNow(a, oldA, s) + ValueNow(b, oldB, s);
+            // The candidates below include the couple-room bonus, so what they have now has to include it
+            // too when they already live in a room of their own, or they could "move up" to a worse room.
+            float current = ValueNow(a, oldA, s) + ValueNow(b, oldB, s) + (Family.IsInCoupleRoom(a) ? 2f * s.coupleRoomBonus : 0f);
 
             Plan? best = null;
             foreach (var room in RoomsWithBeds(a.Map))
@@ -128,6 +134,10 @@ namespace SmarterBeds
                 if (oldB != null) b.ownership.ClaimBedIfNonMedical(oldB);
                 return false;
             }
+
+            var negotiation = GameComponent_BedNegotiation.Instance;
+            negotiation?.NoteMoved(a);
+            negotiation?.NoteMoved(b);
 
             if (s.verboseLogging)
                 Log.Message($"[Smarter Beds] couple: {a.LabelShort} and {b.LabelShort} moved into a room of their own at {plan.bedA.Position}");
