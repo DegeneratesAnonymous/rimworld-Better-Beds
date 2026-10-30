@@ -1,0 +1,72 @@
+[h1]Smarter Beds[/h1]
+
+Colonists pick the bed that would actually make them happiest. A colonist who sleeps badly can ask someone else to swap rooms, and the outcome is decided by a dice roll that cares about skills, opinions and royal titles. You always have the last word.
+
+[b]Requires:[/b] Harmony. Royalty is optional (it adds title bedroom rules).
+[b]Works with:[/b] RimWorld 1.6 and 1.7.
+
+[h2]What it does[/h2]
+
+[list]
+[*][b]Better bed choice.[/b] Vanilla gives a bedless colonist the nearest bed. Smarter Beds scores every free bed in mood points, using the game's own numbers for bedrooms, barracks and sleeping outside, so a "better" bed is one that really would make them happier. Mark any bed as [b]overflow[/b] and it is only used when nothing else is free.
+[*][b]Royalty and traits.[/b] Title-holders need a personal bedroom that meets their title, and the Jealous trait envies better rooms. Both are scored exactly the way the game scores them.
+[*][b]Room negotiation.[/b] A colonist with a sleep-related mood penalty (slept in barracks, outside, on the ground, too cold or hot, a title bedroom problem, or jealousy) can choose "negotiate for a better room" as recreation. They walk to another colonist, make their case, and a contested roll decides it.
+[*][b]Mood and experience.[/b] The winner moves into the better room and gains Social experience, with half as much if they fail. The loser finds another room at bedtime and feels it: bullied out is a penalty, while a friend who was talked round is happy to have helped.
+[*][b]You decide.[/b] Assign a bed yourself and it is locked: nobody negotiates for that room and its owner does not negotiate either. Every bed has a lock button if you want to change that.
+[*][b]No bed? A chair.[/b] A colonist with nowhere to sleep dozes in a free indoor chair instead of on the floor, for a smaller mood penalty.
+[/list]
+
+[h2]How a negotiation is decided[/h2]
+
+Both sides roll a d20 and add a number. The asker has to beat the defender, and ties go to the defender, who is holding the room.
+
+[list]
+[*][b]Asker:[/b] Social skill plus how much the defender likes them, or, if it is clearly stronger, Melee skill to intimidate. Kind colonists never intimidate, and nobody bullies a friend.
+[*][b]Defender:[/b] the matching skill, plus a bonus for already holding the room.
+[*][b]Both:[/b] royal title and time in the colony. A Knight beats an equal colonist about three times in four, and a Baron almost always wins.
+[*][b]Fair by default:[/b] two equal colonists succeed about a third of the time when asking, a friend is much easier to persuade than a stranger, and a colonist will not start a conversation they have almost no chance of winning.
+[/list]
+
+Intimidation always costs something: the person who was leaned on remembers it.
+
+[h2]See it happen[/h2]
+
+Every conversation is written to the colonists' social log, and with [b]Interaction Bubbles[/b] installed each speaker gets a speech bubble: the pitch from the asker, then the answer from the defender. A message with the roll totals tells you when a room changes hands.
+
+[h2]Compatibility[/h2]
+
+Smarter Beds is built to sit alongside other bed mods rather than override them.
+
+[list]
+[*]Bed choice runs last, after vanilla and every other mod, and defers to the game's own "can this pawn use this bed" check. Whatever another mod forbids, this mod forbids too.
+[*][b]Hospitality:[/b] guest beds are never used by colonists, and guests never take part in negotiation.
+[*][b]Interaction Bubbles:[/b] negotiation shows up as bubbles.
+[*][b]Dubs Mint Menus:[/b] assigning through its window locks the bed like the normal one.
+[*]Mods that change royal bedroom requirements (such as Vanilla Factions Expanded - Empire) are honoured, because the requirements are read through the game.
+[*]Prisoners, guests, slaves, children and medical beds are left to vanilla.
+[/list]
+
+[h2]Settings[/h2]
+
+Everything is adjustable in the mod options, with a tooltip on every setting and a reset button: scoring weights, how big an upgrade is worth asking for, cooldowns, every number in the roll, whether moods, messages and log entries appear, locking, and chair sleeping.
+
+[h2]Load order[/h2]
+
+Load after Harmony and any bed or room mods. Anywhere below Hospitality is fine. Mod managers will sort it for you.
+
+[h2]Known limits[/h2]
+
+[list]
+[*]Ideology roles have no bedroom requirements in the game, so only Royalty titles are scored.
+[*]A cold or hot room can make a colonist ask for a better room, but temperature is not part of the room score.
+[*]Replace Stuff rebuilds beds as new objects, which can drop the lock on a replaced bed.
+[*]The game has no sitting pose, so a colonist dozing in a chair is shown upright.
+[/list]
+
+[h2]Bugs and feedback[/h2]
+
+If something goes wrong, turn on [b]Log decisions[/b] in the mod options, reproduce it, and press Ctrl+F12 in game to get a log. Describe what you expected and what happened, and include the log and your mod list.
+
+[h2]Credits[/h2]
+
+By Spaceman_Wil. Uses Harmony by Andreas Pardeke. Released under the MIT license.
