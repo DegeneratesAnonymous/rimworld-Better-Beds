@@ -12,6 +12,7 @@ All notable changes are listed here. Versions follow semantic versioning.
 - Messages and the chair options no longer disappear when negotiation is off
 
 ### Fixed
+- The tooltip of the "sleeping too close to ..." thoughts named the colonist themselves instead of the person they dislike
 - A negotiation could end without being settled if the asker's recreation filled up mid-conversation; it now always reaches the roll
 - Nobody asks someone who is asleep, drafted, downed or in a mental break
 - Old cooldown entries are cleared every hour, not only after a successful swap
