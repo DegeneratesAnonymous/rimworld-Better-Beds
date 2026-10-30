@@ -3,7 +3,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// Offers "negotiate for a better room" as a recreation choice, but only to a pawn who has a
@@ -17,7 +17,7 @@ namespace SmarterBeds
             {
                 var comp = GameComponent_BedNegotiation.Instance;
                 if (comp == null || !comp.WantsToNegotiate(pawn)) return 0f;
-                return base.GetChance(pawn) * SmarterBedsMod.Settings.negotiationJoyWeight;
+                return base.GetChance(pawn) * WilsBetterBedsMod.Settings.negotiationJoyWeight;
             }
             catch (System.Exception e)
             {
@@ -47,7 +47,7 @@ namespace SmarterBeds
     /// </summary>
     public static class TalkHold
     {
-        public const string JobDefName = "SmarterBeds_ListenToRoomPitch";
+        public const string JobDefName = "WilsBetterBeds_ListenToRoomPitch";
 
         public static void Start(Pawn listener, Pawn speaker, int ticks)
         {

@@ -4,7 +4,7 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds.Patches
+namespace WilsBetterBeds.Patches
 {
     /// <summary>
     /// Postfix on the full RestUtility.FindBedFor overload (the short one forwards to it).
@@ -38,7 +38,7 @@ namespace SmarterBeds.Patches
         {
             try
             {
-                if (!SmarterBedsMod.Settings.enabled) return;
+                if (!WilsBetterBedsMod.Settings.enabled) return;
 
                 var sleeper = __args.Length > 0 ? __args[0] as Pawn : null;
                 var traveler = __args.Length > 1 ? __args[1] as Pawn : sleeper;

@@ -2,7 +2,7 @@
 <Defs>
   <!-- Mood points are the stage's baseMoodEffect (+/-1) times a factor set in code. -->
   <ThoughtDef>
-    <defName>SmarterBeds_BulliedOutOfRoom</defName>
+    <defName>WilsBetterBeds_BulliedOutOfRoom</defName>
     <thoughtClass>Thought_Memory</thoughtClass>
     <durationDays>5</durationDays>
     <stackLimit>1</stackLimit>
@@ -15,7 +15,7 @@
     </stages>
   </ThoughtDef>
   <ThoughtDef>
-    <defName>SmarterBeds_GaveUpRoomHappily</defName>
+    <defName>WilsBetterBeds_GaveUpRoomHappily</defName>
     <thoughtClass>Thought_Memory</thoughtClass>
     <durationDays>5</durationDays>
     <stackLimit>1</stackLimit>
@@ -28,7 +28,7 @@
     </stages>
   </ThoughtDef>
   <ThoughtDef>
-    <defName>SmarterBeds_PushedAround</defName>
+    <defName>WilsBetterBeds_PushedAround</defName>
     <thoughtClass>Thought_MemorySocial</thoughtClass>
     <durationDays>15</durationDays>
     <stackLimit>3</stackLimit>
@@ -42,7 +42,7 @@
   </ThoughtDef>
   <!-- Winner of a negotiation. Mood points = baseMoodEffect (+1) x a factor set in code. -->
   <ThoughtDef>
-    <defName>SmarterBeds_GotBetterRoom</defName>
+    <defName>WilsBetterBeds_GotBetterRoom</defName>
     <thoughtClass>Thought_Memory</thoughtClass>
     <durationDays>5</durationDays>
     <stackLimit>1</stackLimit>
@@ -57,7 +57,7 @@
 
   <!-- Dozing in a chair is bad, but less bad than the floor (slept on ground is -4). The stage is worth -1; the setting scales it (default 3). -->
   <ThoughtDef>
-    <defName>SmarterBeds_SleptInChair</defName>
+    <defName>WilsBetterBeds_SleptInChair</defName>
     <durationDays>1</durationDays>
     <stackLimit>1</stackLimit>
     <nullifyingPrecepts>
@@ -74,9 +74,9 @@
   <!-- Situational: worked out in code (see FamilyThoughts.cs). The mood shown is the matching setting (Thought_SettingMood);
        the value here is only a fallback. -->
   <ThoughtDef>
-    <defName>SmarterBeds_RoomFarFromFamily</defName>
-    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
-    <workerClass>SmarterBeds.ThoughtWorker_RoomFarFromFamily</workerClass>
+    <defName>WilsBetterBeds_RoomFarFromFamily</defName>
+    <thoughtClass>WilsBetterBeds.Thought_SettingMood</thoughtClass>
+    <workerClass>WilsBetterBeds.ThoughtWorker_RoomFarFromFamily</workerClass>
     <developmentalStageFilter>Adult</developmentalStageFilter>
     <stages>
       <li>
@@ -88,9 +88,9 @@
   </ThoughtDef>
 
   <ThoughtDef>
-    <defName>SmarterBeds_RoomNearDislikedFamily</defName>
-    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
-    <workerClass>SmarterBeds.ThoughtWorker_RoomNearDislikedFamily</workerClass>
+    <defName>WilsBetterBeds_RoomNearDislikedFamily</defName>
+    <thoughtClass>WilsBetterBeds.Thought_SettingMood</thoughtClass>
+    <workerClass>WilsBetterBeds.ThoughtWorker_RoomNearDislikedFamily</workerClass>
     <developmentalStageFilter>Adult</developmentalStageFilter>
     <stages>
       <li>
@@ -102,9 +102,9 @@
   </ThoughtDef>
 
   <ThoughtDef>
-    <defName>SmarterBeds_RoomNearDislikedNeighbor</defName>
-    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
-    <workerClass>SmarterBeds.ThoughtWorker_RoomNearDislikedNeighbor</workerClass>
+    <defName>WilsBetterBeds_RoomNearDislikedNeighbor</defName>
+    <thoughtClass>WilsBetterBeds.Thought_SettingMood</thoughtClass>
+    <workerClass>WilsBetterBeds.ThoughtWorker_RoomNearDislikedNeighbor</workerClass>
     <developmentalStageFilter>Adult</developmentalStageFilter>
     <stages>
       <li>
@@ -116,9 +116,9 @@
   </ThoughtDef>
 
   <ThoughtDef>
-    <defName>SmarterBeds_RoomNearPrisoners</defName>
-    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
-    <workerClass>SmarterBeds.ThoughtWorker_RoomNearPrisoners</workerClass>
+    <defName>WilsBetterBeds_RoomNearPrisoners</defName>
+    <thoughtClass>WilsBetterBeds.Thought_SettingMood</thoughtClass>
+    <workerClass>WilsBetterBeds.ThoughtWorker_RoomNearPrisoners</workerClass>
     <developmentalStageFilter>Adult</developmentalStageFilter>
     <stages>
       <li>
@@ -130,9 +130,9 @@
   </ThoughtDef>
 
   <ThoughtDef MayRequire="Ludeon.RimWorld.Ideology">
-    <defName>SmarterBeds_RoomAmongOwnIdeo</defName>
-    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
-    <workerClass>SmarterBeds.ThoughtWorker_RoomAmongOwnIdeo</workerClass>
+    <defName>WilsBetterBeds_RoomAmongOwnIdeo</defName>
+    <thoughtClass>WilsBetterBeds.Thought_SettingMood</thoughtClass>
+    <workerClass>WilsBetterBeds.ThoughtWorker_RoomAmongOwnIdeo</workerClass>
     <developmentalStageFilter>Adult</developmentalStageFilter>
     <stages>
       <li>
@@ -144,9 +144,9 @@
   </ThoughtDef>
 
   <ThoughtDef MayRequire="Ludeon.RimWorld.Biotech">
-    <defName>SmarterBeds_RoomAmongSimilarGenes</defName>
-    <thoughtClass>SmarterBeds.Thought_SettingMood</thoughtClass>
-    <workerClass>SmarterBeds.ThoughtWorker_RoomAmongSimilarGenes</workerClass>
+    <defName>WilsBetterBeds_RoomAmongSimilarGenes</defName>
+    <thoughtClass>WilsBetterBeds.Thought_SettingMood</thoughtClass>
+    <workerClass>WilsBetterBeds.ThoughtWorker_RoomAmongSimilarGenes</workerClass>
     <developmentalStageFilter>Adult</developmentalStageFilter>
     <stages>
       <li>

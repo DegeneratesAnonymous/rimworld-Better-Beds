@@ -4,6 +4,13 @@ All notable changes are listed here. Versions follow semantic versioning.
 
 ## [Unreleased]
 
+### Added
+- Temperature is part of choosing a room: a bed in a room that is too cold or too hot for the sleeper right now (the game's own test for slept in the cold or heat) is marked down by 4, in bed choice, free-bed moves and negotiation, with a switch and a slider
+
+## [1.0.0] - 2026-10-30
+
+First release, as Wil's Better Beds.
+
 ### Settings
 - Every tooltip now says what lowering and raising the setting does, and the default. Sliders with a calculable effect also show a worked example for the current value (win odds, bed value, intimidation vs persuasion, days of tenure, chair vs floor)
 - New switches: royal title bedroom rules, the Jealous trait, the Assign rooms button; a slider for the chair-sleep penalty
@@ -12,6 +19,7 @@ All notable changes are listed here. Versions follow semantic versioning.
 - Messages and the chair options no longer disappear when negotiation is off
 
 ### Fixed
+- Performance: the hourly free-bed and couple checks are spread over the hour a few colonists at a time instead of all on one tick, and a colonist with no partner is skipped without building their relationships snapshot
 - Nobody is pulled into a negotiation while using the toilet, washing, bathing, showering (Dubs Bad Hygiene) or eating, and a conversation is called off if the other colonist goes to the toilet on the way
 - The settings window went blank after the General heading once it grew past its starting height (the list wrapped into a hidden second column)
 - "Collection was modified" errors when searching for someone to negotiate with, or housing couples

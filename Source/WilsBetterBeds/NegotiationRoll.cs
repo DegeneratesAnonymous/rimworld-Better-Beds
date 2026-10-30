@@ -2,7 +2,7 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     public enum NegotiationApproach { Persuade, Intimidate }
 
@@ -38,11 +38,11 @@ namespace SmarterBeds
         private const float IntimidationMargin = 2f;     // must beat persuasion by this much to be chosen
         private const float FriendOpinion = 40f;         // won't bully someone they like this much
 
-        private static float TitlePoints(Pawn p, SmarterBedsSettings s) =>
+        private static float TitlePoints(Pawn p, WilsBetterBedsSettings s) =>
             Requirements.Rank(p) / 100f * s.titleRollWeight;
 
         // One point per 45 days in the colony, up to the cap.
-        private static float TenurePoints(Pawn p, SmarterBedsSettings s)
+        private static float TenurePoints(Pawn p, WilsBetterBedsSettings s)
         {
             float days = p.records.GetAsInt(RecordDefOf.TimeAsColonistOrColonyAnimal) / (float)GenDate.TicksPerDay;
             return Mathf.Min(s.tenureCap, days / TenureDaysPerPoint);
@@ -74,7 +74,7 @@ namespace SmarterBeds
         /// One of a couple persuading the other to move. The partner is not holding a room against them, so
         /// there is no defender bonus, and leaning on them is only an option when they do not think well of the asker.
         /// </param>
-        public static NegotiationContest Build(Pawn asker, Pawn defender, SmarterBedsSettings s, bool convince = false)
+        public static NegotiationContest Build(Pawn asker, Pawn defender, WilsBetterBedsSettings s, bool convince = false)
         {
             bool canTalk = asker.skills != null && !asker.skills.GetSkill(SkillDefOf.Social).TotallyDisabled;
             bool canBully = WillIntimidate(asker, defender);

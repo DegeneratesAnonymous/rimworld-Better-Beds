@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Defs>
   <JobDef>
-    <defName>SmarterBeds_NegotiateRoom</defName>
-    <driverClass>SmarterBeds.JobDriver_NegotiateRoom</driverClass>
+    <defName>WilsBetterBeds_NegotiateRoom</defName>
+    <driverClass>WilsBetterBeds.JobDriver_NegotiateRoom</driverClass>
     <reportString>negotiating for a better room with TargetA.</reportString>
     <casualInterruptible>true</casualInterruptible>
     <joyDuration>600</joyDuration>
@@ -13,8 +13,8 @@
   <!-- The colonist being asked stops and listens (see TalkHold in NegotiateRoom.cs). Their old job
        resumes afterwards. -->
   <JobDef>
-    <defName>SmarterBeds_ListenToRoomPitch</defName>
-    <driverClass>SmarterBeds.JobDriver_ListenToPitch</driverClass>
+    <defName>WilsBetterBeds_ListenToRoomPitch</defName>
+    <driverClass>WilsBetterBeds.JobDriver_ListenToPitch</driverClass>
     <reportString>listening to TargetA.</reportString>
     <casualInterruptible>true</casualInterruptible>
     <neverShowWeapon>true</neverShowWeapon>
@@ -22,8 +22,8 @@
 
   <!-- Last resort for a colonist with no bed: doze off in a chair. See ChairSleep.cs. -->
   <JobDef>
-    <defName>SmarterBeds_SleepInChair</defName>
-    <driverClass>SmarterBeds.JobDriver_SleepInChair</driverClass>
+    <defName>WilsBetterBeds_SleepInChair</defName>
+    <driverClass>WilsBetterBeds.JobDriver_SleepInChair</driverClass>
     <reportString>dozing in a chair.</reportString>
     <casualInterruptible>false</casualInterruptible>
     <allowOpportunisticPrefix>true</allowOpportunisticPrefix>

@@ -2,7 +2,7 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds.Patches
+namespace WilsBetterBeds.Patches
 {
     /// <summary>
     /// A line in a bed's inspect pane when its owner was set by the player and is therefore locked
@@ -16,7 +16,7 @@ namespace SmarterBeds.Patches
             try
             {
                 if (!BedLocks.IsLockedForOwner(__instance)) return;
-                string line = "SmarterBeds_LockedInspect".Translate();
+                string line = "WilsBetterBeds_LockedInspect".Translate();
                 __result = __result.NullOrEmpty() ? line : __result + "\n" + line;
             }
             catch (System.Exception e) { SafeLog.Once("bed inspect line", e); }

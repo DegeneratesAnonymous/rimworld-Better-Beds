@@ -1,13 +1,13 @@
 using System.Reflection;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// All tunables. Scoring numbers are mood points (see RoomComfort); defaults are explained in
     /// the settings window and in PLAN.md.
     /// </summary>
-    public class SmarterBedsSettings : ModSettings
+    public class WilsBetterBedsSettings : ModSettings
     {
         // General
         public bool enabled = true;
@@ -19,6 +19,8 @@ namespace SmarterBeds
         public float unmetRequirementPenalty = 6f;   // the game's own title bedroom penalty
         public bool titleRulesEnabled = true;        // Royalty: a title-holder's bedroom rules count in the score
         public bool jealousyEnabled = true;          // the Jealous trait counts in the score
+        public bool temperatureEnabled = true;       // a bed that is too cold or too hot for the sleeper counts against it
+        public float temperaturePenalty = 4f;        // the game's own 'slept in the cold / heat' is -4
 
         // Family and couples
         public bool familyEnabled = true;
@@ -83,6 +85,8 @@ namespace SmarterBeds
             Scribe_Values.Look(ref unmetRequirementPenalty, "unmetRequirementPenalty", 6f);
             Scribe_Values.Look(ref titleRulesEnabled, "titleRulesEnabled", true);
             Scribe_Values.Look(ref jealousyEnabled, "jealousyEnabled", true);
+            Scribe_Values.Look(ref temperatureEnabled, "temperatureEnabled", true);
+            Scribe_Values.Look(ref temperaturePenalty, "temperaturePenalty", 4f);
 
             Scribe_Values.Look(ref familyEnabled, "familyEnabled", true);
             Scribe_Values.Look(ref familyRadius, "familyRadius", 35f);
@@ -129,8 +133,8 @@ namespace SmarterBeds
         /// <summary>Puts every setting back to the value in its field initializer.</summary>
         public void ResetToDefaults()
         {
-            var fresh = new SmarterBedsSettings();
-            foreach (var field in typeof(SmarterBedsSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
+            var fresh = new WilsBetterBedsSettings();
+            foreach (var field in typeof(WilsBetterBedsSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
                 field.SetValue(this, field.GetValue(fresh));
             }

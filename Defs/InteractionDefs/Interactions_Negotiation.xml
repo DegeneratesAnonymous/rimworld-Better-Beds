@@ -2,7 +2,7 @@
 <Defs>
   <!-- The asker speaks. Written to the play log, so Interaction Bubbles shows them. -->
   <InteractionDef>
-    <defName>SmarterBeds_AskForRoom</defName>
+    <defName>WilsBetterBeds_AskForRoom</defName>
     <label>ask for a room</label>
     <workerClass>InteractionWorker</workerClass>
     <symbol>Things/Mote/SpeechSymbols/BuildRapport</symbol>
@@ -17,7 +17,7 @@
   </InteractionDef>
 
   <InteractionDef>
-    <defName>SmarterBeds_IntimidateForRoom</defName>
+    <defName>WilsBetterBeds_IntimidateForRoom</defName>
     <label>demand a room</label>
     <workerClass>InteractionWorker</workerClass>
     <symbol>Things/Mote/SpeechSymbols/Insult</symbol>
@@ -32,7 +32,7 @@
 
   <!-- The defender answers, so they get their own bubble. INITIATOR is the defender here. -->
   <InteractionDef>
-    <defName>SmarterBeds_AgreeToRoom</defName>
+    <defName>WilsBetterBeds_AgreeToRoom</defName>
     <label>agree to a room swap</label>
     <workerClass>InteractionWorker</workerClass>
     <symbol>Things/Mote/SpeechSymbols/KindWords</symbol>
@@ -46,7 +46,7 @@
   </InteractionDef>
 
   <InteractionDef>
-    <defName>SmarterBeds_YieldRoom</defName>
+    <defName>WilsBetterBeds_YieldRoom</defName>
     <label>yield a room</label>
     <workerClass>InteractionWorker</workerClass>
     <symbol>Things/Mote/SpeechSymbols/Slight</symbol>
@@ -60,7 +60,7 @@
   </InteractionDef>
 
   <InteractionDef>
-    <defName>SmarterBeds_RefuseRoom</defName>
+    <defName>WilsBetterBeds_RefuseRoom</defName>
     <label>refuse to give up a room</label>
     <workerClass>InteractionWorker</workerClass>
     <symbol>Things/Mote/SpeechSymbols/Slight</symbol>
@@ -75,7 +75,7 @@
 
   <!-- A couple: one of them talks their partner round to moving. -->
   <InteractionDef>
-    <defName>SmarterBeds_ConvinceToMove</defName>
+    <defName>WilsBetterBeds_ConvinceToMove</defName>
     <label>talk a partner into moving</label>
     <workerClass>InteractionWorker</workerClass>
     <symbol>Things/Mote/SpeechSymbols/BuildRapport</symbol>
@@ -89,7 +89,7 @@
   </InteractionDef>
 
   <InteractionDef>
-    <defName>SmarterBeds_PressureToMove</defName>
+    <defName>WilsBetterBeds_PressureToMove</defName>
     <label>push a partner into moving</label>
     <workerClass>InteractionWorker</workerClass>
     <symbol>Things/Mote/SpeechSymbols/Insult</symbol>
@@ -102,7 +102,7 @@
   </InteractionDef>
 
   <InteractionDef>
-    <defName>SmarterBeds_AgreeToMove</defName>
+    <defName>WilsBetterBeds_AgreeToMove</defName>
     <label>agree to move</label>
     <workerClass>InteractionWorker</workerClass>
     <symbol>Things/Mote/SpeechSymbols/KindWords</symbol>
@@ -115,7 +115,7 @@
   </InteractionDef>
 
   <InteractionDef>
-    <defName>SmarterBeds_RefuseToMove</defName>
+    <defName>WilsBetterBeds_RefuseToMove</defName>
     <label>refuse to move</label>
     <workerClass>InteractionWorker</workerClass>
     <symbol>Things/Mote/SpeechSymbols/Slight</symbol>

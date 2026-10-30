@@ -16,19 +16,19 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Build for RimWorld 1.7
-        run: dotnet build Source/SmarterBeds/SmarterBeds.csproj -c Release -p:GameVersion=1.7
+        run: dotnet build Source/WilsBetterBeds/WilsBetterBeds.csproj -c Release -p:GameVersion=1.7
       - name: Build for RimWorld 1.6
-        run: dotnet build Source/SmarterBeds/SmarterBeds.csproj -c Release -p:GameVersion=1.6
+        run: dotnet build Source/WilsBetterBeds/WilsBetterBeds.csproj -c Release -p:GameVersion=1.6
       - name: Package mod folder
         run: |
-          mkdir -p dist/SmarterBeds
+          mkdir -p dist/WilsBetterBeds
           for d in About 1.6 1.7 Defs Languages Patches Textures; do
-            [ -d "$d" ] && cp -r "$d" dist/SmarterBeds/
+            [ -d "$d" ] && cp -r "$d" dist/WilsBetterBeds/
           done
           find dist -name .gitkeep -delete
-          cp LICENSE dist/SmarterBeds/
-          cd dist && zip -r ../SmarterBeds-${GITHUB_REF_NAME}.zip SmarterBeds
+          cp LICENSE dist/WilsBetterBeds/
+          cd dist && zip -r ../WilsBetterBeds-${GITHUB_REF_NAME}.zip WilsBetterBeds
       - uses: softprops/action-gh-release@v2
         with:
-          files: SmarterBeds-*.zip
+          files: WilsBetterBeds-*.zip
           generate_release_notes: true

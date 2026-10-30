@@ -1,7 +1,7 @@
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// Writes negotiation lines to the game's play log as ordinary interactions. That is all
@@ -16,7 +16,7 @@ namespace SmarterBeds
     {
         public static void Say(string interactionDefName, Pawn speaker, Pawn listener)
         {
-            if (!SmarterBedsMod.Settings.showInPlayLog || speaker == null || listener == null) return;
+            if (!WilsBetterBedsMod.Settings.showInPlayLog || speaker == null || listener == null) return;
             var def = DefDatabase<InteractionDef>.GetNamedSilentFail(interactionDefName);
             if (def == null) return;
             Find.PlayLog.Add(new PlayLogEntry_Interaction(def, speaker, listener, null));

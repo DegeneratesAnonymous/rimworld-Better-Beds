@@ -2,7 +2,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// Pure bed-choice logic. No Harmony here, so it can be reasoned about on its own.
@@ -54,7 +54,7 @@ namespace SmarterBeds
 
         private static Building_Bed Search(Pawn sleeper, Pawn traveler)
         {
-            var s = SmarterBedsMod.Settings;
+            var s = WilsBetterBedsMod.Settings;
             Building_Bed best = null;
             float bestScore = float.MinValue;
 
@@ -80,7 +80,7 @@ namespace SmarterBeds
         }
 
         /// <summary>Best quality among free beds this pawn could claim now; MinValue when there are none.</summary>
-        public static float BestFreeQuality(Pawn pawn, SmarterBedsSettings s)
+        public static float BestFreeQuality(Pawn pawn, WilsBetterBedsSettings s)
         {
             float best = float.MinValue;
             foreach (var bed in pawn.Map.listerBuildings.AllBuildingsColonistOfClass<Building_Bed>())
@@ -111,14 +111,14 @@ namespace SmarterBeds
         /// How good this bed is for this pawn, in mood points, ignoring distance.
         /// Used by the bedtime search and by room negotiation.
         /// </summary>
-        public static float Quality(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, Pawn leaving = null) =>
+        public static float Quality(Building_Bed bed, Pawn pawn, WilsBetterBedsSettings s, Pawn leaving = null) =>
             RoomComfort.Points(bed, pawn, s, company: true, leaving: leaving);
 
         // Distance does not count against a bed: a colonist takes the nicest bed they can reach, however
         // far it is. It only breaks ties, so that of two equally good beds the nearer one wins.
         private const float TieBreakPerCell = 0.0001f;
 
-        private static float Score(Building_Bed bed, Pawn sleeper, Pawn traveler, SmarterBedsSettings s)
+        private static float Score(Building_Bed bed, Pawn sleeper, Pawn traveler, WilsBetterBedsSettings s)
         {
             float score = Quality(bed, sleeper, s);
             score -= (bed.Position - traveler.Position).LengthHorizontal * TieBreakPerCell;
