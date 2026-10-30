@@ -40,7 +40,7 @@ Wil's Better Beds is built to coexist with other bed mods rather than overrule t
 | Replace Stuff, EBSG Framework, Worksites Expanded, Vanilla Races Expanded - Android | Patch bed choice or ownership. We run after them and call the game's own claim and validity methods. |
 | Realistic Rooms Rewritten | Only relabels room size stages; room impressiveness is untouched. |
 
-Known limits: Replace Stuff rebuilds a bed as a new object, which can drop the lock on a replaced bed. Ideology roles carry no bedroom requirements in the game's data, so only Royalty titles are scored. Temperature debuffs count as a reason to ask for a room but are not part of the room score.
+Known limits: Replace Stuff rebuilds a bed as a new object, which can drop the lock on a replaced bed. Ideology roles carry no bedroom requirements in the game's data, so only Royalty titles are scored. Temperature is judged at the moment of the decision, as the game judges sleeping in the cold or heat.
 
 ## Building
 
