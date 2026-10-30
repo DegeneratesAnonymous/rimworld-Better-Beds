@@ -241,4 +241,8 @@ Off: the button is hidden (the rest of the mod is unaffected). Turn it off if an
   <SmarterBeds_CoupleRoomFailed>{0} tried to take {1}'s bedroom for {4} and themselves, but {1} held firm. ({2} vs {3})</SmarterBeds_CoupleRoomFailed>
   <SmarterBeds_S_CoupleNegotiate>Couples negotiate together</SmarterBeds_S_CoupleNegotiate>
   <SmarterBeds_S_CoupleNegotiate_Tip>When both of a couple want a better room, the one who talks better (Social skill) asks for it, and if they win both move in. When only one wants to move, they first have to talk their partner round (leaning on them is possible only if the partner does not think well of them), and then the better talker asks. The room has to hold nobody but its owner and have space for two.\nOff: a colonist with a partner negotiates alone, as before, and only moves themselves.</SmarterBeds_S_CoupleNegotiate_Tip>
+  <!-- Guests (Hospitality) -->
+  <SmarterBeds_Sec_Guests>Guests and visitors</SmarterBeds_Sec_Guests>
+  <SmarterBeds_S_VisitorBeds>Visitors rent a guest bed (Hospitality)</SmarterBeds_S_VisitorBeds>
+  <SmarterBeds_S_VisitorBeds_Tip>Needs Hospitality's guest beds. Visitors who are not Hospitality guests, such as spaceport visitors and trade caravans, sleep on the floor even when they carry silver. With this on they rent a free guest bed when they can pay the rent, leaving the silver beside it as a guest would. One who cannot pay, and any guest without a bed, sleeps in a free chair if there is one (see Sleeping rough).\nHospitality's own guests are not affected: their bed choice is Hospitality's.\nOff: these visitors sleep where the game puts them.</SmarterBeds_S_VisitorBeds_Tip>
 </LanguageData>

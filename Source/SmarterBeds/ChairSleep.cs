@@ -23,10 +23,11 @@ namespace SmarterBeds
         {
             if (!SmarterBedsMod.Settings.enabled || !SmarterBedsMod.Settings.chairSleepEnabled) return false;
             if (pawn == null || !pawn.Spawned || pawn.Downed || pawn.Dead) return false;
-            if (!pawn.RaceProps.Humanlike || !pawn.IsColonist || pawn.IsPrisoner || pawn.IsSlave) return false;
-            if (pawn.HostFaction != null) return false;
+            if (!pawn.RaceProps.Humanlike || pawn.IsPrisoner || pawn.IsSlave) return false;
             if ((pawn.DevelopmentalStage & DevelopmentalStage.Adult) == 0) return false;
-            return true;
+            // A settled colonist, or someone visiting: a Hospitality guest, or a visitor or trader with no bed to rent.
+            bool colonist = pawn.IsColonist && pawn.HostFaction == null;
+            return colonist || Visitors.IsHospitalityGuest(pawn) || Visitors.IsPlainVisitor(pawn);
         }
 
         /// <summary>The most comfortable free chair indoors that this pawn can get to, or null.</summary>
@@ -112,6 +113,39 @@ namespace SmarterBeds
                 __result = JobMaker.MakeJob(chairJob, chair.Position, chair);
             }
             catch (System.Exception e) { SafeLog.Once("sleeping in a chair", e); }
+        }
+    }
+
+    /// <summary>
+    /// A Hospitality guest with no bed to claim is sent to lie down on a spot of floor by Hospitality's own
+    /// sleep step. If a chair is free, make it a chair instead. Skipped if Hospitality is not installed.
+    /// </summary>
+    [HarmonyPatch]
+    public static class HospitalitySleep_ChairPatch
+    {
+        private static readonly MethodBase Target = AccessTools.Method("Hospitality.JobGiver_Sleep:TryIssueJobPackage");
+
+        static bool Prepare() => Target != null;
+        static MethodBase TargetMethod() => Target;
+
+        [HarmonyPriority(Priority.Last)]
+        static void Postfix(ThinkNode __instance, Pawn pawn, ref ThinkResult __result)
+        {
+            try
+            {
+                var job = __result.Job;
+                if (job == null || job.def != JobDefOf.LayDown || job.targetA.Thing != null) return; // a real bed: not our business
+                if (pawn.CurJob != null && pawn.CurJob.def == JobDefOf.LayDown) return;
+                if (!ChairSleep.Eligible(pawn)) return;
+
+                var chairJob = ChairSleep.JobDef;
+                if (chairJob == null) return;
+                var chair = ChairSleep.FindChair(pawn);
+                if (chair == null) return;
+
+                __result = new ThinkResult(JobMaker.MakeJob(chairJob, chair.Position, chair), __instance, null, false);
+            }
+            catch (System.Exception e) { SafeLog.Once("a guest sleeping in a chair", e); }
         }
     }
 

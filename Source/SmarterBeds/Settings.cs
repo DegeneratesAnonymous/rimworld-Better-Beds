@@ -64,6 +64,9 @@ namespace SmarterBeds
         public bool chairSleepEnabled = true;
         public float chairSleepPenalty = 3f;           // mood for a night in a chair (the floor is 4)
 
+        // Guests (Hospitality)
+        public bool visitorsUseGuestBeds = true;       // visitors who are not Hospitality guests rent a guest bed
+
         // Interface
         public bool showRoomsButton = true;            // the Assign rooms button on the Assign tab
 
@@ -116,6 +119,7 @@ namespace SmarterBeds
             Scribe_Values.Look(ref chairSleepEnabled, "chairSleepEnabled", true);
             Scribe_Values.Look(ref chairSleepPenalty, "chairSleepPenalty", 3f);
             Scribe_Values.Look(ref showRoomsButton, "showRoomsButton", true);
+            Scribe_Values.Look(ref visitorsUseGuestBeds, "visitorsUseGuestBeds", true);
         }
 
         /// <summary>Puts every setting back to the value in its field initializer.</summary>

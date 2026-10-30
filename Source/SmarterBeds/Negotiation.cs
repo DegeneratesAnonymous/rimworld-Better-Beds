@@ -543,7 +543,7 @@ namespace SmarterBeds
             {
                 if (b == a || (only != null && b != only) || !Eligible(b)) continue;
                 // Someone asleep, drafted, downed or in a mental break cannot be talked to.
-                if (!b.Awake() || b.Downed || b.Drafted || b.InMentalState) continue;
+                if (!b.Awake() || b.Downed || b.Drafted || b.InMentalState || PawnBusy.Is(b)) continue;
                 var bedB = b.ownership.OwnedBed;
                 if (bedA.GetRoom() == bedB.GetRoom()) continue;
                 if (!force && PairOnCooldown(a, b)) continue;
@@ -668,7 +668,7 @@ namespace SmarterBeds
                 // Still finishing the conversation; this follows straight after it.
                 negotiator.jobs.jobQueue.EnqueueFirst(job, JobTag.Misc);
             }
-            else if (!negotiator.Downed && negotiator.Awake())
+            else if (!negotiator.Downed && negotiator.Awake() && !PawnBusy.Is(negotiator))
             {
                 negotiator.jobs.TryTakeOrderedJob(job, JobTag.Misc);
             }
@@ -779,7 +779,7 @@ namespace SmarterBeds
             foreach (var c in new List<Pawn>(n.Map.mapPawns.FreeColonistsSpawned))
             {
                 if (c == n || c == m || (only != null && c != only) || !Eligible(c)) continue;
-                if (!c.Awake() || c.Downed || c.Drafted || c.InMentalState) continue;
+                if (!c.Awake() || c.Downed || c.Drafted || c.InMentalState || PawnBusy.Is(c)) continue;
                 if (AreLovePartners(n, c) || AreLovePartners(m, c)) continue;
                 if (Family.IsInCoupleRoom(c)) continue;
                 if (!force && (PairOnCooldown(n, c) || PairOnCooldown(m, c))) continue;
