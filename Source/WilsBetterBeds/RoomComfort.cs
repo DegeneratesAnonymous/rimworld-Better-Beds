@@ -2,7 +2,7 @@ using System.Linq;
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// How good a bed is for a pawn, measured in the unit the game itself uses: mood points.
@@ -24,7 +24,7 @@ namespace SmarterBeds
         /// Someone who is about to give this bed up (the colonist being asked in a negotiation), so they
         /// are not counted as a roommate or as family living nearby.
         /// </param>
-        public static float Points(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, bool company = true, Pawn leaving = null)
+        public static float Points(Building_Bed bed, Pawn pawn, WilsBetterBedsSettings s, bool company = true, Pawn leaving = null)
         {
             Room room = bed.GetRoom();
             bool outdoors = room == null || room.PsychologicallyOutdoors;
@@ -34,6 +34,7 @@ namespace SmarterBeds
             points += (bed.GetStatValue(StatDefOf.BedRestEffectiveness) - 1f) * s.restEffectivenessWeight;
             points -= TitlePenalty(bed, room, outdoors, pawn, s);
             points -= JealousyPenalty(room, outdoors, pawn);
+            points -= TemperaturePenalty(bed, pawn, s);
             points -= FamilyPenalty(bed, pawn, s, leaving);
             points -= NeighborPenalty(bed, pawn, s, leaving);
             points -= PrisonerPenalty(bed, pawn, s);
@@ -47,11 +48,11 @@ namespace SmarterBeds
         /// title-holder's bedroom penalties, the Jealous trait, and being too close to (or, for a
         /// couple, too far from) family. Positive means penalised.
         /// </summary>
-        public static float DebuffPenalty(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, Pawn leaving = null)
+        public static float DebuffPenalty(Building_Bed bed, Pawn pawn, WilsBetterBedsSettings s, Pawn leaving = null)
         {
             Room room = bed.GetRoom();
             bool outdoors = room == null || room.PsychologicallyOutdoors;
-            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn) + FamilyPenalty(bed, pawn, s, leaving) + NeighborPenalty(bed, pawn, s, leaving) + PrisonerPenalty(bed, pawn, s);
+            return TitlePenalty(bed, room, outdoors, pawn, s) + JealousyPenalty(room, outdoors, pawn) + TemperaturePenalty(bed, pawn, s) + FamilyPenalty(bed, pawn, s, leaving) + NeighborPenalty(bed, pawn, s, leaving) + PrisonerPenalty(bed, pawn, s);
         }
 
         /// <summary>
@@ -60,7 +61,7 @@ namespace SmarterBeds
         /// - a couple with family in the colony: unhappy with a bed outside the radius of all of them.
         /// Mirrors the "too close to a disliked relative" and "room far from family" thoughts.
         /// </summary>
-        public static float FamilyPenalty(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, Pawn leaving = null)
+        public static float FamilyPenalty(Building_Bed bed, Pawn pawn, WilsBetterBedsSettings s, Pawn leaving = null)
         {
             if (!s.familyEnabled || !Family.IsAdultColonist(pawn)) return 0f;
 
@@ -93,21 +94,21 @@ namespace SmarterBeds
         /// Counted for up to two of them, and worth more than the same dislike of a relative, since
         /// family is put up with.
         /// </summary>
-        public static float NeighborPenalty(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, Pawn leaving = null)
+        public static float NeighborPenalty(Building_Bed bed, Pawn pawn, WilsBetterBedsSettings s, Pawn leaving = null)
         {
             if (!s.neighborsEnabled || !Family.IsAdultColonist(pawn)) return 0f;
             return Family.CountNear(pawn, Family.HostileNeighbors(pawn), bed, s, leaving, 2) * s.neighborHostilePenalty;
         }
 
         /// <summary>Sleeping within the family distance of a bed that has a prisoner in it. Counted once, however many there are.</summary>
-        public static float PrisonerPenalty(Building_Bed bed, Pawn pawn, SmarterBedsSettings s)
+        public static float PrisonerPenalty(Building_Bed bed, Pawn pawn, WilsBetterBedsSettings s)
         {
             if (!s.neighborsEnabled || s.prisonerNeighborPenalty <= 0f || !Family.IsAdultColonist(pawn)) return 0f;
             return Family.PrisonersNear(bed, s) ? s.prisonerNeighborPenalty : 0f;
         }
 
         /// <summary>The comfort of sleeping near people of your own ideoligion and your own kind.</summary>
-        public static float NeighborMood(Building_Bed bed, Pawn pawn, SmarterBedsSettings s, Pawn leaving = null)
+        public static float NeighborMood(Building_Bed bed, Pawn pawn, WilsBetterBedsSettings s, Pawn leaving = null)
         {
             if (!s.neighborsEnabled || !Family.IsAdultColonist(pawn)) return 0f;
             float mood = 0f;
@@ -122,7 +123,7 @@ namespace SmarterBeds
         ///   less so in an empty room their partner could move into; sharing with anyone else costs.
         /// - Family sharing a room is a small plus, for pawns on good terms.
         /// </summary>
-        private static float CompanyMood(Building_Bed bed, Room room, bool outdoors, Pawn pawn, SmarterBedsSettings s, Pawn leaving)
+        private static float CompanyMood(Building_Bed bed, Room room, bool outdoors, Pawn pawn, WilsBetterBedsSettings s, Pawn leaving)
         {
             if (!s.familyEnabled || outdoors || !Family.IsAdultColonist(pawn)) return 0f;
 
@@ -154,6 +155,32 @@ namespace SmarterBeds
             return mood;
         }
 
+        /// <summary>
+        /// The game's own test for "slept in the cold" and "slept in the heat": the temperature where the bed
+        /// stands against the sleeper's comfortable range (their race, plus any genes that move it). Either
+        /// is -4 in the game, which is the default here. It is the temperature now, so a room that is
+        /// heated, or cooled, counts as the better room, and one that has gone cold with the weather does not.
+        /// </summary>
+        public static float TemperaturePenalty(Building_Bed bed, Pawn pawn, WilsBetterBedsSettings s)
+        {
+            if (!s.temperatureEnabled || s.temperaturePenalty <= 0f || bed == null || bed.Map == null) return 0f;
+
+            float min = pawn.def.GetStatValueAbstract(StatDefOf.ComfyTemperatureMin);
+            float max = pawn.def.GetStatValueAbstract(StatDefOf.ComfyTemperatureMax);
+            if (ModsConfig.BiotechActive && pawn.genes != null)
+            {
+                foreach (var gene in pawn.genes.GenesListForReading)
+                {
+                    if (!gene.Active) continue;
+                    min += gene.def.statOffsets.GetStatOffsetFromList(StatDefOf.ComfyTemperatureMin);
+                    max += gene.def.statOffsets.GetStatOffsetFromList(StatDefOf.ComfyTemperatureMax);
+                }
+            }
+
+            float temperature = bed.AmbientTemperature;
+            return temperature < min || temperature > max ? s.temperaturePenalty : 0f;
+        }
+
         /// <summary>The mood the vanilla "slept in ..." thought would give for this room.</summary>
         private static float RoomMood(Room room, bool outdoors, Pawn pawn)
         {
@@ -179,7 +206,7 @@ namespace SmarterBeds
         /// partner sharing the room), and if they have one it has to meet the title's requirements.
         /// Each failure is the same -6 the game charges. Ascetics ignore both.
         /// </summary>
-        public static float TitlePenalty(Building_Bed bed, Room room, bool outdoors, Pawn pawn, SmarterBedsSettings s)
+        public static float TitlePenalty(Building_Bed bed, Room room, bool outdoors, Pawn pawn, WilsBetterBedsSettings s)
         {
             if (!s.titleRulesEnabled) return 0f;
             var title = Requirements.TitleOf(pawn);
@@ -215,7 +242,7 @@ namespace SmarterBeds
         /// </summary>
         public static float JealousyPenalty(Room room, bool outdoors, Pawn pawn)
         {
-            if (!SmarterBedsMod.Settings.jealousyEnabled) return 0f;
+            if (!WilsBetterBedsMod.Settings.jealousyEnabled) return 0f;
             if (pawn.story?.traits == null || !pawn.story.traits.HasTrait(TraitDefOf.Jealous)) return 0f;
             if (pawn.Map == null) return 0f;
             float own = outdoors ? 0f : room.GetStat(RoomStatDefOf.Impressiveness);

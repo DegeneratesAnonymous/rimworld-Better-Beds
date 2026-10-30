@@ -1,5 +1,5 @@
 <#
-  Builds Smarter Beds for 1.7 and 1.6 and copies the mod into RimWorld's Mods folder.
+  Builds Wil's Better Beds for 1.7 and 1.6 and copies the mod into RimWorld's Mods folder.
 
   Why a copy and not a junction or symlink: RimWorld 1.7 runs on .NET 10, which refuses to
   enumerate a folder reached through a junction ("The path cannot be traversed because it
@@ -17,7 +17,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
-$dest = Join-Path $Game 'Mods\SmarterBeds'
+$dest = Join-Path $Game 'Mods\WilsBetterBeds'
 
 if (-not (Test-Path (Join-Path $Game 'Mods'))) { throw "No Mods folder at $Game. Pass -Game with your RimWorld folder." }
 
@@ -34,7 +34,7 @@ if ((Test-Path $dest) -and (Get-Item $dest -Force).LinkType) {
 if (-not $NoBuild) {
     foreach ($v in '1.7', '1.6') {
         Write-Host "Building $v..."
-        dotnet build "$repo\Source\SmarterBeds\SmarterBeds.csproj" -c Release -p:GameVersion=$v -v q
+        dotnet build "$repo\Source\WilsBetterBeds\WilsBetterBeds.csproj" -c Release -p:GameVersion=$v -v q
         if ($LASTEXITCODE -ne 0) { throw "Build failed for $v" }
     }
 }
@@ -45,4 +45,4 @@ if ($LASTEXITCODE -ge 8) { throw "Copy failed (robocopy exit code $LASTEXITCODE)
 $global:LASTEXITCODE = 0   # robocopy uses 1-7 for "copied something", which is success
 
 Write-Host "Deployed to $dest"
-Write-Host "In RimSort: Refresh, make sure 'Smarter Beds' (SpacemanWil.SmarterBeds) is active, Sort, Save."
+Write-Host "In RimSort: Refresh, make sure ""Wil's Better Beds"" (SpacemanWil.WilsBetterBeds) is active, Sort, Save."

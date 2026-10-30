@@ -1,7 +1,7 @@
 using Verse;
 using RimWorld;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// The player's decisions about who owns which bed. When you set a bed's owner with the

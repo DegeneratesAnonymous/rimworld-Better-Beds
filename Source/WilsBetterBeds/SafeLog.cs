@@ -6,7 +6,7 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// A problem in one of this mod's own features should never break the game or fill the log. Code
@@ -20,14 +20,14 @@ namespace SmarterBeds
         public static void Once(string what, Exception e)
         {
             if (!Seen.Add(what)) return;
-            Log.Warning($"[Smarter Beds] {what} failed and was skipped (reported once): {e.GetType().Name}: {e.Message}");
+            Log.Warning($"[Wil's Better Beds] {what} failed and was skipped (reported once): {e.GetType().Name}: {e.Message}");
         }
 
         /// <summary>A plain message, written once per key.</summary>
         public static void Note(string key, string text)
         {
             if (!Seen.Add(key)) return;
-            Log.Warning("[Smarter Beds] " + text);
+            Log.Warning("[Wil's Better Beds] " + text);
         }
     }
 
@@ -67,7 +67,7 @@ namespace SmarterBeds
                 catch (Exception e)
                 {
                     Failed.Add(type.Name + ": " + e.GetType().Name + ": " + FirstLine(e.Message));
-                    Log.Warning($"[Smarter Beds] Patch {type.Name} could not be applied and was skipped: {FirstLine(e.Message)}");
+                    Log.Warning($"[Wil's Better Beds] Patch {type.Name} could not be applied and was skipped: {FirstLine(e.Message)}");
                 }
             }
 
@@ -84,7 +84,7 @@ namespace SmarterBeds
                 catch { /* detection is only for the report */ }
             }
 
-            Log.Message($"[Smarter Beds] {Hooks} of {Classes} hooks active" +
+            Log.Message($"[Wil's Better Beds] {Hooks} of {Classes} hooks active" +
                         (Failed.Count > 0 ? $", {Failed.Count} failed" : "") +
                         (DetectedMods.Count > 0 ? "; works alongside: " + string.Join(", ", DetectedMods) : "") + ".");
         }
@@ -98,7 +98,7 @@ namespace SmarterBeds
 
         /// <summary>One line for the options window.</summary>
         public static string Summary() =>
-            "SmarterBeds_Diag_Summary".Translate(Hooks, Classes).ToString();
+            "WilsBetterBeds_Diag_Summary".Translate(Hooks, Classes).ToString();
 
         public static string Details()
         {

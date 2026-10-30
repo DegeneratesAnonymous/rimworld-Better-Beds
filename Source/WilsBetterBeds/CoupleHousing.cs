@@ -3,7 +3,7 @@ using System.Linq;
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// When a colonist has a partner and the two do not live in a room of their own, find them one.
@@ -20,34 +20,44 @@ namespace SmarterBeds
         private const float NoBedMood = -4f; // "slept on the ground"
         private const float RetryDaysWhenNothingFits = 1f;
 
-        public static void Run(Map map, GameComponent_BedNegotiation comp)
+        /// <summary>
+        /// Looks at one colonist: if they are half of a couple with a sleep penalty and no room of their own,
+        /// tries to house the two of them. Called for each colonist in turn through the hour. Returns true if
+        /// they moved.
+        /// </summary>
+        public static bool Step(Pawn a, GameComponent_BedNegotiation comp)
         {
-            var s = SmarterBedsMod.Settings;
-            foreach (var a in new List<Pawn>(map.mapPawns.FreeColonistsSpawned))
+            var s = WilsBetterBedsMod.Settings;
+            try
             {
-                if (!Family.IsAdultColonist(a)) continue;
+                if (!Family.IsAdultColonist(a) || !Family.HasSingleLover(a)) return false; // most colonists stop here, cheaply
                 Family.Refresh(a); // this runs once an hour, so read the relations afresh
                 var b = Family.SoleLover(a);
-                if (b == null) continue;
+                if (b == null) return false;
                 Family.Refresh(b);
-                if (Family.SoleLover(b) != a) continue;
-                if (a.thingIDNumber > b.thingIDNumber) continue; // once per pair
-                if (!Family.IsAdultColonist(b) || b.Map != a.Map) continue;
-                if (!a.Awake() || !b.Awake()) continue;
+                if (Family.SoleLover(b) != a) return false;
+                if (a.thingIDNumber > b.thingIDNumber) return false; // once per pair
+                if (!Family.IsAdultColonist(b) || b.Map != a.Map) return false;
+                if (!a.Awake() || !b.Awake()) return false;
                 // Content, so nothing to look for: only a couple with a sleep penalty are moved.
-                if (!comp.HasRoomDebuff(a) && !comp.HasRoomDebuff(b)) continue;
+                if (!comp.HasRoomDebuff(a) && !comp.HasRoomDebuff(b)) return false;
                 // Already in a room of their own: only look again if family distance is still a problem.
-                if (Family.IsInCoupleRoom(a) && !FamilyProblem(a, b, s)) continue;
-                if (comp.CoupleOnCooldown(a, b)) continue;
+                if (Family.IsInCoupleRoom(a) && !FamilyProblem(a, b, s)) return false;
+                if (comp.CoupleOnCooldown(a, b)) return false;
 
                 bool moved;
                 using (PerfWatch.Measure("couple housing")) moved = TryHouse(a, b, s);
                 comp.StartCoupleCooldown(a, b, moved ? s.negotiationCooldownDays : RetryDaysWhenNothingFits);
-                if (moved) return; // one couple per map per hour is plenty
+                return moved;
+            }
+            catch (System.Exception e)
+            {
+                SafeLog.Once("couple housing", e);
+                return false;
             }
         }
 
-        private static bool FamilyProblem(Pawn a, Pawn b, SmarterBedsSettings s)
+        private static bool FamilyProblem(Pawn a, Pawn b, WilsBetterBedsSettings s)
         {
             var bedA = Family.BedOf(a);
             var bedB = Family.BedOf(b);
@@ -62,7 +72,7 @@ namespace SmarterBeds
             public float value;
         }
 
-        private static bool TryHouse(Pawn a, Pawn b, SmarterBedsSettings s)
+        private static bool TryHouse(Pawn a, Pawn b, WilsBetterBedsSettings s)
         {
             var oldA = Family.BedOf(a);
             var oldB = Family.BedOf(b);
@@ -103,7 +113,7 @@ namespace SmarterBeds
         }
 
         /// <summary>What the pawn has now, in the same units (their company is not counted: they are not yet a couple room).</summary>
-        private static float ValueNow(Pawn p, Building_Bed bed, SmarterBedsSettings s) =>
+        private static float ValueNow(Pawn p, Building_Bed bed, WilsBetterBedsSettings s) =>
             bed == null ? NoBedMood : RoomComfort.Points(bed, p, s, company: false);
 
         private static IEnumerable<Room> RoomsWithBeds(Map map)
@@ -124,7 +134,7 @@ namespace SmarterBeds
             return BedScorer.IsCandidate(bed, a, a) && BedScorer.IsCandidate(bed, b, b);
         }
 
-        private static bool Move(Pawn a, Pawn b, Building_Bed oldA, Building_Bed oldB, Plan plan, SmarterBedsSettings s)
+        private static bool Move(Pawn a, Pawn b, Building_Bed oldA, Building_Bed oldB, Plan plan, WilsBetterBedsSettings s)
         {
             a.ownership.UnclaimBed();
             b.ownership.UnclaimBed();
@@ -145,10 +155,10 @@ namespace SmarterBeds
             negotiation?.NoteMoved(b);
 
             if (s.verboseLogging)
-                Log.Message($"[Smarter Beds] couple: {a.LabelShort} and {b.LabelShort} moved into a room of their own at {plan.bedA.Position}");
+                Log.Message($"[Wil's Better Beds] couple: {a.LabelShort} and {b.LabelShort} moved into a room of their own at {plan.bedA.Position}");
 
             if (s.negotiationMessages)
-                BriefMessage.Show("SmarterBeds_CoupleMoved".Translate(a.LabelShort, b.LabelShort), new LookTargets(a, b), s.messageSeconds);
+                BriefMessage.Show("WilsBetterBeds_CoupleMoved".Translate(a.LabelShort, b.LabelShort), new LookTargets(a, b), s.messageSeconds);
             return true;
         }
     }

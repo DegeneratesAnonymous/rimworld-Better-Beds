@@ -4,7 +4,7 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// In god mode, a selected colonist gets a "Force negotiation" button. It sends them to ask for a
@@ -18,7 +18,7 @@ namespace SmarterBeds
         {
             try
             {
-                if (!DebugSettings.godMode || !SmarterBedsMod.Settings.enabled) return;
+                if (!DebugSettings.godMode || !WilsBetterBedsMod.Settings.enabled) return;
                 if (!__instance.IsColonistPlayerControlled) return;
 
                 var pawn = __instance;
@@ -26,8 +26,8 @@ namespace SmarterBeds
                 {
                     new Command_Action
                     {
-                        defaultLabel = "SmarterBeds_ForceNegotiation".Translate(),
-                        defaultDesc = "SmarterBeds_ForceNegotiation_Desc".Translate(),
+                        defaultLabel = "WilsBetterBeds_ForceNegotiation".Translate(),
+                        defaultDesc = "WilsBetterBeds_ForceNegotiation_Desc".Translate(),
                         icon = TexButton.Add,
                         action = () => GameComponent_BedNegotiation.Instance?.ForceNegotiation(pawn)
                     }

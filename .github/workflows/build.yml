@@ -18,8 +18,8 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Build for RimWorld ${{ matrix.game }}
-        run: dotnet build Source/SmarterBeds/SmarterBeds.csproj -c Release -p:GameVersion=${{ matrix.game }}
+        run: dotnet build Source/WilsBetterBeds/WilsBetterBeds.csproj -c Release -p:GameVersion=${{ matrix.game }}
       - uses: actions/upload-artifact@v4
         with:
-          name: SmarterBeds-${{ matrix.game }}-dll
-          path: ${{ matrix.game }}/Assemblies/SmarterBeds.dll
+          name: WilsBetterBeds-${{ matrix.game }}-dll
+          path: ${{ matrix.game }}/Assemblies/WilsBetterBeds.dll

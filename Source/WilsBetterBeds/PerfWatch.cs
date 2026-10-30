@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// A small stopwatch around the places this mod does real work, so how much time it takes can be

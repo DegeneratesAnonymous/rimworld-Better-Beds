@@ -6,15 +6,15 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v10.0": {
-      "SmarterBeds/1.0.0": {
+      "WilsBetterBeds/1.0.0": {
         "runtime": {
-          "SmarterBeds.dll": {}
+          "WilsBetterBeds.dll": {}
         }
       }
     }
   },
   "libraries": {
-    "SmarterBeds/1.0.0": {
+    "WilsBetterBeds/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

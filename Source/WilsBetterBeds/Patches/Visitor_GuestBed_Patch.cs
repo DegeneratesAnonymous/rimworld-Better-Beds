@@ -4,7 +4,7 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 
-namespace SmarterBeds.Patches
+namespace WilsBetterBeds.Patches
 {
     /// <summary>
     /// Lets a visitor who is not a Hospitality guest (spaceport visitors, trade caravans) sleep in one of
@@ -30,7 +30,7 @@ namespace SmarterBeds.Patches
             if (__result) return;
             try
             {
-                var s = SmarterBedsMod.Settings;
+                var s = WilsBetterBedsMod.Settings;
                 if (!s.enabled || !s.visitorsUseGuestBeds || __args.Length < 2) return;
                 var bed = __args[0] as Building_Bed;
                 var sleeper = __args[1] as Pawn;
@@ -55,7 +55,7 @@ namespace SmarterBeds.Patches
             if (!__result || __state) return;
             try
             {
-                var s = SmarterBedsMod.Settings;
+                var s = WilsBetterBedsMod.Settings;
                 if (!s.enabled || !s.visitorsUseGuestBeds) return;
                 if (Visitors.IsGuestBed(newBed) && Visitors.IsPlainVisitor(___pawn)) Visitors.PayRent(newBed, ___pawn);
             }

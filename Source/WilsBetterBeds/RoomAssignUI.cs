@@ -6,7 +6,7 @@ using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace SmarterBeds
+namespace WilsBetterBeds
 {
     /// <summary>
     /// Adds an "Assign rooms" button to the Assign tab, in the empty space above the Name column at the
@@ -26,11 +26,11 @@ namespace SmarterBeds
         {
             try
             {
-                if (!(__instance is MainTabWindow_Assign) || !SmarterBedsMod.Settings.enabled || !SmarterBedsMod.Settings.showRoomsButton) return;
+                if (!(__instance is MainTabWindow_Assign) || !WilsBetterBedsMod.Settings.enabled || !WilsBetterBedsMod.Settings.showRoomsButton) return;
 
                 var button = new Rect(rect.x + 4f, rect.y + 5f, ButtonWidth, ButtonHeight);
-                TooltipHandler.TipRegion(button, "SmarterBeds_AssignRooms_Tip".Translate());
-                if (!Widgets.ButtonText(button, "SmarterBeds_AssignRooms".Translate())) return;
+                TooltipHandler.TipRegion(button, "WilsBetterBeds_AssignRooms_Tip".Translate());
+                if (!Widgets.ButtonText(button, "WilsBetterBeds_AssignRooms".Translate())) return;
 
                 var open = Find.WindowStack.WindowOfType<Window_RoomList>();
                 if (open != null) open.Close();
@@ -203,7 +203,7 @@ namespace SmarterBeds
         private void Draw(Rect inRect)
         {
             Text.Font = GameFont.Medium;
-            Widgets.Label(new Rect(inRect.x, inRect.y, inRect.width, 32f), "SmarterBeds_RoomsTitle".Translate());
+            Widgets.Label(new Rect(inRect.x, inRect.y, inRect.width, 32f), "WilsBetterBeds_RoomsTitle".Translate());
             Text.Font = GameFont.Small;
 
             float top = inRect.y + 36f;
@@ -213,11 +213,11 @@ namespace SmarterBeds
             // Header: each label sorts by that column.
             var header = new Rect(inRect.x, top, listWidth, 26f);
             float x = header.x + 6f;
-            x = HeaderCell(x, header.y, BedsWidth, "SmarterBeds_RoomsBeds".Translate(), SortBy.Beds, "SmarterBeds_RoomsBeds_Tip".Translate());
-            x = HeaderCell(x, header.y, CribsWidth, "SmarterBeds_RoomsCribs".Translate(), SortBy.Cribs, "SmarterBeds_RoomsCribs_Tip".Translate());
-            x = HeaderCell(x, header.y, ScoreWidth, "SmarterBeds_RoomsScore".Translate(), SortBy.Score, "SmarterBeds_RoomsScore_Tip".Translate());
-            x = HeaderCell(x, header.y, SizeWidth, "SmarterBeds_RoomsSize".Translate(), SortBy.Size, "SmarterBeds_RoomsSize_Tip".Translate());
-            HeaderCell(x, header.y, ownersWidth, "SmarterBeds_RoomsOwners".Translate(), SortBy.Owners, null);
+            x = HeaderCell(x, header.y, BedsWidth, "WilsBetterBeds_RoomsBeds".Translate(), SortBy.Beds, "WilsBetterBeds_RoomsBeds_Tip".Translate());
+            x = HeaderCell(x, header.y, CribsWidth, "WilsBetterBeds_RoomsCribs".Translate(), SortBy.Cribs, "WilsBetterBeds_RoomsCribs_Tip".Translate());
+            x = HeaderCell(x, header.y, ScoreWidth, "WilsBetterBeds_RoomsScore".Translate(), SortBy.Score, "WilsBetterBeds_RoomsScore_Tip".Translate());
+            x = HeaderCell(x, header.y, SizeWidth, "WilsBetterBeds_RoomsSize".Translate(), SortBy.Size, "WilsBetterBeds_RoomsSize_Tip".Translate());
+            HeaderCell(x, header.y, ownersWidth, "WilsBetterBeds_RoomsOwners".Translate(), SortBy.Owners, null);
             Widgets.DrawLineHorizontal(inRect.x, header.yMax, listWidth);
 
             var outRect = new Rect(inRect.x, header.yMax + 2f, inRect.width, inRect.yMax - header.yMax - 28f);
@@ -225,7 +225,7 @@ namespace SmarterBeds
 
             if (rows.Count == 0)
             {
-                Widgets.NoneLabel(outRect.y + 8f, outRect.width, "SmarterBeds_RoomsNone".Translate());
+                Widgets.NoneLabel(outRect.y + 8f, outRect.width, "WilsBetterBeds_RoomsNone".Translate());
             }
 
             Widgets.BeginScrollView(outRect, ref scroll, viewRect);
@@ -240,7 +240,7 @@ namespace SmarterBeds
 
             Text.Font = GameFont.Tiny;
             GUI.color = Color.gray;
-            Widgets.Label(new Rect(inRect.x, inRect.yMax - 22f, inRect.width, 22f), "SmarterBeds_RoomsHint".Translate());
+            Widgets.Label(new Rect(inRect.x, inRect.yMax - 22f, inRect.width, 22f), "WilsBetterBeds_RoomsHint".Translate());
             GUI.color = Color.white;
             Text.Font = GameFont.Small;
         }
@@ -293,19 +293,19 @@ namespace SmarterBeds
             x += SizeWidth;
 
             string names = data.ownerNames.NullOrEmpty()
-                ? (data.beds.Count == 0 ? "-" : "SmarterBeds_RoomsNoOwners".Translate().ToString())
+                ? (data.beds.Count == 0 ? "-" : "WilsBetterBeds_RoomsNoOwners".Translate().ToString())
                 : data.ownerNames;
             Text.WordWrap = false;
             Widgets.Label(new Rect(x, row.y + 4f, ownersWidth, RowHeight), names.Truncate(ownersWidth));
             Text.WordWrap = true;
 
-            if (Widgets.ButtonText(assign, "SmarterBeds_RoomsAssign".Translate())) OpenAssign(data);
+            if (Widgets.ButtonText(assign, "WilsBetterBeds_RoomsAssign".Translate())) OpenAssign(data);
         }
 
         private static string Describe(Building_Bed bed)
         {
             string owners = bed.OwnersForReading.Count == 0
-                ? "SmarterBeds_RoomsNoOwners".Translate().ToString()
+                ? "WilsBetterBeds_RoomsNoOwners".Translate().ToString()
                 : string.Join(", ", bed.OwnersForReading.Select(p => p.LabelShort));
             return bed.LabelCap + " (" + bed.OwnersForReading.Count + "/" + bed.SleepingSlotsCount + "): " + owners;
         }
@@ -313,7 +313,7 @@ namespace SmarterBeds
         private static string BedTooltip(RoomRow data)
         {
             var lines = data.All.Select(Describe).ToList();
-            if (data.room != null) lines.Add("SmarterBeds_RoomsCells".Translate(data.cells));
+            if (data.room != null) lines.Add("WilsBetterBeds_RoomsCells".Translate(data.cells));
             return string.Join("\n", lines);
         }
 
