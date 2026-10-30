@@ -26,15 +26,23 @@ namespace SmarterBeds
 
             void Add(Pawn r) { if (Lives(p, r) && !result.Contains(r)) result.Add(r); }
 
-            Pawn mother = p.GetMother();
-            Pawn father = p.GetFather();
-            Add(mother);
-            Add(father);
-            foreach (var child in p.relations.Children) Add(child);
-            foreach (var parent in new[] { mother, father })
+            try
             {
-                if (parent?.relations == null) continue;
-                foreach (var sibling in parent.relations.Children) Add(sibling);
+                Pawn mother = p.GetMother();
+                Pawn father = p.GetFather();
+                Add(mother);
+                Add(father);
+                foreach (var child in p.relations.Children) Add(child);
+                foreach (var parent in new[] { mother, father })
+                {
+                    if (parent?.relations == null) continue;
+                    foreach (var sibling in parent.relations.Children) Add(sibling);
+                }
+            }
+            catch (System.Exception e)
+            {
+                // Relations are the game's, and a mod can leave odd data in them; no family is the safe answer.
+                SafeLog.Once("reading family relations", e);
             }
             return result;
         }

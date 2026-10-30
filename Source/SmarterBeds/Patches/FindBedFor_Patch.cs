@@ -23,25 +23,37 @@ namespace SmarterBeds.Patches
     {
         static MethodBase TargetMethod()
         {
+            // The overload with the most parameters is the full one (the short ones forward to it).
+            // If a game update removes them all there is nothing to patch, and the feature is skipped.
             return AccessTools.GetDeclaredMethods(typeof(RestUtility))
                 .Where(m => m.Name == nameof(RestUtility.FindBedFor) && m.ReturnType == typeof(Building_Bed))
                 .OrderByDescending(m => m.GetParameters().Length)
-                .First();
+                .FirstOrDefault();
         }
+
+        static bool Prepare() => TargetMethod() != null;
 
         [HarmonyPriority(Priority.Last)]
         static void Postfix(object[] __args, ref Building_Bed __result)
         {
-            if (!SmarterBedsMod.Settings.enabled) return;
+            try
+            {
+                if (!SmarterBedsMod.Settings.enabled) return;
 
-            var sleeper = __args.Length > 0 ? __args[0] as Pawn : null;
-            var traveler = __args.Length > 1 ? __args[1] as Pawn : sleeper;
+                var sleeper = __args.Length > 0 ? __args[0] as Pawn : null;
+                var traveler = __args.Length > 1 ? __args[1] as Pawn : sleeper;
 
-            if (!BedScorer.ShouldHandle(sleeper, traveler)) return;
-            if (__result != null && __result.OwnersForReading.Count > 0) return; // a partner's bed, or similar
+                if (!BedScorer.ShouldHandle(sleeper, traveler)) return;
+                if (__result != null && __result.OwnersForReading.Count > 0) return; // a partner's bed, or similar
 
-            var bed = BedScorer.FindBest(sleeper, traveler);
-            if (bed != null) __result = bed;
+                var bed = BedScorer.FindBest(sleeper, traveler);
+                if (bed != null) __result = bed;
+            }
+            catch (System.Exception e)
+            {
+                // Whatever the game or another mod chose stands.
+                SafeLog.Once("choosing a bed", e);
+            }
         }
     }
 }

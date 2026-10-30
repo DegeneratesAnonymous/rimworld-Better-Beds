@@ -20,12 +20,14 @@ namespace SmarterBeds.Patches
     {
         static void Postfix(CompAssignableToPawn_Bed __instance, Pawn pawn)
         {
-            if (pawn == null) return;
-            var bed = __instance.parent as Building_Bed;
-            if (bed == null || bed.Medical) return;
-
-            var comp = bed.GetComp<CompBedLock>();
-            if (comp != null) comp.lockedOwnerId = pawn.thingIDNumber;
+            try
+            {
+                if (pawn == null) return;
+                var bed = __instance.parent as Building_Bed;
+                if (bed == null || bed.Medical) return;
+                BedLocks.Lock(bed, pawn);
+            }
+            catch (System.Exception e) { SafeLog.Once("lock on assign", e); }
         }
     }
 
@@ -38,8 +40,12 @@ namespace SmarterBeds.Patches
     {
         static void Postfix(CompAssignableToPawn_Bed __instance, Pawn pawn)
         {
-            var comp = (__instance.parent as Building_Bed)?.GetComp<CompBedLock>();
-            if (comp != null && pawn != null && comp.lockedOwnerId == pawn.thingIDNumber) comp.lockedOwnerId = -1;
+            try
+            {
+                var bed = __instance.parent as Building_Bed;
+                if (bed != null && pawn != null) BedLocks.Release(bed, pawn);
+            }
+            catch (System.Exception e) { SafeLog.Once("release on unassign", e); }
         }
     }
 }

@@ -60,7 +60,7 @@ namespace SmarterBeds
         {
             var oldA = Family.BedOf(a);
             var oldB = Family.BedOf(b);
-            if (CompBedLock.IsLocked(oldA, a) || CompBedLock.IsLocked(oldB, b)) return false; // the player decided
+            if (BedLocks.IsLocked(oldA, a) || BedLocks.IsLocked(oldB, b)) return false; // the player decided
 
             float current = ValueNow(a, oldA, s) + ValueNow(b, oldB, s);
 

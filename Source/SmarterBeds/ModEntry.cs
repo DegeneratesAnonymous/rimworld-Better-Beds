@@ -14,7 +14,7 @@ namespace SmarterBeds
         public SmarterBedsMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<SmarterBedsSettings>();
-            new Harmony("SpacemanWil.SmarterBeds").PatchAll();
+            SafePatcher.PatchAll(new Harmony("SpacemanWil.SmarterBeds"));
             Log.Message("[Smarter Beds] Loaded.");
         }
 
@@ -85,6 +85,9 @@ namespace SmarterBeds
 
             Section(list, "SmarterBeds_Sec_Rough");
             Check(list, "SmarterBeds_S_Chair", ref s.chairSleepEnabled);
+
+            Section(list, "SmarterBeds_Sec_Diag");
+            list.Label(new TaggedString(SafePatcher.Summary()), -1f, SafePatcher.Details());
 
             viewHeight = list.CurHeight + 24f;
             list.End();

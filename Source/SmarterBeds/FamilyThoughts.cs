@@ -12,7 +12,15 @@ namespace SmarterBeds
     {
         protected override ThoughtState CurrentStateInternal(Pawn p)
         {
-            return Family.IsFarFromFamily(p, SmarterBedsMod.Settings) ? ThoughtState.ActiveAtStage(0) : ThoughtState.Inactive;
+            try
+            {
+                return Family.IsFarFromFamily(p, SmarterBedsMod.Settings) ? ThoughtState.ActiveAtStage(0) : ThoughtState.Inactive;
+            }
+            catch (System.Exception e)
+            {
+                SafeLog.Once("room far from family thought", e);
+                return ThoughtState.Inactive;
+            }
         }
     }
 
@@ -24,8 +32,16 @@ namespace SmarterBeds
     {
         protected override ThoughtState CurrentStateInternal(Pawn p)
         {
-            var relative = Family.NearbyDislikedRelative(p, SmarterBedsMod.Settings);
-            return relative != null ? ThoughtState.ActiveWithReason(relative.LabelShort) : ThoughtState.Inactive;
+            try
+            {
+                var relative = Family.NearbyDislikedRelative(p, SmarterBedsMod.Settings);
+                return relative != null ? ThoughtState.ActiveWithReason(relative.LabelShort) : ThoughtState.Inactive;
+            }
+            catch (System.Exception e)
+            {
+                SafeLog.Once("too close to relative thought", e);
+                return ThoughtState.Inactive;
+            }
         }
     }
 }

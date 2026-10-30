@@ -96,17 +96,21 @@ namespace SmarterBeds
         [HarmonyPriority(Priority.Last)]
         static void Postfix(Pawn pawn, ref Job __result)
         {
-            if (__result == null || __result.def != JobDefOf.LayDown) return;
-            if (__result.targetA.Thing != null) return;                    // a real bed: not our business
-            if (pawn.CurJob != null && pawn.CurJob.def == JobDefOf.LayDown) return; // already resting where they are
-            if (!ChairSleep.Eligible(pawn)) return;
+            try
+            {
+                if (__result == null || __result.def != JobDefOf.LayDown) return;
+                if (__result.targetA.Thing != null) return;                    // a real bed: not our business
+                if (pawn.CurJob != null && pawn.CurJob.def == JobDefOf.LayDown) return; // already resting where they are
+                if (!ChairSleep.Eligible(pawn)) return;
 
-            var chairJob = ChairSleep.JobDef;
-            if (chairJob == null) return;
-            var chair = ChairSleep.FindChair(pawn);
-            if (chair == null) return;
+                var chairJob = ChairSleep.JobDef;
+                if (chairJob == null) return;
+                var chair = ChairSleep.FindChair(pawn);
+                if (chair == null) return;
 
-            __result = JobMaker.MakeJob(chairJob, chair.Position, chair);
+                __result = JobMaker.MakeJob(chairJob, chair.Position, chair);
+            }
+            catch (System.Exception e) { SafeLog.Once("sleeping in a chair", e); }
         }
     }
 
@@ -122,13 +126,17 @@ namespace SmarterBeds
 
         static void Postfix(Pawn actor)
         {
-            if (!(actor?.jobs?.curDriver is JobDriver_SleepInChair)) return;
-            var memories = actor.needs?.mood?.thoughts?.memories;
-            if (memories == null) return;
+            try
+            {
+                if (!(actor?.jobs?.curDriver is JobDriver_SleepInChair)) return;
+                var memories = actor.needs?.mood?.thoughts?.memories;
+                if (memories == null) return;
 
-            memories.RemoveMemoriesOfDef(ThoughtDefOf.SleptOnGround);
-            var def = DefDatabase<ThoughtDef>.GetNamedSilentFail(ChairSleep.ThoughtDefName);
-            if (def != null) memories.TryGainMemory(def);
+                memories.RemoveMemoriesOfDef(ThoughtDefOf.SleptOnGround);
+                var def = DefDatabase<ThoughtDef>.GetNamedSilentFail(ChairSleep.ThoughtDefName);
+                if (def != null) memories.TryGainMemory(def);
+            }
+            catch (System.Exception e) { SafeLog.Once("chair sleep thought", e); }
         }
     }
 }

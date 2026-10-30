@@ -23,3 +23,8 @@ All notable changes are listed here. Versions follow semantic versioning.
 - Family: prefer sharing with family you get on with; negative relations want a room outside 35 tiles ("sleeping too close to" thought)
 - Couples: prefer a room of just the two of them near family; "room far from family" thought; new couples are moved into a free room of their own
 - God mode: Force negotiation button on a selected colonist
+- Cribs column in the room list; animal beds, prisoner and slave beds, and Hospitality guest beds are left out
+- Assign rooms button moved above the Name column so it no longer overlaps the policy buttons
+- The colonist being asked stops and faces the asker while they talk, then carries on with what they were doing
+- Negotiation notification stays 4 seconds by default (was 1)
+- Compatibility: locks stored in the save instead of on every bed; patches applied individually and fail soft; features catch their own errors; compatibility summary in the options

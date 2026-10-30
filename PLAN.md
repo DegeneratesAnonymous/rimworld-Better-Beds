@@ -37,7 +37,7 @@ A colonist who owns a bed alone and has a sleep debuff can choose "negotiate for
 - Shown in the play log (so Interaction Bubbles draws speech bubbles for the ask and the answer).
 
 ### Player control
-A bed whose owner the player sets with the Set Owner button (vanilla's window or a reskin of it) is locked to that owner. Locked beds are never targets and their owners never ask. There is no separate button: unassigning the owner releases the lock, and it stops applying whenever the owner changes.
+A bed whose owner the player sets with the Set Owner button (vanilla's window or a reskin of it) is locked to that owner. Locks are stored in the save (bed id to owner id), not on the beds, so nothing is added to any bed definition. Locked beds are never targets and their owners never ask. There is no separate button: unassigning the owner releases the lock, and it stops applying whenever the owner changes.
 
 ### Sleeping rough
 With no bed to use, the game's "lie down where you stand" is replaced by dozing in a free indoor chair (upright, since the game has no sitting posture), with a -3 thought in place of the -4 floor thought.
@@ -54,10 +54,20 @@ With no bed to use, the game's "lie down where you stand" is replaced by dozing 
 A bedless colonist takes the nicest free bed they can reach. Distance is only a tie-break (0.0001 per cell).
 
 ### Assign rooms
-A button at the top right of the Assign tab opens a list of rooms that have beds: Beds (owners/spaces), Room score (impressiveness), Size (width x height), Owners. Rows sort by column; hover highlights the room's beds in the world; double-click jumps the camera; Assign opens the game's Set owner window (a bed to choose first if the room has several). Owners set there lock the bed.
+A button above the Name column (top left) of the Assign tab opens a list of rooms that have beds or cribs: Beds (owners/spaces, cribs excluded), Cribs (babies/cribs), Room score (impressiveness), Size (width x height), Owners. Left out: medical, prisoner, slave and animal beds, and Hospitality guest beds. Rows sort by column; hover highlights the room's beds in the world; double-click jumps the camera; Assign opens the game's Set owner window (a bed to choose first if the room has several). Owners set there lock the bed.
 
 ### God mode
 A selected colonist gets Force negotiation: sends them to ask for a better room now, skipping reasons, cooldowns, rematch blocks and the minimum odds. The target must still own a bed alone and not be locked.
+
+### Compatibility
+- Bed choice is a postfix running last; candidates must pass the game's `IsValidBedFor`; ownership changes use the game's own claim methods.
+- Patches are applied one class at a time (`SafePatcher`); a failure skips that feature and is listed in the options and the log. Patches whose target may not exist use `Prepare`.
+- UI, patches, thought workers and job givers catch and log once (`SafeLog`) instead of throwing into the game.
+- Reflection is limited to one private field (the message start time) and is guarded.
+- Version folders: `1.6` and `1.7` carry their own DLLs. A new game version needs a rebuild against its reference package (see README).
+
+### Negotiation conversation
+When the asker gets within 6 cells, the colonist being asked stops, faces them and waits (a short job that resumes their old one afterwards, interruptible by emergencies and skipped for drafted, mentally broken, downed or sleeping colonists). Both stand still for the talk. The listener is released as soon as the conversation ends or the asker's job is interrupted.
 
 ### Open
 - Verify in game: the recreation activity is picked, bubbles appear, the chair looks acceptable.
