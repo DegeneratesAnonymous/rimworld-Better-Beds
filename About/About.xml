@@ -2,6 +2,7 @@
 <ModMetaData>
   <name>Wil's Better Beds</name>
   <author>Spaceman_Wil</author>
+  <modVersion>1.0</modVersion>
   <packageId>SpacemanWil.WilsBetterBeds</packageId>
   <supportedVersions>
     <li>1.6</li>
