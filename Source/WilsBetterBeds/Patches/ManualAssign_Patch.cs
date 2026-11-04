@@ -24,7 +24,7 @@ namespace WilsBetterBeds.Patches
             {
                 if (pawn == null) return;
                 var bed = __instance.parent as Building_Bed;
-                if (bed == null || bed.Medical) return;
+                if (bed == null || bed.Medical || InnBedCompat.IsInn(bed)) return;     // an inn bed's guest is not the player's decision
                 BedLocks.Lock(bed, pawn);
             }
             catch (System.Exception e) { SafeLog.Once("lock on assign", e); }

@@ -41,8 +41,34 @@ namespace WilsBetterBeds
             points -= NeighborPenalty(bed, pawn, s, leaving);
             points -= PrisonerPenalty(bed, pawn, s);
             points += NeighborMood(bed, pawn, s, leaving);
+            points += ChildParentBonus(bed, pawn, s);
             if (company) points += CompanyMood(bed, room, outdoors, pawn, s, leaving);
             return points;
+        }
+
+        /// <summary>
+        /// A child's wish to sleep near their parents, in mood points: how close the bed is to a parent's (1 in the same room, 0 at the family
+        /// radius) times how strong the wish is at their age. It is the "child parent bonus" while they are young and falls steadily to the
+        /// ordinary family bonus (what an adult counts for sharing a room with family) as they reach adulthood.
+        /// </summary>
+        public static float ChildParentBonus(Building_Bed bed, Pawn pawn, WilsBetterBedsSettings s)
+        {
+            if (!s.childrenEnabled || !Family.IsChild(pawn)) return 0f;
+            return ChildStrength(pawn, s) * Family.ParentCloseness(bed, pawn, s);
+        }
+
+        /// <summary>The mood points at the closest, at this age: the child bonus at the start of childhood, the family bonus at adulthood.</summary>
+        public static float ChildStrength(Pawn pawn, WilsBetterBedsSettings s)
+        {
+            float age = pawn.ageTracker.AgeBiologicalYearsFloat;
+            float start = 3f;
+            var stages = pawn.RaceProps.lifeStageAges;
+            if (stages != null)
+                foreach (var a in stages)
+                    if (a.def != null && a.def.developmentalStage == DevelopmentalStage.Child) { start = a.minAge; break; }
+            float end = pawn.ageTracker.AdultMinAge;
+            if (end <= start) return s.childParentBonus;
+            return Mathf.Lerp(s.childParentBonus, s.familyShareBonus, Mathf.InverseLerp(start, end, age));
         }
 
         /// <summary>

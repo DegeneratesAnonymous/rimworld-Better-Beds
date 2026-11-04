@@ -103,6 +103,9 @@ namespace WilsBetterBeds
                 if (__result == null || __result.def != JobDefOf.LayDown) return;
                 if (__result.targetA.Thing != null) return;                    // a real bed: not our business
                 if (pawn.CurJob != null && pawn.CurJob.def == JobDefOf.LayDown) return; // already resting where they are
+                // A visitor who may lodge at a RimMarket inn takes a free inn bed before the floor or a chair.
+                var inn = InnBedCompat.LodgingJob(pawn);
+                if (inn != null) { __result = inn; return; }
                 if (!ChairSleep.Eligible(pawn)) return;
 
                 var chairJob = ChairSleep.JobDef;

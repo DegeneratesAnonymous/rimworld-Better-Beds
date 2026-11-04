@@ -5,6 +5,16 @@ All notable changes are listed here. Versions follow semantic versioning.
 ## [Unreleased]
 
 ### Added
+- Children and babies sleep near their parents by the shortest way to walk, not the straight line through the walls: a bed the other side of a wall is far if the way round is long, and a bed with no way to it counts as too far to matter. The distance is found once from each parent's bed and kept for a while, so choosing a bed costs one search per parent. Setting: "Near means the shortest walk" (on by default)
+
+### Added
+- Babies and children: a baby with no bed gets the free crib nearest its mother's bed (father's if she is away), and a baby in a clearly further crib is moved to a nearer one; a child strongly prefers a bed near a parent's (the same room best), moving to a clearly nearer free bed, with a wish that is strong when small and falls to the ordinary family bonus by adulthood. Settings: "Babies sleep in the crib nearest their mother", "Children keep their beds near their parents" and the child bonus
+- RimCourt: a room taken by force can be heard as a court case
+- RimMarket: inn beds are never given to colonists (bed choice, moves, couples, negotiation, room list); visitors who may lodge are offered a free inn bed before the floor or a chair
+- RimTalk: conversations are told where a colonist sleeps and with whom (setting "Tell RimTalk where colonists sleep")
+- Interaction Bubbles Expanded: successful negotiation bubbles are tinted by mood effect
+
+### Added
 - Greedy and Ascetic: the game's own bedroom moods for those traits (Greedy -4 to -8 unless impressive; Ascetic +3 to +5 humble, -5 impressive) now count in choosing a room, free-bed moves and negotiation, and are a reason to ask for a better room
 - Optional "high expectations" setting (off by default): colonists with high expectations ask for, or move to, smaller upgrades when nothing is wrong
 

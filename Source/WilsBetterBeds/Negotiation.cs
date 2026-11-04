@@ -59,6 +59,8 @@ namespace WilsBetterBeds
             public readonly Queue<Pawn> couples = new Queue<Pawn>();
             public int moved;           // colonists who moved to a free bed this hour
             public bool coupleMoved;    // a couple was housed this hour: one is plenty
+            public readonly Queue<Pawn> kids = new Queue<Pawn>();
+            public int kidsMoved;       // babies and children who moved nearer their parents this hour
         }
 
         // Not saved.
@@ -89,8 +91,11 @@ namespace WilsBetterBeds
                     w.coupleMoved = false;
                     w.freeBeds.Clear();
                     w.couples.Clear();
+                    w.kids.Clear();
+                    w.kidsMoved = 0;
                     foreach (var p in map.mapPawns.FreeColonistsSpawned)
                     {
+                        if ((s.childrenEnabled || s.cribNearMotherEnabled) && (p.DevelopmentalStage & DevelopmentalStage.Adult) == 0) w.kids.Enqueue(p);
                         if (s.freeBedMoveEnabled) w.freeBeds.Enqueue(p);
                         if (s.familyEnabled && s.coupleHousingEnabled) w.couples.Enqueue(p);
                     }
@@ -101,6 +106,19 @@ namespace WilsBetterBeds
                 catch (System.Exception e) { SafeLog.Once("moving to a free bed", e); }
                 try { StepCouples(w, s, slicesLeft); }
                 catch (System.Exception e) { SafeLog.Once("couple housing", e); }
+                try { StepKids(w, s, slicesLeft); }
+                catch (System.Exception e) { SafeLog.Once("children's beds", e); }
+            }
+        }
+
+        private void StepKids(MapWork w, WilsBetterBedsSettings s, int slicesLeft)
+        {
+            if (!s.childrenEnabled && !s.cribNearMotherEnabled) { w.kids.Clear(); return; }
+            for (int n = Share(w.kids.Count, slicesLeft); n > 0 && w.kids.Count > 0; n--)
+            {
+                var kid = w.kids.Dequeue();
+                if (w.kidsMoved >= 3) { w.kids.Clear(); return; } // a few per hour is plenty
+                if (ChildHousing.Step(kid, this)) w.kidsMoved++;
             }
         }
 
@@ -239,6 +257,7 @@ namespace WilsBetterBeds
         {
             Family.ClearCache();
             BedScorer.ClearCache();
+            WalkDistance.ClearCache();
             movedAt.Clear();
             lastChecked.Clear();
             wantsCache.Clear();
@@ -351,7 +370,7 @@ namespace WilsBetterBeds
             if ((p.DevelopmentalStage & DevelopmentalStage.Adult) == 0) return false;
             if (HealthAIUtility.ShouldSeekMedicalRest(p)) return false;
             var bed = p.ownership?.OwnedBed;
-            if (bed == null || bed.Medical || !bed.Spawned) return false;
+            if (bed == null || bed.Medical || !bed.Spawned || InnBedCompat.IsInn(bed)) return false;
             // Shared beds belong to two people (usually a couple); leave those to vanilla.
             // A double bed with a single owner is fine.
             if (bed.OwnersForReading.Count != 1) return false;
@@ -625,7 +644,7 @@ namespace WilsBetterBeds
             if (c.approach == NegotiationApproach.Intimidate)
             {
                 float points = Mathf.Clamp(MoodWeight * Mathf.Abs(relationship) + MoodWeight * quality, MoodFloor, MoodCap);
-                GainMood(loser, "WilsBetterBeds_BulliedOutOfRoom", points);
+                GainMood(loser, "WilsBetterBeds_BulliedOutOfRoom", points, winner);     // names who: RimCourt can hear it as a grievance
             }
             else if (relationship > 0f)
             {
@@ -731,8 +750,12 @@ namespace WilsBetterBeds
             if (s.verboseLogging)
                 Log.Message($"[Wil's Better Beds] negotiation: {winner.LabelShort} took {loser.LabelShort}'s bed at {wonBed.Position} (gain {gain:0.0})");
 
-            NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "WilsBetterBeds_YieldRoom" : "WilsBetterBeds_AgreeToRoom", loser, winner);
-            ApplyMoodEffects(winner, loser, contest, gain, s);
+            // The moods first, then the line, inside one tracked step, so a bubble mod that tints by mood effect can see it.
+            BubblesExpandedCompat.Track(loser, winner, () =>
+            {
+                ApplyMoodEffects(winner, loser, contest, gain, s);
+                NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "WilsBetterBeds_YieldRoom" : "WilsBetterBeds_AgreeToRoom", loser, winner);
+            });
 
             if (s.negotiationMessages)
             {
@@ -868,8 +891,11 @@ namespace WilsBetterBeds
             if (s.verboseLogging)
                 Log.Message($"[Wil's Better Beds] couple negotiation: {asker.LabelShort} and {partner.LabelShort} took {owner.LabelShort}'s room (gain {gain:0.0})");
 
-            NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "WilsBetterBeds_YieldRoom" : "WilsBetterBeds_AgreeToRoom", owner, asker);
-            ApplyMoodEffects(asker, owner, contest, gain, s, partner);
+            BubblesExpandedCompat.Track(owner, asker, () =>
+            {
+                ApplyMoodEffects(asker, owner, contest, gain, s, partner);
+                NegotiationLog.Say(contest.approach == NegotiationApproach.Intimidate ? "WilsBetterBeds_YieldRoom" : "WilsBetterBeds_AgreeToRoom", owner, asker);
+            });
 
             if (s.negotiationMessages)
             {
@@ -919,7 +945,7 @@ namespace WilsBetterBeds
 
                 // Nobody else may live there, and there has to be space for two.
                 if (room.ContainedBeds.Any(bed => bed.OwnersForReading.Any(o => o != c))) continue;
-                var usable = room.ContainedBeds.Where(bed => bed.Spawned && !bed.Medical && bed.ForColonists
+                var usable = room.ContainedBeds.Where(bed => bed.Spawned && !bed.Medical && bed.ForColonists && !InnBedCompat.IsInn(bed)
                     && RestUtility.CanUseBedEver(n, bed.def) && RestUtility.CanUseBedEver(m, bed.def)
                     && (bed.OwnersForReading.Count > 0 || (BedScorer.IsCandidate(bed, n, n) && BedScorer.IsCandidate(bed, m, m)))).ToList();
                 if (usable.Sum(bed => bed.SleepingSlotsCount) < 2) continue;

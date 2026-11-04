@@ -209,6 +209,70 @@ namespace WilsBetterBeds
             return null;
         }
 
+        private static bool IsFreeColonistKind(Pawn p) =>
+            p != null && !p.Dead && p.IsColonist && !p.IsPrisoner && !p.IsSlave && p.HostFaction == null;
+
+        /// <summary>A colonist baby or newborn. A baby being carried is not spawned, so that is not required.</summary>
+        public static bool IsBaby(Pawn p) =>
+            IsFreeColonistKind(p) && (p.DevelopmentalStage & (DevelopmentalStage.Newborn | DevelopmentalStage.Baby)) != 0;
+
+        /// <summary>A colonist child: past the crib, not yet an adult (or a teenager).</summary>
+        public static bool IsChild(Pawn p) =>
+            IsFreeColonistKind(p) && p.Spawned && p.Map != null && p.DevelopmentalStage == DevelopmentalStage.Child;
+
+        /// <summary>A bed for babies (a crib, or whatever a mod adds that is for human babies).</summary>
+        public static bool IsCrib(Building_Bed bed) => bed != null && (bed.ForHumanBabies || bed.def.building.bed_crib);
+
+        /// <summary>
+        /// Where a baby's family sleeps: the mother's bed (or, with no bed, where she is), else the father's. False when neither
+        /// is a colonist on this map.
+        /// </summary>
+        public static bool NurseryAnchor(Pawn baby, Map map, out IntVec3 position)
+        {
+            position = IntVec3.Invalid;
+            if (baby == null || map == null) return false;
+            foreach (var parent in new[] { baby.GetMother(), baby.GetFather() })
+            {
+                if (parent == null || parent == baby || parent.Dead || !parent.Spawned || parent.Map != map || !parent.IsColonist || parent.IsPrisoner || parent.IsSlave) continue;
+                var bed = BedOf(parent);
+                position = bed != null && bed.Spawned ? bed.Position : parent.Position;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>The child's mother and father who are colonists on the child's map.</summary>
+        public static List<Pawn> Parents(Pawn child)
+        {
+            var list = new List<Pawn>(2);
+            if (child == null) return list;
+            foreach (var parent in new[] { child.GetMother(), child.GetFather() })
+                if (Lives(child, parent) && !list.Contains(parent)) list.Add(parent);
+            return list;
+        }
+
+        /// <summary>
+        /// How near this bed is to a parent's bed, from 1 (the same room) down to 0 (at the family radius or further),
+        /// taking the nearest of the child's parents.
+        /// </summary>
+        public static float ParentCloseness(Building_Bed bed, Pawn child, WilsBetterBedsSettings s)
+        {
+            if (bed == null || s.familyRadius <= 0f) return 0f;
+            float best = 0f;
+            Room room = bed.GetRoom();
+            bool indoors = room != null && !room.PsychologicallyOutdoors;
+            foreach (var parent in Parents(child))
+            {
+                var theirs = BedOf(parent);
+                if (theirs == null || !theirs.Spawned) continue;
+                float closeness;
+                if (theirs == bed || (indoors && theirs.GetRoom() == room)) closeness = 1f;
+                else closeness = UnityEngine.Mathf.Clamp01(1f - WalkOrLineDistance(bed.Map, theirs.Position, bed.Position, s) / s.familyRadius);
+                if (closeness > best) best = closeness;
+            }
+            return best;
+        }
+
         public static bool IsAdultColonist(Pawn p) =>
             p != null && p.Spawned && p.Map != null && !p.Dead && p.IsColonist && !p.IsPrisoner && !p.IsSlave
             && p.HostFaction == null && (p.DevelopmentalStage & DevelopmentalStage.Adult) != 0;
@@ -230,6 +294,19 @@ namespace WilsBetterBeds
         public static Building_Bed BedOf(Pawn p) => p.ownership?.OwnedBed;
 
         public static float Distance(Building_Bed a, Building_Bed b) => (a.Position - b.Position).LengthHorizontal;
+
+        /// <summary>
+        /// How far a child is from a parent's bed for the purpose of sleeping near them: the shortest way to walk, round walls and through
+        /// doors, when that is switched on. A bed with no way to it within reach counts as too far to matter (the old straight-line distance,
+        /// plus the family distance), so it is never preferred over one that can be reached.
+        /// </summary>
+        public static float WalkOrLineDistance(Map map, IntVec3 from, IntVec3 to, WilsBetterBedsSettings s)
+        {
+            float line = (from - to).LengthHorizontal;
+            if (!s.walkingDistanceEnabled || map == null) return line;
+            float walked = WalkDistance.To(map, from, to, System.Math.Max(s.familyRadius * 1.5f, line + 10f));
+            return float.IsInfinity(walked) ? line + s.familyRadius * 2f : walked;
+        }
 
         /// <summary>The pawn's current love partners (spouse, fiance, lover) who are alive. Do not modify the list.</summary>
         public static List<Pawn> Lovers(Pawn p) => p?.relations == null ? NoPawns : Get(p).lovers;

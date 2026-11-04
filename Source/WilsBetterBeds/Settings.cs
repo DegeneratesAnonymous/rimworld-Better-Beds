@@ -31,6 +31,11 @@ namespace WilsBetterBeds
         public float familyShareBonus = 2f;            // mood points for sharing a room with family you get on with
         public float familyHostilePenalty = 2f;        // mirrors the "too close to a relative" thought (less than for a stranger)
         public float familyFarPenalty = 4f;            // mirrors the "room far from family" thought
+        // Children: babies sleep in the crib nearest their mother's bed; children want a bed near their parents
+        public bool cribNearMotherEnabled = true;      // a baby with no bed is given the free crib nearest its mother's bed
+        public bool childrenEnabled = true;            // children strongly prefer a bed near their parents, and move to one
+        public bool walkingDistanceEnabled = true;     // near means the shortest way to walk, not the shortest line through the walls
+        public float childParentBonus = 12f;           // mood points for a young child's bed right beside a parent's; falls to the family bonus by adulthood
         // Neighbours: who sleeps near you, within the same family distance
         public bool neighborsEnabled = true;
         public float neighborHostilePenalty = 4f;      // each disliked colonist (up to two) whose bed is near
@@ -63,6 +68,7 @@ namespace WilsBetterBeds
         public bool negotiationMoodEffects = true;
         public bool negotiationMessages = true;
         public float messageSeconds = 4f;              // how long the top-left notification stays before it fades
+        public bool rimTalkContext = true;             // tell RimTalk where a pawn sleeps and with whom
         public bool showInPlayLog = true;              // also what Interaction Bubbles displays
 
 
@@ -98,6 +104,10 @@ namespace WilsBetterBeds
             Scribe_Values.Look(ref familyShareBonus, "familyShareBonus", 2f);
             Scribe_Values.Look(ref familyHostilePenalty, "familyHostilePenaltyV2", 2f);
             Scribe_Values.Look(ref familyFarPenalty, "familyFarPenalty", 4f);
+            Scribe_Values.Look(ref cribNearMotherEnabled, "cribNearMotherEnabled", true);
+            Scribe_Values.Look(ref childrenEnabled, "childrenEnabled", true);
+            Scribe_Values.Look(ref walkingDistanceEnabled, "walkingDistanceEnabled", true);
+            Scribe_Values.Look(ref childParentBonus, "childParentBonus", 12f);
             Scribe_Values.Look(ref neighborsEnabled, "neighborsEnabled", true);
             Scribe_Values.Look(ref neighborHostilePenalty, "neighborHostilePenalty", 4f);
             Scribe_Values.Look(ref ideoNeighborBonus, "ideoNeighborBonus", 2f);
@@ -127,6 +137,7 @@ namespace WilsBetterBeds
             Scribe_Values.Look(ref negotiationMessages, "negotiationMessages", true);
             Scribe_Values.Look(ref messageSeconds, "messageDuration", 4f);
             Scribe_Values.Look(ref showInPlayLog, "showInPlayLog", true);
+            Scribe_Values.Look(ref rimTalkContext, "rimTalkContext", true);
 
             Scribe_Values.Look(ref chairSleepEnabled, "chairSleepEnabled", true);
             Scribe_Values.Look(ref chairSleepPenalty, "chairSleepPenalty", 3f);

@@ -9,9 +9,10 @@ A RimWorld mod for 1.7 (unstable branch) and 1.6 about who sleeps where.
 - **Last resort sleeping.** A colonist with no bed dozes in a chair instead of on the floor, for a smaller mood penalty.
 - **Assign rooms.** The Assign tab gets an **Assign rooms** button. It lists every room with beds or cribs (beds taken, cribs taken, room score, size, owners). Hover a room to point at its beds in the world, double-click to jump the camera there, and use **Assign** to set owners room by room.
 - **Family and couples.** Colonists prefer to share a room with family they get on with. A colonist with negative relations with a parent, child or sibling wants a room outside 35 tiles of them. A couple wants a room of just the two of them, close to family, and a couple far from family gets a "room far from family" thought. New couples are moved into a free room of their own.
+- **Babies and children.** A baby with no bed is put in the free crib nearest its mother's bed (its father's if she is away); a baby in a clearly further crib is moved. A child strongly prefers a bed near a parent's, the same room best, and moves to a nearer free bed. The wish is strong when small and falls to the ordinary family bonus as they reach adulthood.
 - **God mode.** A selected colonist gets a **Force negotiation** button that sends them to ask for a better room right now.
 
-Prisoner, guest, slave, medical, and child bed choice is left entirely to vanilla.
+Prisoner, guest, slave and medical bed choice is left entirely to vanilla.
 
 **Status:** pre-release scaffold. See [PLAN.md](PLAN.md) for milestones.
 
@@ -34,7 +35,11 @@ Wil's Better Beds is built to coexist with other bed mods rather than overrule t
 | Mod | Behaviour |
 | --- | --- |
 | Hospitality (Continued) | Guest beds are separate bed defs and `IsValidBedFor` keeps colonists out of them, so we never take one. Guests are never part of negotiation. |
-| Interaction Bubbles | Negotiation lines are written as ordinary interactions, so each speaker gets a bubble. |
+| Interaction Bubbles / Interaction Bubbles Expanded | Negotiation lines are written as ordinary interactions, so each speaker gets a bubble. Expanded also tints a successful negotiation's bubble by its mood effect. |
+| RimCourt | Adds a court case (Patches/RimCourt.xml) built from the "bullied out of room" and "pushed around" memories, which now name the other colonist. Only when RimCourt is loaded. |
+| RimMarket | Inn beds belong to the market: no colonist is given one, and a visitor who may lodge there is offered a free inn bed before the floor or a chair. |
+| Rimblings | Negotiation lines are voiced like any other social interaction (it voices every social log entry). |
+| RimTalk | Its conversations are told where a colonist sleeps and with whom; the negotiation lines reach it through the play log. |
 | Dubs Mint Menus | Its assign window ends up in the same assignment method as vanilla's, so setting an owner through it locks the bed. |
 | Vanilla Factions Expanded - Empire | Changes royal bedroom requirements through the game's title methods, which we read. |
 | Replace Stuff, EBSG Framework, Worksites Expanded, Vanilla Races Expanded - Android | Patch bed choice or ownership. We run after them and call the game's own claim and validity methods. |

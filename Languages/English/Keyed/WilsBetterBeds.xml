@@ -96,6 +96,8 @@ Off: no notifications; the play log and thoughts are unaffected.</WilsBetterBeds
   <WilsBetterBeds_S_MessageSeconds>Notification stays for: {0} s</WilsBetterBeds_S_MessageSeconds>
   <WilsBetterBeds_S_MessageSeconds_Tip>How long the notification stays fully visible before it fades out (the fade takes about half a second more).
 The game's normal messages stay for 13 seconds. Default 4.</WilsBetterBeds_S_MessageSeconds_Tip>
+  <WilsBetterBeds_S_RimTalk>Tell RimTalk where colonists sleep</WilsBetterBeds_S_RimTalk>
+  <WilsBetterBeds_S_RimTalk_Tip>RimTalk's conversations are told which bed a colonist has and who shares their room, so what they say can reflect it. Default on.</WilsBetterBeds_S_RimTalk_Tip>
   <WilsBetterBeds_S_Log>Show negotiations in the log and speech bubbles</WilsBetterBeds_S_Log>
   <WilsBetterBeds_S_Log_Tip>Adds each conversation to the colonists' social log. Interaction Bubbles, if installed, shows it as speech bubbles over their heads.
 Off: nothing is added to the log, so no bubbles appear.</WilsBetterBeds_S_Log_Tip>
@@ -151,6 +153,16 @@ Higher: xenotypes cluster together. Default 2.</WilsBetterBeds_S_GeneBonus_Tip>
 
   <!-- Family and couples -->
   <WilsBetterBeds_CoupleMoved>{0} and {1} moved into a room of their own.</WilsBetterBeds_CoupleMoved>
+  <WilsBetterBeds_Sec_Children>Babies and children</WilsBetterBeds_Sec_Children>
+  <WilsBetterBeds_S_CribNearMother>Babies sleep in the crib nearest their mother</WilsBetterBeds_S_CribNearMother>
+  <WilsBetterBeds_S_CribNearMother_Tip>A baby with no bed is given the free crib nearest its mother's bed (its father's if she is not here), and once an hour a baby in a crib that is clearly further away moves to a nearer one. Cribs you assigned yourself are left alone.\nOff: the game chooses.</WilsBetterBeds_S_CribNearMother_Tip>
+  <WilsBetterBeds_S_Children>Children keep their beds near their parents</WilsBetterBeds_S_Children>
+  <WilsBetterBeds_S_Children_Tip>A child picks the bed nearest a parent's (the same room is best), and once an hour a child whose bed is far from their parents moves to a clearly nearer free bed. Beds you assigned yourself are left alone.\nOff: children choose like vanilla.</WilsBetterBeds_S_Children_Tip>
+  <WilsBetterBeds_S_ChildBonus>Young child's wish to sleep beside a parent: +{0}</WilsBetterBeds_S_ChildBonus>
+  <WilsBetterBeds_S_ChildBonus_Tip>Mood points a small child counts for a bed in the same room as a parent. It falls with distance (nothing at the family distance) and, as the child grows up, falls steadily to the ordinary 'Sharing a room with family' bonus by the time they are an adult. Default 12.</WilsBetterBeds_S_ChildBonus_Tip>
+  <WilsBetterBeds_Live_Child>A small child counts {0} for a bed beside a parent, falling to {1} (the family bonus) when grown up.</WilsBetterBeds_Live_Child>
+  <WilsBetterBeds_BabyMoved>{0} was moved to a crib nearer their mother.</WilsBetterBeds_BabyMoved>
+  <WilsBetterBeds_ChildMoved>{0} moved to a bed nearer their parents.</WilsBetterBeds_ChildMoved>
   <WilsBetterBeds_Sec_Family>Family and couples</WilsBetterBeds_Sec_Family>
   <WilsBetterBeds_S_Family>Family and couples affect who sleeps where</WilsBetterBeds_S_Family>
   <WilsBetterBeds_S_Family_Tip>Colonists prefer to share a room with family they get on with, want distance from relatives they do not, and couples want a room of their own that is near family.
@@ -259,4 +271,6 @@ Off: the button is hidden (the rest of the mod is unaffected). Turn it off if an
   <WilsBetterBeds_S_Expectations>High expectations make colonists pickier: {0}</WilsBetterBeds_S_Expectations>
   <WilsBetterBeds_S_Expectations_Tip>A colonist whose expectations are high (a rich colony, an ideoligion role, a royal title) asks for, or moves to, a smaller upgrade when nothing is actually wrong with their room. Their expectations also lower how big an upgrade has to be. This only affects the 'big enough upgrade' reason, never a real penalty.\nHigher: colonists with high expectations chase small improvements. 0 turns it off. Default 0%.</WilsBetterBeds_S_Expectations_Tip>
   <WilsBetterBeds_Live_Expectations>A colonist with supreme expectations (an ideoligion role) asks for an upgrade of {0} instead of {1}.</WilsBetterBeds_Live_Expectations>
+  <WilsBetterBeds_S_WalkDistance>Near means the shortest walk</WilsBetterBeds_S_WalkDistance>
+  <WilsBetterBeds_S_WalkDistance_Tip>A child's (or baby's) bed is judged by how far they would have to walk to a parent's bed, round walls and through doors, not by the straight line through them. A bed on the other side of a wall counts as far away if the way round is long.\nOff: the straight-line distance, as before.</WilsBetterBeds_S_WalkDistance_Tip>
 </LanguageData>

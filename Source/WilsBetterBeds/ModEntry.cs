@@ -15,6 +15,7 @@ namespace WilsBetterBeds
         {
             Settings = GetSettings<WilsBetterBedsSettings>();
             SafePatcher.PatchAll(new Harmony("SpacemanWil.WilsBetterBeds"));
+            LongEventHandler.ExecuteWhenFinished(RimTalkCompat.Register);   // after every mod has loaded
             Log.Message("[Wil's Better Beds] Loaded.");
         }
 
@@ -72,6 +73,15 @@ namespace WilsBetterBeds
                 Slide(list, "WilsBetterBeds_S_CoupleShare", ref s.coupleSharePenalty, 0f, 8f, "0.0");
             }
 
+            Section(list, "WilsBetterBeds_Sec_Children");
+            Check(list, "WilsBetterBeds_S_CribNearMother", ref s.cribNearMotherEnabled);
+            Check(list, "WilsBetterBeds_S_Children", ref s.childrenEnabled);
+            if (s.childrenEnabled || s.cribNearMotherEnabled)
+                Check(list, "WilsBetterBeds_S_WalkDistance", ref s.walkingDistanceEnabled);
+            if (s.childrenEnabled)
+                Slide(list, "WilsBetterBeds_S_ChildBonus", ref s.childParentBonus, 0f, 30f, "0.0",
+                    () => "WilsBetterBeds_Live_Child".Translate(s.childParentBonus.ToString("0.#"), s.familyShareBonus.ToString("0.#")));
+
             Section(list, "WilsBetterBeds_Sec_Neighbors");
             Check(list, "WilsBetterBeds_S_Neighbors", ref s.neighborsEnabled);
             if (s.neighborsEnabled)
@@ -120,6 +130,7 @@ namespace WilsBetterBeds
             if (s.negotiationMessages)
                 Slide(list, "WilsBetterBeds_S_MessageSeconds", ref s.messageSeconds, 0.5f, 13f, "0.0");
             if (s.negotiationEnabled) Check(list, "WilsBetterBeds_S_Log", ref s.showInPlayLog);
+            if (RimTalkCompat.Installed) Check(list, "WilsBetterBeds_S_RimTalk", ref s.rimTalkContext);
 
             Section(list, "WilsBetterBeds_Sec_Rough");
             Check(list, "WilsBetterBeds_S_Chair", ref s.chairSleepEnabled);

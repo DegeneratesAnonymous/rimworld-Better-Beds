@@ -120,7 +120,7 @@ namespace WilsBetterBeds
         /// </summary>
         private static bool Listed(Building_Bed bed)
         {
-            if (!bed.Spawned || bed.Medical || !bed.ForColonists) return false;
+            if (!bed.Spawned || bed.Medical || !bed.ForColonists || InnBedCompat.IsInn(bed)) return false;
             if (bed.def.building == null || !bed.def.building.bed_humanlike) return false;
             if (bed.GetType().Name.IndexOf("GuestBed", System.StringComparison.OrdinalIgnoreCase) >= 0) return false;
             return true;

@@ -119,7 +119,7 @@ namespace WilsBetterBeds
         private static IEnumerable<Room> RoomsWithBeds(Map map)
         {
             return map.listerBuildings.AllBuildingsColonistOfClass<Building_Bed>()
-                .Where(bed => bed.Spawned && !bed.Medical && bed.ForColonists)
+                .Where(bed => bed.Spawned && !bed.Medical && bed.ForColonists && !InnBedCompat.IsInn(bed))
                 .Select(bed => bed.GetRoom())
                 .Where(room => room != null && !room.PsychologicallyOutdoors)
                 .Distinct();
@@ -128,7 +128,7 @@ namespace WilsBetterBeds
         /// <summary>A bed that is free (and valid for both), or is already one of the couple's.</summary>
         private static bool UsableByBoth(Building_Bed bed, Pawn a, Pawn b)
         {
-            if (!bed.Spawned || bed.Medical || !bed.ForColonists) return false;
+            if (!bed.Spawned || bed.Medical || !bed.ForColonists || InnBedCompat.IsInn(bed)) return false;
             if (bed.OwnersForReading.Count > 0)
                 return bed.OwnersForReading.All(o => o == a || o == b);
             return BedScorer.IsCandidate(bed, a, a) && BedScorer.IsCandidate(bed, b, b);

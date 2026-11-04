@@ -109,9 +109,33 @@ It's still not ideal, but it's better than the ground.
 [*] Colonists won't interrupt toilet, bathing, or shower activities for negotiations.
 [/list]
 
-[b]Interaction Bubbles[/b]
+[b]RimCourt[/b]
+[list]
+[*] A colonist who was bullied out of their room, or pushed around over one, can bring it before the lord as a court case. Added only when RimCourt is loaded.
+[/list]
+
+[b]RimMarket[/b]
+[list]
+[*] Inn beds belong to the market. No colonist is given one: not in bed choice, free-bed moves, couple housing, room negotiation or the room list.
+[*] A visitor who may lodge at the inn (merchants, guards and shoppers) is offered a free inn bed before the floor or a chair. RimMarket does the paying, rating and prices.
+[*] Guest beds still work as before: Hospitality's guests keep Hospitality's system, and other visitors can rent a free guest bed.
+[/list]
+
+[b]Interaction Bubbles and Interaction Bubbles Expanded[/b]
 [list]
 [*] Bedroom negotiations appear as speech bubbles.
+[*] With Expanded, a successful negotiation's bubble is tinted green or red by its mood effect.
+[/list]
+
+[b]Rimblings[/b]
+[list]
+[*] Negotiation lines are spoken in its voices, like any other social interaction.
+[/list]
+
+[b]RimTalk[/b]
+[list]
+[*] Its AI conversations are told where a colonist sleeps and with whom.
+[*] Negotiations reach it through the play log, so they become conversations too. Works with RimTalk add-ons.
 [/list]
 
 [b]Additional Support[/b]

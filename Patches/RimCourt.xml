@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only when RimCourt is loaded: a colonist who was bullied out of their room, or pushed around over one, can bring it before the lord.
+     RimCourt builds cases like this from colonists' memories (the memory must name the other colonist: see Negotiation.ApplyMoodEffects). -->
+<Patch>
+  <Operation Class="PatchOperationFindMod">
+    <mods>
+      <li>RimCourt</li>
+    </mods>
+    <match Class="PatchOperationAdd">
+      <xpath>/Defs</xpath>
+      <value>
+        <RimCourt.Court.PetitionDef>
+          <defName>WilsBetterBeds_RoomGrievance</defName>
+          <priority>25</priority>
+          <label>a room taken by force</label>
+          <description>A colonist who was bullied out of their bedroom brings it before the lord.</description>
+          <workerClass>RimCourt.Court.PetitionWorker_Memory</workerClass>
+          <sourceThoughts>
+            <li>WilsBetterBeds_BulliedOutOfRoom</li>
+            <li>WilsBetterBeds_PushedAround</li>
+          </sourceThoughts>
+          <maxMemoryAgeDays>15</maxMemoryAgeDays>
+          <caseText>{OTHER_labelShort} pushed {PETITIONER_labelShort} out of a bedroom, and {PETITIONER_labelShort} wants the lord to say whose it is.\n\nHow does the lord rule?</caseText>
+          <verdicts>
+            <li>
+              <label>Rule that {OTHER_labelShort} took it unfairly</label>
+              <pastLabel>the room taken unfairly</pastLabel>
+              <outcome>FavorPetitioner</outcome>
+              <just>2</just>
+            </li>
+            <li>
+              <label>Rule that {OTHER_labelShort} keeps the room</label>
+              <pastLabel>the room left with {OTHER_labelShort}</pastLabel>
+              <outcome>FavorOther</outcome>
+              <harsh>1</harsh>
+            </li>
+            <li>
+              <label>Punish them both for the quarrel</label>
+              <pastLabel>both punished for the quarrel</pastLabel>
+              <outcome>PunishBoth</outcome>
+              <harsh>2</harsh>
+            </li>
+            <li>
+              <label>Throw the case out</label>
+              <pastLabel>case thrown out</pastLabel>
+              <outcome>Dismiss</outcome>
+              <weak>2</weak>
+            </li>
+          </verdicts>
+        </RimCourt.Court.PetitionDef>
+      </value>
+    </match>
+  </Operation>
+</Patch>

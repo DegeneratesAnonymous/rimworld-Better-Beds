@@ -24,6 +24,10 @@
     <li>OskarPotocki.VanillaFactionsExpanded.Core</li>
     <li>Orion.Hospitality</li>
     <li>Jaxe.Bubbles</li>
+    <li>Vengie.BubblesExpanded</li>
+    <li>cj.rimtalk</li>
+    <li>forti.rimmarket</li>
+    <li>forti.rimcourt</li>
   </loadAfter>
   <description>Where a colonist sleeps now matters to them, and they do something about it. Beds are chosen by how happy they would make the person in them, a colonist who sleeps badly can ask someone for their room (or move to an empty one), couples look for a room together, and who sleeps nearby counts. You always have the last word.
 
@@ -43,7 +47,12 @@ WORKS WITH
 - Hospitality: your guests keep Hospitality's bed choice, rent and rules. A guest with no bed sleeps in a chair.
 - Spaceports and trade caravans: visitors who are not Hospitality guests used to sleep on the floor whatever they carried. They now rent a free guest bed when they can pay; those who cannot sleep in a chair.
 - Dubs Bad Hygiene: nobody is pulled into a conversation while using the toilet, shower or bath.
-- Interaction Bubbles: negotiations show as speech bubbles. Dubs Mint Menus, Vanilla Factions Expanded - Empire, Royalty, Ideology and Biotech are supported.
+- RimCourt: a colonist bullied out of their room can bring it before the lord as a court case (RimCourt reads it from their memory of it).
+- RimMarket: inn beds belong to the market. No colonist is given one (bed choice, moves, couples, negotiation, the room list), and a visitor who may lodge at the inn is offered a free inn bed before the floor or a chair. Its own rent, ratings and prices are left to it.
+- Interaction Bubbles and Interaction Bubbles Expanded: negotiations show as speech bubbles (Expanded also tints them by mood effect).
+- Rimblings: negotiation lines are spoken in its voices.
+- RimTalk: its conversations are told where a colonist sleeps and with whom. Works with RimTalk add-ons, which use the same API.
+- Dubs Mint Menus, Vanilla Factions Expanded - Empire, Royalty, Ideology and Biotech are supported.
 - Other bed mods: bed choice runs last and defers to the game's own bed check, so whatever another mod forbids, this mod forbids too. Every patch is isolated; if one breaks, that one feature is skipped and logged and the rest keep working.
 
 Prisoners, slaves, children and medical beds are left to vanilla. Everything is adjustable in the mod options, with a tooltip on every setting. Load after Harmony and any bed or room mods.
