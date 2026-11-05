@@ -727,6 +727,78 @@ namespace WilsBetterBeds
             return best;
         }
 
+        /// <summary>
+        /// A child whose parents' beds are nearer a bed that someone already has. No free bed was better, so a parent asks the owner for
+        /// it, as adults do for each other. On a win the owner takes the child's old bed if they can use it (otherwise it is left to the
+        /// game, as when anyone loses a bed). Never a locked bed, a couple's room, or a bed shared by two.
+        /// </summary>
+        public bool TryNegotiateChildBed(Pawn child, Building_Bed current)
+        {
+            var s = WilsBetterBedsMod.Settings;
+            try
+            {
+                Pawn asker = null;
+                foreach (var parent in Family.Parents(child))
+                {
+                    if (parent == null || !parent.Spawned || parent.Map != child.Map || !parent.IsColonist || parent.Downed || parent.Drafted
+                        || parent.InMentalState || !parent.Awake() || PawnBusy.Is(parent)) continue;
+                    if ((parent.DevelopmentalStage & DevelopmentalStage.Adult) == 0) continue;
+                    asker = parent;
+                    break;
+                }
+                if (asker == null) return false;
+
+                float minGain = Mathf.Max(1.5f, 0.25f * RoomComfort.ChildStrength(child, s));
+                float currentQuality = BedScorer.Quality(current, child, s);
+                float currentBonus = RoomComfort.ChildParentBonus(current, child, s);
+
+                Pawn bestOwner = null; NegotiationContest bestContest = default;
+                float bestGain = 0f, bestValue = 0f;
+                foreach (var owner in new List<Pawn>(child.Map.mapPawns.FreeColonistsSpawned))
+                {
+                    if (owner == child || owner == asker || !Eligible(owner)) continue;       // an adult on their own in a bed the player has not locked
+                    if (Family.Parents(child).Contains(owner) || AreLovePartners(asker, owner) || Family.IsInCoupleRoom(owner)) continue;
+                    if (!owner.Awake() || owner.Downed || owner.Drafted || owner.InMentalState || PawnBusy.Is(owner)) continue;
+                    if (PairOnCooldown(asker, owner)) continue;
+                    var bed = owner.ownership.OwnedBed;
+                    if (bed == current || Family.IsCrib(bed) || !RestUtility.CanUseBedEver(child, bed.def)) continue;
+                    // About being nearer a parent, not just a nicer room.
+                    if (RoomComfort.ChildParentBonus(bed, child, s) - currentBonus < minGain * 0.5f) continue;
+                    float gain = BedScorer.Quality(bed, child, s) - currentQuality;
+                    if (gain < minGain) continue;
+                    // The owner must have somewhere to go: the child's old bed has to be one they can use, and not much worse.
+                    if (current.Medical || Family.IsCrib(current) || !RestUtility.CanUseBedEver(owner, current.def)) continue;
+                    if (BedScorer.Quality(bed, owner, s) - BedScorer.Quality(current, owner, s) > 1.5f) continue;
+                    if (!asker.CanReserveAndReach(bed, PathEndMode.OnCell, Danger.Some, bed.SleepingSlotsCount)) continue;
+
+                    var contest = NegotiationRoll.Build(asker, owner, s);
+                    if (!contest.possible || contest.winChance < s.minWinChance) continue;
+                    float value = gain * contest.winChance;
+                    if (value > bestValue) { bestValue = value; bestOwner = owner; bestGain = gain; bestContest = contest; }
+                }
+                if (bestOwner == null) return false;
+
+                StartPairCooldown(asker, bestOwner);
+                bool won = NegotiationRoll.Roll(bestContest, out int askerTotal, out int ownerTotal);
+                GiveSocialExperience(asker, won, s);
+                if (bestContest.approach == NegotiationApproach.Intimidate) Resent(bestOwner, asker);
+                if (!won)
+                {
+                    Refuse(asker, bestOwner, bestContest, askerTotal, ownerTotal, s);
+                    return false;
+                }
+
+                var oldBed = current;
+                if (!Swap(child, bestOwner, bestGain, s, bestContest, askerTotal, ownerTotal)) return false;
+                if (oldBed.OwnersForReading.Count == 0) bestOwner.ownership.ClaimBedIfNonMedical(oldBed);
+                return true;
+            }
+            catch (System.Exception e)
+            {
+                SafeLog.Once("a parent asking for a child's bed", e);
+                return false;
+            }
+        }
         private bool Swap(Pawn winner, Pawn loser, float gain, WilsBetterBedsSettings s, NegotiationContest contest, int winnerTotal, int loserTotal)
         {
             var wonBed = loser.ownership.OwnedBed;

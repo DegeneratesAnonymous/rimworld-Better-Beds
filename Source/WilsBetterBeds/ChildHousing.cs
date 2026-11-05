@@ -31,7 +31,12 @@ namespace WilsBetterBeds
                 Family.Refresh(kid);
                 Building_Bed best;
                 using (PerfWatch.Measure("children's beds")) best = baby ? BestCrib(kid, current) : BestForChild(kid, current, s);
-                if (best == null) return false;
+                if (best == null)
+                {
+                    // Nothing free is better. A bed someone already has can still be the one nearest the parents: a parent asks for it.
+                    if (child && s.negotiationEnabled && comp != null) return comp.TryNegotiateChildBed(kid, current);
+                    return false;
+                }
 
                 kid.ownership.UnclaimBed();
                 if (!kid.ownership.ClaimBedIfNonMedical(best))
