@@ -26,6 +26,7 @@ namespace WilsBetterBeds
                 var current = kid.ownership.OwnedBed;
                 if (current == null || current.Medical || !current.Spawned || InnBedCompat.IsInn(current)) return false;
                 if (BedLocks.IsLocked(current, kid)) return false;
+                if (FamilyLifeCompat.IsHousedByFamilyLife(kid)) return false;      // Wil's Family Life has the child in its family's zone: one of us moves them, not both
                 if (kid.InBed() || kid.Downed || kid.Drafted || HealthAIUtility.ShouldSeekMedicalRest(kid)) return false;
 
                 Family.Refresh(kid);
